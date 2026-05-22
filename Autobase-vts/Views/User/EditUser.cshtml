@@ -1,0 +1,766 @@
+﻿@model autobase.Models.DTOs.EditUserDto
+@{
+    ViewBag.Title = "Edit User";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    string sessionRole = ViewBag.SessionRole as string ?? Session["Role"]?.ToString() ?? "";
+}
+
+<style>
+    .breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        color: #bbb;
+        margin-bottom: 18px;
+        animation: fadeUp .3s ease both;
+    }
+
+        .breadcrumb a {
+            color: #bbb;
+            text-decoration: none;
+        }
+
+            .breadcrumb a:hover {
+                color: #555;
+            }
+
+        .breadcrumb .sep {
+            color: #ddd;
+        }
+
+        .breadcrumb .current {
+            color: #555;
+            font-weight: 600;
+        }
+
+    .page-header {
+        margin-bottom: 20px;
+        animation: fadeUp .32s ease .02s both;
+    }
+
+    .page-title {
+        font-size: 24px;
+        font-weight: 800;
+        color: #0d0d0d;
+        letter-spacing: -.3px;
+    }
+
+    .page-sub {
+        font-size: 13px;
+        color: #aaa;
+        margin-top: 3px;
+    }
+
+    /* Info bar */
+    .info-bar {
+        background: #f0f7ff;
+        border-left: 3px solid #3182ce;
+        border-radius: 0 10px 10px 0;
+        padding: 13px 18px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 13px;
+        color: #2c5282;
+        margin-bottom: 22px;
+        animation: fadeUp .35s ease .04s both;
+    }
+
+        .info-bar svg {
+            flex-shrink: 0;
+        }
+
+        .info-bar strong {
+            color: #1a56db;
+        }
+
+    /* Form sections */
+    .form-section {
+        background: #fff;
+        border: 1px solid #efefef;
+        border-radius: 14px;
+        overflow: hidden;
+        margin-bottom: 18px;
+        animation: fadeUp .38s ease .06s both;
+    }
+
+        .form-section + .form-section {
+            animation-delay: .09s;
+        }
+
+            .form-section + .form-section + .form-section {
+                animation-delay: .12s;
+            }
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 16px 22px;
+        border-bottom: 1px solid #f5f5f5;
+    }
+
+    .section-icon {
+        width: 30px;
+        height: 30px;
+        border-radius: 8px;
+        background: #f5f5f5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #888;
+        flex-shrink: 0;
+    }
+
+    .section-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: #0d0d0d;
+    }
+
+    .section-body {
+        padding: 22px;
+    }
+
+    /* Fields */
+    .field-row {
+        display: grid;
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+        .field-row.col-2 {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .field-row.col-1 {
+            grid-template-columns: 1fr;
+        }
+
+        .field-row:last-child {
+            margin-bottom: 0;
+        }
+
+    .field {
+        display: flex;
+        flex-direction: column;
+        gap: 7px;
+    }
+
+    .field-label {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 1.2px;
+        text-transform: uppercase;
+        color: #888;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .req {
+        color: #e53e3e;
+    }
+
+    .optional {
+        font-size: 9px;
+        font-weight: 400;
+        color: #ccc;
+        letter-spacing: 0;
+        text-transform: none;
+        margin-left: auto;
+    }
+
+    .input-wrap {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .input-icon {
+        position: absolute;
+        left: 13px;
+        color: #ccc;
+        display: flex;
+        align-items: center;
+        pointer-events: none;
+    }
+
+    .field input[type="text"],
+    .field input[type="email"],
+    .field input[type="password"] {
+        width: 100%;
+        height: 46px;
+        padding: 0 14px 0 38px;
+        border: 1.5px solid #e8e8e8;
+        border-radius: 10px;
+        font-family: 'Barlow',sans-serif;
+        font-size: 14px;
+        font-weight: 500;
+        color: #0d0d0d;
+        background: #fafafa;
+        outline: none;
+        transition: border-color .2s,background .2s,box-shadow .2s;
+    }
+
+    .field input:focus {
+        border-color: #3182ce;
+        background: #fff;
+        box-shadow: 0 0 0 3px rgba(49,130,206,.12);
+    }
+
+    .field input.input-error {
+        border-color: #e53e3e;
+    }
+
+    /* Password toggle */
+    .pwd-toggle {
+        position: absolute;
+        right: 13px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: #bbb;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        transition: color .2s;
+    }
+
+        .pwd-toggle:hover {
+            color: #555;
+        }
+
+    /* Role cards */
+    .role-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+    }
+
+    .role-card {
+        border: 2px solid #e8e8e8;
+        border-radius: 12px;
+        padding: 22px 18px;
+        text-align: center;
+        cursor: pointer;
+        transition: border-color .2s,background .2s,box-shadow .2s;
+        background: #fafafa;
+        position: relative;
+    }
+
+        .role-card:hover {
+            border-color: #cbd5e0;
+            background: #fff;
+        }
+
+        .role-card.selected {
+            border-color: #F5C518;
+            background: #fffde7;
+            box-shadow: 0 0 0 3px rgba(245,197,24,.15);
+        }
+
+        .role-card input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+    .role-card-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: #f0f0f0;
+        margin: 0 auto 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #888;
+        transition: background .2s,color .2s;
+    }
+
+    .role-card.selected .role-card-icon {
+        background: #fef08a;
+        color: #92400e;
+    }
+
+    .role-card-name {
+        font-size: 14px;
+        font-weight: 700;
+        color: #0d0d0d;
+        margin-bottom: 4px;
+    }
+
+    .role-card-desc {
+        font-size: 11px;
+        color: #aaa;
+    }
+
+    .role-card.selected .role-card-name {
+        color: #92400e;
+    }
+
+    .role-error {
+        font-size: 11px;
+        color: #e53e3e;
+        margin-top: 8px;
+    }
+
+    /* Password hint */
+    .pwd-hint-box {
+        background: #fffbeb;
+        border: 1.5px solid #fde68a;
+        border-radius: 10px;
+        padding: 13px 16px;
+        font-size: 12px;
+        color: #92400e;
+        line-height: 1.6;
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+        .pwd-hint-box strong {
+            color: #b45309;
+        }
+
+    /* Actions */
+    .form-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 18px 0 4px;
+        animation: fadeUp .4s ease .15s both;
+    }
+
+    .btn-save {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        height: 46px;
+        padding: 0 28px;
+        background: #2563eb;
+        color: #fff;
+        font-family: 'Barlow',sans-serif;
+        font-size: 14px;
+        font-weight: 700;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        box-shadow: 0 3px 12px rgba(37,99,235,.3);
+        transition: background .2s,transform .12s;
+    }
+
+        .btn-save:hover {
+            background: #1d4ed8;
+        }
+
+        .btn-save:active {
+            transform: scale(.98);
+        }
+
+    .btn-cancel {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        height: 46px;
+        padding: 0 20px;
+        background: #fff;
+        color: #666;
+        font-family: 'Barlow',sans-serif;
+        font-size: 14px;
+        font-weight: 600;
+        border: 1.5px solid #e0e0e0;
+        border-radius: 10px;
+        cursor: pointer;
+        text-decoration: none;
+        transition: border-color .2s,color .2s;
+    }
+
+        .btn-cancel:hover {
+            border-color: #aaa;
+            color: #0d0d0d;
+        }
+
+    /* Alerts */
+    .alert-success {
+        background: #f0fdf4;
+        border: 1.5px solid #bbf7d0;
+        border-radius: 10px;
+        padding: 13px 16px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #166534;
+        margin-bottom: 18px;
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        animation: fadeUp .3s ease both;
+    }
+
+    .alert-error {
+        background: #fff5f5;
+        border: 1.5px solid #fed7d7;
+        border-radius: 10px;
+        padding: 13px 16px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #c53030;
+        margin-bottom: 18px;
+    }
+
+        .alert-error div + div {
+            margin-top: 4px;
+        }
+
+    @@keyframes fadeUp {
+        from {
+            opacity: 0;
+            transform: translateY(10px)
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0)
+        }
+    }
+</style>
+
+<!-- Breadcrumb -->
+<div class="breadcrumb">
+    <a href="@Url.Action("Index","Dashboard")">Dashboard</a>
+    <span class="sep">›</span><span>Users</span>
+    <span class="sep">›</span>
+    <a href="@Url.Action("EditIndex","User")">Edit User</a>
+    <span class="sep">›</span>
+    <span class="current">@Model.FullName</span>
+</div>
+
+<!-- Page header -->
+<div class="page-header">
+    <div class="page-title">Edit User</div>
+    <div class="page-sub">Update account details for <strong>@Model.FullName</strong> (@Model.EmployeeNumber)</div>
+</div>
+
+<!-- Info bar -->
+<div class="info-bar">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10" />
+        <line x1="12" y1="8" x2="12" y2="12" />
+        <line x1="12" y1="16" x2="12.01" y2="16" />
+    </svg>
+    Leave the <strong>New Password</strong> field blank to keep the existing password unchanged.
+</div>
+
+<!-- Alerts -->
+@if (TempData["Success"] != null)
+{
+    <div class="alert-success">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
+            <polyline points="22 4 12 14.01 9 11.01" />
+        </svg>
+        @TempData["Success"]
+    </div>
+}
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert-error">
+        @foreach (var s in ViewData.ModelState.Values)
+        {
+            foreach (var e in s.Errors)
+            {<div>@e.ErrorMessage</div>}
+    }
+    </div>
+}
+
+@using (Html.BeginForm("Edit", "User", FormMethod.Post, new { id = "editUserForm" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.HiddenFor(m => m.Id)
+
+    <!-- Section 1: Employee Details -->
+    <div class="form-section">
+        <div class="section-header">
+            <div class="section-icon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                </svg>
+            </div>
+            <span class="section-title">Employee Details</span>
+        </div>
+        <div class="section-body">
+
+            <!-- Full Name -->
+            <div class="field-row col-1">
+                <div class="field">
+                    <label class="field-label">Full Name <span class="req">*</span></label>
+                    <div class="input-wrap">
+                        <div class="input-icon">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+                                <circle cx="12" cy="7" r="4" />
+                            </svg>
+                        </div>
+                        @Html.TextBoxFor(m => m.FullName, new
+                        {
+                            placeholder = "e.g. Rajesh Kumar Singh",
+                            @class = ViewData.ModelState["FullName"]?.Errors.Count > 0 ? "input-error" : ""
+                        })
+                    </div>
+                </div>
+            </div>
+
+            <!-- Employee Number | Mobile Number -->
+            <div class="field-row col-2">
+                <div class="field">
+                    <label class="field-label">Employee Number <span class="req">*</span></label>
+                    <div class="input-wrap">
+                        <div class="input-icon">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="4" width="18" height="16" rx="2" />
+                                <line x1="7" y1="9" x2="17" y2="9" />
+                                <line x1="7" y1="13" x2="13" y2="13" />
+                            </svg>
+                        </div>
+                        @Html.TextBoxFor(m => m.EmployeeNumber, new
+                        {
+                            placeholder = "e.g. 1001",
+                            @class = ViewData.ModelState["EmployeeNumber"]?.Errors.Count > 0 ? "input-error" : "",
+                            style = "text-transform:uppercase;"
+                        })
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="field-label">Mobile Number <span class="req">*</span></label>
+                    <div class="input-wrap">
+                        <div class="input-icon">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="5" y="2" width="14" height="20" rx="2" />
+                                <line x1="12" y1="18" x2="12.01" y2="18" />
+                            </svg>
+                        </div>
+                        @Html.TextBoxFor(m => m.MobileNumber, new
+                        {
+                            placeholder = "10-digit mobile number",
+                            maxlength = "10",
+                            @class = ViewData.ModelState["MobileNumber"]?.Errors.Count > 0 ? "input-error" : ""
+                        })
+                    </div>
+                </div>
+            </div>
+
+            <!-- Designation | Department -->
+            <div class="field-row col-2">
+                <div class="field">
+                    <label class="field-label">Designation <span class="req">*</span></label>
+                    <div class="input-wrap">
+                        <div class="input-icon">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" />
+                            </svg>
+                        </div>
+                        @Html.TextBoxFor(m => m.Designation, new
+                        {
+                            placeholder = "e.g. Junior Engineer",
+                            @class = ViewData.ModelState["Designation"]?.Errors.Count > 0 ? "input-error" : ""
+                        })
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="field-label">Department <span class="req">*</span></label>
+                    <div class="input-wrap">
+                        <div class="input-icon">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="2" y="7" width="20" height="14" rx="2" />
+                                <path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2" />
+                            </svg>
+                        </div>
+                        @Html.TextBoxFor(m => m.Department, new
+                        {
+                            placeholder = "e.g. Operations",
+                            @class = ViewData.ModelState["Department"]?.Errors.Count > 0 ? "input-error" : ""
+                        })
+                    </div>
+                </div>
+            </div>
+
+            <!-- Email (optional) -->
+            <div class="field-row col-1">
+                <div class="field">
+                    <label class="field-label">
+                        Email Address
+                        <span class="optional">Optional</span>
+                    </label>
+                    <div class="input-wrap">
+                        <div class="input-icon">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                                <polyline points="22,6 12,13 2,6" />
+                            </svg>
+                        </div>
+                        @Html.TextBoxFor(m => m.Email, new
+                        {
+                            placeholder = "e.g. rajesh@ntpc.co.in",
+                            type = "email",
+                            @class = ViewData.ModelState["Email"]?.Errors.Count > 0 ? "input-error" : ""
+                        })
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Section 2: Assign Role -->
+    <div class="form-section">
+        <div class="section-header">
+            <div class="section-icon" style="background:#fffde7;color:#c9a000;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                </svg>
+            </div>
+            <span class="section-title">Assign Role <span class="req">*</span></span>
+        </div>
+        <div class="section-body">
+            <div class="role-grid" id="roleGrid">
+
+                @if (sessionRole == "SuperAdmin")
+                {
+                    <label class="role-card @(Model.Role == "Admin" ? "selected" : "")" id="card-Admin">
+                        <input type="radio" name="Role" value="Admin"
+                               @(Model.Role == "Admin" ? "checked" : "")
+                               onchange="selectRole('Admin')" />
+                        <div class="role-card-icon">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                            </svg>
+                        </div>
+                        <div class="role-card-name">Admin</div>
+                        <div class="role-card-desc">Full system access</div>
+                    </label>
+                }
+
+                <label class="role-card @(Model.Role == "Employee" ? "selected" : "")" id="card-Employee">
+                    <input type="radio" name="Role" value="Employee"
+                           @(Model.Role == "Employee" ? "checked" : "")
+                           onchange="selectRole('Employee')" />
+                    <div class="role-card-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+                            <circle cx="12" cy="7" r="4" />
+                        </svg>
+                    </div>
+                    <div class="role-card-name">Employee</div>
+                    <div class="role-card-desc">Can request vehicles</div>
+                </label>
+
+            </div>
+            @if (ViewData.ModelState["Role"]?.Errors.Count > 0)
+            {
+                <div class="role-error">Please select a role.</div>
+            }
+        </div>
+    </div>
+
+    <!-- Section 3: Change Password -->
+    <div class="form-section">
+        <div class="section-header">
+            <div class="section-icon" style="background:#f0fdf4;color:#276749;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" />
+                    <path d="M7 11V7a5 5 0 0110 0v4" />
+                </svg>
+            </div>
+            <span class="section-title">Change Password</span>
+        </div>
+        <div class="section-body">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;">
+                <div class="field">
+                    <label class="field-label">
+                        New Password
+                        <span class="optional">Leave blank to keep current</span>
+                    </label>
+                    <div class="input-wrap">
+                        <div class="input-icon">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="11" width="18" height="11" rx="2" />
+                                <path d="M7 11V7a5 5 0 0110 0v4" />
+                            </svg>
+                        </div>
+                        @Html.PasswordFor(m => m.NewPassword, new
+                        {
+                            placeholder = "Min. 6 characters",
+                            id = "passwordInput",
+                            @class = ViewData.ModelState["NewPassword"]?.Errors.Count > 0 ? "input-error" : ""
+                        })
+                        <button type="button" class="pwd-toggle" onclick="togglePwd()" tabindex="-1">
+                            <svg id="eyeIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                <circle cx="12" cy="12" r="3" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="pwd-hint-box">
+                    <span>🔒</span>
+                    <div>
+                        Password is securely hashed.<br>
+                        Leave blank to <strong>keep the existing password</strong>.<br>
+                        Enter a new value to override it.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="form-actions">
+        <button type="submit" class="btn-save">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12" />
+            </svg>
+            Update User
+        </button>
+        <a href="@Url.Action("EditIndex","User")" class="btn-cancel">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+            Cancel
+        </a>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        function selectRole(role) {
+            document.querySelectorAll('.role-card').forEach(function (c) { c.classList.remove('selected'); });
+            var card = document.getElementById('card-' + role);
+            if (card) card.classList.add('selected');
+        }
+
+        function togglePwd() {
+            var inp = document.getElementById('passwordInput');
+            var icon = document.getElementById('eyeIcon');
+            if (inp.type === 'password') {
+                inp.type = 'text';
+                icon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/>' +
+                    '<path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/>' +
+                    '<line x1="1" y1="1" x2="23" y2="23"/>';
+            } else {
+                inp.type = 'password';
+                icon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+            }
+        }
+
+        (function () {
+            var checked = document.querySelector('input[name="Role"]:checked');
+            if (checked) selectRole(checked.value);
+        })();
+    </script>
+}

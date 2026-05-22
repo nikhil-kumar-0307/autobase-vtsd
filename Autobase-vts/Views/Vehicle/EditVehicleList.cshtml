@@ -1,0 +1,527 @@
+﻿@model List<autobase.Models.Vehicle>
+@{
+    ViewBag.Title = "Edit Vehicle";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<style>
+    /* ── Breadcrumb ── */
+    .breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        color: #bbb;
+        margin-bottom: 18px;
+        animation: fadeUp .3s ease both;
+    }
+
+        .breadcrumb a {
+            color: #bbb;
+            text-decoration: none;
+        }
+
+            .breadcrumb a:hover {
+                color: #555;
+            }
+
+        .breadcrumb .sep {
+            color: #ddd;
+        }
+
+        .breadcrumb .current {
+            color: #555;
+            font-weight: 600;
+        }
+
+    /* ── Hero ── */
+    .hero-banner {
+        background: linear-gradient(120deg, #1a2340 0%, #2a3a6e 60%, #1e2e55 100%);
+        border-radius: 14px;
+        padding: 28px 32px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 20px;
+        position: relative;
+        overflow: hidden;
+        animation: fadeUp .35s ease .03s both;
+    }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            right: -40px;
+            top: -40px;
+            width: 200px;
+            height: 200px;
+            background: rgba(255,255,255,.04);
+            border-radius: 50%;
+        }
+
+    .hero-left {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+    }
+
+    .hero-icon {
+        width: 52px;
+        height: 52px;
+        background: rgba(255,255,255,.1);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .hero-eyebrow {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: #F5C518;
+        margin-bottom: 4px;
+    }
+
+    .hero-title {
+        font-size: 26px;
+        font-weight: 800;
+        color: #fff;
+        letter-spacing: -.3px;
+    }
+
+        .hero-title span {
+            color: #F5C518;
+        }
+
+    .hero-sub {
+        font-size: 13px;
+        color: rgba(255,255,255,.5);
+        margin-top: 4px;
+    }
+
+    .btn-add-vehicle {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        height: 44px;
+        padding: 0 22px;
+        background: #F5C518;
+        color: #0d0d0d;
+        font-family: 'Barlow', sans-serif;
+        font-size: 14px;
+        font-weight: 700;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        text-decoration: none;
+        box-shadow: 0 3px 12px rgba(245,197,24,.35);
+        transition: background .2s, box-shadow .2s, transform .12s;
+        white-space: nowrap;
+    }
+
+        .btn-add-vehicle:hover {
+            background: #e6b800;
+        }
+
+        .btn-add-vehicle:active {
+            transform: scale(.98);
+        }
+
+    /* ── Table card ── */
+    .table-card {
+        background: #fff;
+        border: 1px solid #efefef;
+        border-radius: 14px;
+        overflow: hidden;
+        animation: fadeUp .4s ease .07s both;
+    }
+
+    .table-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 22px;
+        border-bottom: 1px solid #f5f5f5;
+    }
+
+    .table-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: #0d0d0d;
+    }
+
+    .table-count {
+        font-size: 11px;
+        color: #aaa;
+        background: #f5f5f5;
+        padding: 3px 10px;
+        border-radius: 20px;
+        margin-left: 10px;
+        font-weight: 600;
+    }
+
+    /* ── Search box ── */
+    .search-wrap {
+        position: relative;
+    }
+
+        .search-wrap input {
+            height: 38px;
+            padding: 0 14px 0 36px;
+            border: 1.5px solid #e8e8e8;
+            border-radius: 9px;
+            font-family: 'Barlow', sans-serif;
+            font-size: 13px;
+            color: #0d0d0d;
+            background: #fafafa;
+            outline: none;
+            transition: border-color .2s, box-shadow .2s;
+            width: 220px;
+        }
+
+            .search-wrap input:focus {
+                border-color: #3182ce;
+                background: #fff;
+                box-shadow: 0 0 0 3px rgba(49,130,206,.12);
+            }
+
+    .search-icon {
+        position: absolute;
+        left: 11px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #ccc;
+        pointer-events: none;
+    }
+
+    /* ── Data table ── */
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .data-table thead tr {
+            background: #fafafa;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .data-table thead th {
+            padding: 11px 18px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            color: #aaa;
+            text-align: left;
+        }
+
+        .data-table tbody tr {
+            border-bottom: 1px solid #f9f9f9;
+            transition: background .15s;
+        }
+
+            .data-table tbody tr:last-child {
+                border-bottom: none;
+            }
+
+            .data-table tbody tr:hover {
+                background: #fafcff;
+            }
+
+        .data-table td {
+            padding: 14px 18px;
+            font-size: 13px;
+            color: #333;
+        }
+
+    .td-num {
+        font-weight: 600;
+        color: #bbb;
+        font-size: 12px;
+    }
+
+    .td-name {
+        font-weight: 700;
+        color: #0d0d0d;
+        font-size: 14px;
+    }
+
+    .td-reg {
+        font-family: 'Courier New', monospace;
+        font-size: 13px;
+        font-weight: 600;
+        color: #444;
+    }
+
+    /* status badge */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .3px;
+    }
+
+        .status-badge.available {
+            background: #f0fdf4;
+            color: #166534;
+        }
+
+        .status-badge.allocated {
+            background: #fffbeb;
+            color: #92400e;
+        }
+
+        .status-badge.maintenance {
+            background: #fff5f5;
+            color: #c53030;
+        }
+
+    .status-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+    }
+
+        .status-dot.available {
+            background: #38a169;
+        }
+
+        .status-dot.allocated {
+            background: #d69e2e;
+        }
+
+        .status-dot.maintenance {
+            background: #e53e3e;
+        }
+
+    /* Edit button */
+    .btn-edit {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        height: 36px;
+        padding: 0 16px;
+        background: #F5C518;
+        color: #0d0d0d;
+        font-family: 'Barlow', sans-serif;
+        font-size: 12px;
+        font-weight: 700;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background .2s, transform .1s;
+    }
+
+        .btn-edit:hover {
+            background: #e6b800;
+        }
+
+        .btn-edit:active {
+            transform: scale(.97);
+        }
+
+    /* alerts */
+    .alert-success {
+        background: #f0fdf4;
+        border: 1.5px solid #bbf7d0;
+        border-radius: 10px;
+        padding: 12px 16px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #166534;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        animation: fadeUp .3s ease both;
+    }
+
+    .alert-error {
+        background: #fff5f5;
+        border: 1.5px solid #fed7d7;
+        border-radius: 10px;
+        padding: 12px 16px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #c53030;
+        margin-bottom: 16px;
+    }
+
+    /* empty state */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #bbb;
+    }
+
+        .empty-state svg {
+            margin-bottom: 12px;
+            opacity: .4;
+        }
+
+        .empty-state p {
+            font-size: 14px;
+            font-weight: 600;
+            color: #ccc;
+        }
+
+    @@keyframes fadeUp {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<!-- Breadcrumb -->
+<div class="breadcrumb">
+    <a href="@Url.Action("Index","Dashboard")">Dashboard</a>
+    <span class="sep">›</span>
+    <span>Fleet</span>
+    <span class="sep">›</span>
+    <span class="current">Edit Vehicle</span>
+</div>
+
+<!-- Hero -->
+<div class="hero-banner">
+    <div class="hero-left">
+        <div class="hero-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+                <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+            </svg>
+        </div>
+        <div>
+            <div class="hero-eyebrow">◆ Fleet Management</div>
+            <div class="hero-title">Edit <span>Vehicle</span></div>
+            <div class="hero-sub">Click Edit on any vehicle to update its details.</div>
+        </div>
+    </div>
+    <a href="@Url.Action("Add","Vehicle")" class="btn-add-vehicle">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19" />
+            <line x1="5" y1="12" x2="19" y2="12" />
+        </svg>
+        + Add Vehicle
+    </a>
+</div>
+
+<!-- Alerts -->
+@if (TempData["Success"] != null)
+{
+    <div class="alert-success">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
+            <polyline points="22 4 12 14.01 9 11.01" />
+        </svg>
+        @TempData["Success"]
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert-error">@TempData["Error"]</div>
+}
+
+<!-- Table Card -->
+<div class="table-card">
+    <div class="table-card-header">
+        <div style="display:flex;align-items:center;">
+            <span class="table-title">All Vehicles</span>
+            <span class="table-count">@Model.Count</span>
+        </div>
+        <div class="search-wrap">
+            <span class="search-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+            </span>
+            <input type="text" id="searchInput" placeholder="Search..." oninput="filterTable(this.value)" />
+        </div>
+    </div>
+
+    @if (Model.Count == 0)
+    {
+        <div class="empty-state">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ccc" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="1" y="3" width="15" height="13" rx="1" />
+                <path d="M16 8h4l3 4v3h-7V8z" />
+                <circle cx="5.5" cy="18.5" r="2.5" />
+                <circle cx="18.5" cy="18.5" r="2.5" />
+            </svg>
+            <p>No vehicles found in the fleet.</p>
+        </div>
+    }
+    else
+    {
+        <table class="data-table" id="vehicleTable">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Vehicle Name</th>
+                    <th>Reg. Number</th>
+                    <th>Type</th>
+                    <th>Year</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{ int i = 1; }
+                @foreach (var v in Model)
+                {
+                    string statusClass = v.Status?.ToLower() == "available" ? "available"
+                                       : v.Status?.ToLower() == "allocated" ? "allocated"
+                                       : "maintenance";
+                    <tr>
+                        <td class="td-num">@(i++)</td>
+                        <td class="td-name">@v.VehicleName</td>
+                        <td class="td-reg">@v.RegistrationNo</td>
+                        <td>@v.VehicleType</td>
+                        <td>@v.YearOfManufacture</td>
+                        <td>
+                            <span class="status-badge @statusClass">
+                                <span class="status-dot @statusClass"></span>
+                                @v.Status
+                            </span>
+                        </td>
+                        <td>
+                            <a href="@Url.Action("Edit","Vehicle", new { id = v.Id })" class="btn-edit">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+                                    <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+                                </svg>
+                                Edit
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function filterTable(q) {
+            q = q.toLowerCase();
+            var rows = document.querySelectorAll('#vehicleTable tbody tr');
+            rows.forEach(function(row) {
+                row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+            });
+        }
+    </script>
+}

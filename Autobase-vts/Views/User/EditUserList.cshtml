@@ -1,0 +1,483 @@
+﻿@model List<autobase.Models.Employee>
+@{
+    ViewBag.Title = "Edit User";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<style>
+    .breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        color: #bbb;
+        margin-bottom: 18px;
+        animation: fadeUp .3s ease both;
+    }
+
+        .breadcrumb a {
+            color: #bbb;
+            text-decoration: none;
+        }
+
+            .breadcrumb a:hover {
+                color: #555;
+            }
+
+        .breadcrumb .sep {
+            color: #ddd;
+        }
+
+        .breadcrumb .current {
+            color: #555;
+            font-weight: 600;
+        }
+
+    .page-header {
+        margin-bottom: 20px;
+        animation: fadeUp .32s ease .02s both;
+    }
+
+    .page-header-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .page-title {
+        font-size: 24px;
+        font-weight: 800;
+        color: #0d0d0d;
+        letter-spacing: -.3px;
+    }
+
+    .page-sub {
+        font-size: 13px;
+        color: #aaa;
+        margin-top: 3px;
+    }
+
+    .btn-add-user {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        height: 44px;
+        padding: 0 22px;
+        background: #F5C518;
+        color: #0d0d0d;
+        font-family: 'Barlow',sans-serif;
+        font-size: 14px;
+        font-weight: 700;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        text-decoration: none;
+        box-shadow: 0 3px 12px rgba(245,197,24,.35);
+        transition: background .2s,transform .12s;
+        white-space: nowrap;
+    }
+
+        .btn-add-user:hover {
+            background: #e6b800;
+        }
+
+        .btn-add-user:active {
+            transform: scale(.98);
+        }
+
+    /* Table card */
+    .table-card {
+        background: #fff;
+        border: 1px solid #efefef;
+        border-radius: 14px;
+        overflow: hidden;
+        animation: fadeUp .4s ease .07s both;
+    }
+
+    .table-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 22px;
+        border-bottom: 1px solid #f5f5f5;
+    }
+
+    .table-title-wrap {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .table-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: #0d0d0d;
+    }
+
+    .table-count {
+        font-size: 11px;
+        color: #aaa;
+        background: #f5f5f5;
+        padding: 3px 10px;
+        border-radius: 20px;
+        font-weight: 600;
+    }
+
+    /* Search */
+    .search-wrap {
+        position: relative;
+    }
+
+        .search-wrap input {
+            height: 38px;
+            padding: 0 14px 0 36px;
+            border: 1.5px solid #e8e8e8;
+            border-radius: 9px;
+            font-family: 'Barlow',sans-serif;
+            font-size: 13px;
+            color: #0d0d0d;
+            background: #fafafa;
+            outline: none;
+            width: 220px;
+            transition: border-color .2s,box-shadow .2s;
+        }
+
+            .search-wrap input:focus {
+                border-color: #3182ce;
+                background: #fff;
+                box-shadow: 0 0 0 3px rgba(49,130,206,.12);
+            }
+
+    .search-icon {
+        position: absolute;
+        left: 11px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #ccc;
+        pointer-events: none;
+    }
+
+    /* Data table */
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .data-table thead tr {
+            background: #fafafa;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .data-table thead th {
+            padding: 11px 18px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            color: #aaa;
+            text-align: left;
+        }
+
+        .data-table tbody tr {
+            border-bottom: 1px solid #f9f9f9;
+            transition: background .15s;
+        }
+
+            .data-table tbody tr:last-child {
+                border-bottom: none;
+            }
+
+            .data-table tbody tr:hover {
+                background: #fafcff;
+            }
+
+        .data-table td {
+            padding: 13px 18px;
+            font-size: 13px;
+            color: #333;
+        }
+
+    .td-num {
+        font-weight: 600;
+        color: #bbb;
+        font-size: 12px;
+    }
+
+    /* User avatar + name cell */
+    .user-cell {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .user-avatar {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        background: #F5C518;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        font-weight: 700;
+        color: #0d0d0d;
+        flex-shrink: 0;
+    }
+
+    .user-name {
+        font-weight: 700;
+        color: #0d0d0d;
+        font-size: 13px;
+    }
+
+    .user-email {
+        font-size: 11px;
+        color: #aaa;
+        margin-top: 1px;
+    }
+
+    .td-emp {
+        font-family: 'Courier New',monospace;
+        font-weight: 600;
+        color: #444;
+    }
+
+    /* Role badge */
+    .role-badge {
+        display: inline-block;
+        padding: 3px 12px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+        .role-badge.admin {
+            background: #eff6ff;
+            color: #1d4ed8;
+        }
+
+        .role-badge.employee {
+            background: #f0fdf4;
+            color: #166534;
+        }
+
+        .role-badge.superadmin {
+            background: #fdf4ff;
+            color: #7e22ce;
+        }
+
+    /* Edit button */
+    .btn-edit {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        height: 36px;
+        padding: 0 16px;
+        background: #F5C518;
+        color: #0d0d0d;
+        font-family: 'Barlow',sans-serif;
+        font-size: 12px;
+        font-weight: 700;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        text-decoration: none;
+        transition: background .2s,transform .1s;
+    }
+
+        .btn-edit:hover {
+            background: #e6b800;
+        }
+
+        .btn-edit:active {
+            transform: scale(.97);
+        }
+
+    /* Alerts */
+    .alert-success {
+        background: #f0fdf4;
+        border: 1.5px solid #bbf7d0;
+        border-radius: 10px;
+        padding: 12px 16px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #166534;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        animation: fadeUp .3s ease both;
+    }
+
+    .alert-error {
+        background: #fff5f5;
+        border: 1.5px solid #fed7d7;
+        border-radius: 10px;
+        padding: 12px 16px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #c53030;
+        margin-bottom: 16px;
+    }
+
+    /* Empty */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+    }
+
+        .empty-state p {
+            font-size: 14px;
+            font-weight: 600;
+            color: #ccc;
+            margin-top: 12px;
+        }
+
+    @@keyframes fadeUp {
+        from {
+            opacity: 0;
+            transform: translateY(10px)
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0)
+        }
+    }
+</style>
+
+<!-- Breadcrumb -->
+<div class="breadcrumb">
+    <a href="@Url.Action("Index","Dashboard")">Dashboard</a>
+    <span class="sep">›</span><span>Users</span>
+    <span class="sep">›</span>
+    <span class="current">Edit User</span>
+</div>
+
+<!-- Page header -->
+<div class="page-header">
+    <div class="page-header-row">
+        <div>
+            <div class="page-title">Edit User</div>
+            <div class="page-sub">Update login account details for existing users.</div>
+        </div>
+        <a href="@Url.Action("Add","User")" class="btn-add-user">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            + Add User
+        </a>
+    </div>
+</div>
+
+<!-- Alerts -->
+@if (TempData["Success"] != null)
+{
+    <div class="alert-success">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
+            <polyline points="22 4 12 14.01 9 11.01" />
+        </svg>
+        @TempData["Success"]
+    </div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert-error">@TempData["Error"]</div>
+}
+
+<!-- Table Card -->
+<div class="table-card">
+    <div class="table-card-header">
+        <div class="table-title-wrap">
+            <span class="table-title">All Login Users</span>
+            <span class="table-count">@Model.Count</span>
+        </div>
+        <div class="search-wrap">
+            <span class="search-icon">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                </svg>
+            </span>
+            <input type="text" placeholder="Search..." oninput="filterTable(this.value)" />
+        </div>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="empty-state">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#ddd" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+                <circle cx="12" cy="7" r="4" />
+            </svg>
+            <p>No users found.</p>
+        </div>
+    }
+    else
+    {
+        <table class="data-table" id="userTable">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Employee No.</th>
+                    <th>Mobile</th>
+                    <th>Designation</th>
+                    <th>Department</th>
+                    <th>Role</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{ int i = 1; }
+                @foreach (var emp in Model)
+                {
+                    string initial = string.IsNullOrEmpty(emp.FullName) ? "?" : emp.FullName.Substring(0, 1).ToUpper();
+                    string roleCss = emp.Role == "Admin" ? "admin" : emp.Role == "SuperAdmin" ? "superadmin" : "employee";
+                    <tr>
+                        <td class="td-num">@(i++)</td>
+                        <td>
+                            <div class="user-cell">
+                                <div class="user-avatar">@initial</div>
+                                <div>
+                                    <div class="user-name">@emp.FullName</div>
+                                    @if (!string.IsNullOrEmpty(emp.Email))
+                                    {
+                                        <div class="user-email">@emp.Email</div>
+                                    }
+                                </div>
+                            </div>
+                        </td>
+                        <td class="td-emp">#@emp.EmployeeNumber</td>
+                        <td>@emp.MobileNumber</td>
+                        <td>@emp.Designation</td>
+                        <td>@emp.Department</td>
+                        <td><span class="role-badge @roleCss">@emp.Role</span></td>
+                        <td>
+                            <a href="@Url.Action("Edit","User", new { id = emp.Id })" class="btn-edit">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+                                    <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+                                </svg>
+                                Edit
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function filterTable(q) {
+            q = q.toLowerCase();
+            document.querySelectorAll('#userTable tbody tr').forEach(function(r) {
+                r.style.display = r.textContent.toLowerCase().includes(q) ? '' : 'none';
+            });
+        }
+    </script>
+}
