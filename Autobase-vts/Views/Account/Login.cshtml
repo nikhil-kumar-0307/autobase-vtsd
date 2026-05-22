@@ -1,0 +1,378 @@
+﻿@model autobase.Models.DTOs.LoginDto
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AutoBase &mdash; Sign In</title>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&family=Barlow+Condensed:wght@700;800&display=swap" rel="stylesheet" />
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --yellow: #F5C518;
+            --yellow-dark: #d4a800;
+            --black: #0d0d0d;
+            --white: #ffffff;
+            --gray-100: #f7f7f7;
+            --gray-200: #e8e8e8;
+            --gray-400: #a0a0a0;
+            --gray-600: #666666;
+            --error: #e53e3e;
+            --panel-w: 580px;
+        }
+
+        html, body {
+            height: 100%;
+            font-family: 'Barlow', sans-serif;
+        }
+
+        .page {
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .panel {
+            width: var(--panel-w);
+            min-width: var(--panel-w);
+            background: var(--white);
+            display: flex;
+            flex-direction: column;
+            padding: 48px 72px;
+            position: relative;
+            z-index: 2;
+            box-shadow: 4px 0 32px rgba(0,0,0,.12);
+            animation: slideInLeft .55s cubic-bezier(.22,1,.36,1) both;
+        }
+
+        @@keyframes slideInLeft {
+            from {
+                transform: translateX(-30px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 56px;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--yellow);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+            .logo-icon svg {
+                width: 24px;
+                height: 24px;
+            }
+
+        .logo-text {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--black);
+            letter-spacing: -.3px;
+        }
+
+        .heading {
+            margin-bottom: 36px;
+        }
+
+            .heading h1 {
+                font-size: 32px;
+                font-weight: 800;
+                color: var(--black);
+                letter-spacing: -.5px;
+                line-height: 1.1;
+            }
+
+            .heading p {
+                margin-top: 6px;
+                font-size: 14px;
+                color: var(--gray-400);
+                font-weight: 400;
+            }
+
+        .form {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+        }
+
+            .field label {
+                font-size: 11px;
+                font-weight: 700;
+                letter-spacing: 1.2px;
+                text-transform: uppercase;
+                color: var(--gray-600);
+            }
+
+        .input-wrap {
+            position: relative;
+        }
+
+        .field input {
+            width: 100%;
+            height: 48px;
+            padding: 0 44px 0 16px;
+            border: 1.5px solid var(--gray-200);
+            border-radius: 10px;
+            font-family: 'Barlow', sans-serif;
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--black);
+            background: var(--gray-100);
+            transition: border-color .2s, box-shadow .2s, background .2s;
+            outline: none;
+        }
+
+            .field input:focus {
+                border-color: var(--yellow);
+                background: var(--white);
+                box-shadow: 0 0 0 3px rgba(245,197,24,.18);
+            }
+
+            .field input.input-error {
+                border-color: var(--error);
+            }
+
+        .eye-btn {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--gray-400);
+            display: flex;
+            align-items: center;
+            padding: 4px;
+            transition: color .2s;
+        }
+
+            .eye-btn:hover {
+                color: var(--black);
+            }
+
+        .validation-summary {
+            background: #fff5f5;
+            border: 1.5px solid #fed7d7;
+            border-radius: 10px;
+            padding: 12px 16px;
+            font-size: 13px;
+            color: var(--error);
+            font-weight: 500;
+        }
+
+        .btn-sign-in {
+            margin-top: 8px;
+            height: 50px;
+            background: var(--yellow);
+            color: var(--black);
+            font-family: 'Barlow', sans-serif;
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: .3px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background .2s, transform .12s, box-shadow .2s;
+            box-shadow: 0 4px 14px rgba(245,197,24,.35);
+        }
+
+            .btn-sign-in:hover {
+                background: var(--yellow-dark);
+                box-shadow: 0 6px 20px rgba(245,197,24,.45);
+            }
+
+            .btn-sign-in:active {
+                transform: scale(.98);
+            }
+
+        .hero {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-fallback {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #0d0d0d 100%);
+        }
+
+        .hero-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            filter: brightness(.65) saturate(.85);
+        }
+
+        .hero-brand {
+            position: absolute;
+            bottom: 36px;
+            right: 40px;
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 42px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            line-height: 1;
+            pointer-events: none;
+        }
+
+            .hero-brand .auto {
+                color: #ffffff;
+            }
+
+            .hero-brand .base {
+                color: #F5C518;
+            }
+
+        .hero::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at 30% 50%, transparent 40%, rgba(0,0,0,.55) 100%);
+            pointer-events: none;
+        }
+
+        @@media (max-width: 680px) {
+            .hero {
+                display: none;
+            }
+
+            .panel {
+                width: 100%;
+                min-width: unset;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+
+        <!-- Left panel -->
+        <div class="panel">
+            <div class="logo">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="1" y="5" width="15" height="11" rx="1" fill="#1a1a1a" />
+                        <path d="M16 9h4l3 4v3h-7V9z" fill="#1a1a1a" />
+                        <circle cx="5.5" cy="18.5" r="2.5" fill="#1a1a1a" />
+                        <circle cx="18.5" cy="18.5" r="2.5" fill="#1a1a1a" />
+                    </svg>
+                </div>
+                <span class="logo-text">VehicleTrack</span>
+            </div>
+
+            <div class="heading">
+                <h1>Welcome Back</h1>
+                <p>Sign in to your account</p>
+            </div>
+
+            @using (Html.BeginForm("Login", "Account", FormMethod.Post, new { @class = "form" }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.Hidden("ReturnUrl", Request.QueryString["ReturnUrl"])
+
+                if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="validation-summary">
+                        @foreach (var modelState in ViewData.ModelState.Values)
+                        {
+                            foreach (var err in modelState.Errors)
+                            {
+                                <div>@err.ErrorMessage</div>
+                            }
+                        }
+                    </div>
+                }
+
+                <div class="field">
+                    @Html.LabelFor(m => m.EmployeeNumber, "EMPLOYEE NUMBER")
+                    <div class="input-wrap">
+                        @Html.TextBoxFor(m => m.EmployeeNumber, new
+                        {
+                            placeholder = "e.g. 1001",
+                            autocomplete = "username"
+                        })
+                    </div>
+                </div>
+
+                <div class="field">
+                    @Html.LabelFor(m => m.Password, "PASSWORD")
+                    <div class="input-wrap">
+                        @Html.PasswordFor(m => m.Password, new
+                        {
+                            id = "passwordInput",
+                            placeholder = "••••••••",
+                            autocomplete = "current-password"
+                        })
+                        <button type="button" class="eye-btn" onclick="togglePassword()" aria-label="Toggle password">
+                            <svg id="eyeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none"
+                                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                                <circle cx="12" cy="12" r="3" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-sign-in">Sign In</button>
+            }
+        </div>
+
+        <!-- Right hero -->
+        <div class="hero">
+            <div class="hero-fallback"></div>
+            <div class="hero-brand">
+                <span class="auto">AUTO</span><span class="base">BASE</span>
+            </div>
+        </div>
+
+    </div>
+    <script>
+        function togglePassword() {
+            var input = document.getElementById('passwordInput');
+            var icon = document.getElementById('eyeIcon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94"/>'
+                    + '<path d="M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19"/>'
+                    + '<line x1="1" y1="1" x2="23" y2="23"/>';
+            } else {
+                input.type = 'password';
+                icon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,539 @@
+﻿@model autobase.Models.DTOs.VehicleTypesDto
+@{
+    ViewBag.Title = "Create Vehicle";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+
+    var vehicles = ViewBag.Vehicles as List<autobase.Models.VehicleTypes> ?? new List<autobase.Models.VehicleTypes>();
+
+    var typeOptions = new[] { "SUV", "Sedan", "Hatchback", "Bus", "Mini Truck", "Van", "Pickup", "Bike" };
+}
+
+<style>
+    .page-header {
+        margin-bottom: 24px;
+        animation: fadeUp .35s ease both;
+    }
+
+    .page-title {
+        font-size: 24px;
+        font-weight: 800;
+        color: #0d0d0d;
+        letter-spacing: -.3px;
+    }
+
+    .page-sub {
+        font-size: 13px;
+        color: #aaa;
+        margin-top: 3px;
+    }
+
+    /* ── Form card ── */
+    .form-card {
+        background: #fff;
+        border: 1px solid #efefef;
+        border-radius: 14px;
+        margin-bottom: 20px;
+        animation: fadeUp .4s ease .04s both;
+    }
+
+    .form-card-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 18px 24px;
+        border-bottom: 1px solid #f5f5f5;
+    }
+
+    .form-card-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: #0d0d0d;
+    }
+
+    .form-card-body {
+        padding: 28px 24px;
+    }
+
+    /* ── Alert ── */
+    .alert-success {
+        background: #f0fdf4;
+        border: 1.5px solid #bbf7d0;
+        border-radius: 10px;
+        padding: 12px 16px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #166534;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        animation: fadeUp .3s ease both;
+    }
+
+    .alert-error {
+        background: #fff5f5;
+        border: 1.5px solid #fed7d7;
+        border-radius: 10px;
+        padding: 12px 16px;
+        font-size: 13px;
+        font-weight: 500;
+        color: #c53030;
+        margin-bottom: 20px;
+    }
+
+    /* ── Two-col grid ── */
+    .field-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 28px;
+        margin-bottom: 24px;
+    }
+
+    .field {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .field-label {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 1.3px;
+        text-transform: uppercase;
+        color: #888;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+    .required-dot {
+        color: #e53e3e;
+        font-size: 14px;
+        line-height: 1;
+    }
+
+    .field input[type="text"],
+    .field select {
+        height: 48px;
+        padding: 0 16px;
+        border: 1.5px solid #e8e8e8;
+        border-radius: 10px;
+        font-family: 'Barlow', sans-serif;
+        font-size: 14px;
+        font-weight: 500;
+        color: #0d0d0d;
+        background: #fafafa;
+        outline: none;
+        transition: border-color .2s, background .2s, box-shadow .2s;
+        width: 100%;
+    }
+
+        .field input[type="text"]::placeholder {
+            color: #c0c0c0;
+            font-weight: 400;
+        }
+
+        .field input[type="text"]:focus,
+        .field select:focus {
+            border-color: #F5C518;
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(245,197,24,.15);
+        }
+
+    .field input.input-error {
+        border-color: #e53e3e;
+    }
+
+    .field-hint {
+        font-size: 11px;
+        color: #bbb;
+        margin-top: 2px;
+    }
+
+    /* ── Type chips ── */
+    .type-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 10px;
+    }
+
+    .type-chip {
+        padding: 5px 14px;
+        border: 1.5px solid #e8e8e8;
+        border-radius: 50px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #666;
+        background: #fff;
+        cursor: pointer;
+        transition: border-color .15s, background .15s, color .15s;
+        user-select: none;
+    }
+
+        .type-chip:hover {
+            border-color: #F5C518;
+            background: #fffbea;
+            color: #0d0d0d;
+        }
+
+        .type-chip.selected {
+            border-color: #F5C518;
+            background: #F5C518;
+            color: #0d0d0d;
+        }
+
+    /* ── Divider ── */
+    .form-divider {
+        border: none;
+        border-top: 1px solid #f0f0f0;
+        margin: 4px 0 24px;
+    }
+
+    /* ── Buttons ── */
+    .form-actions {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .btn-save {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        height: 44px;
+        padding: 0 24px;
+        background: #F5C518;
+        color: #0d0d0d;
+        font-family: 'Barlow', sans-serif;
+        font-size: 14px;
+        font-weight: 700;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        box-shadow: 0 3px 12px rgba(245,197,24,.35);
+        transition: background .2s, box-shadow .2s, transform .12s;
+    }
+
+        .btn-save:hover {
+            background: #d4a800;
+            box-shadow: 0 5px 18px rgba(245,197,24,.45);
+        }
+
+        .btn-save:active {
+            transform: scale(.98);
+        }
+
+    .btn-cancel {
+        display: inline-flex;
+        align-items: center;
+        height: 44px;
+        padding: 0 20px;
+        background: #fff;
+        color: #555;
+        font-family: 'Barlow', sans-serif;
+        font-size: 14px;
+        font-weight: 600;
+        border: 1.5px solid #e8e8e8;
+        border-radius: 10px;
+        cursor: pointer;
+        text-decoration: none;
+        transition: border-color .2s, color .2s;
+    }
+
+        .btn-cancel:hover {
+            border-color: #ccc;
+            color: #0d0d0d;
+        }
+
+    /* ── Vehicles list card ── */
+    .list-card {
+        background: #fff;
+        border: 1px solid #efefef;
+        border-radius: 14px;
+        overflow: hidden;
+        animation: fadeUp .45s ease .08s both;
+    }
+
+    .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 56px 20px;
+        gap: 12px;
+        color: #ccc;
+    }
+
+        .empty-state svg {
+            color: #ddd;
+        }
+
+        .empty-state p {
+            font-size: 13px;
+            color: #bbb;
+        }
+
+    /* ── Vehicle table ── */
+    .v-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .v-table th {
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 1.3px;
+            text-transform: uppercase;
+            color: #bbb;
+            padding: 11px 20px;
+            text-align: left;
+            background: #fafafa;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .v-table td {
+            padding: 13px 20px;
+            font-size: 13px;
+            color: #444;
+            border-bottom: 1px solid #f9f9f9;
+            vertical-align: middle;
+        }
+
+        .v-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .v-table tr:hover td {
+            background: #fafafa;
+        }
+
+    .v-name {
+        font-weight: 600;
+        color: #0d0d0d;
+    }
+
+    .type-tag {
+        display: inline-block;
+        padding: 3px 12px;
+        border-radius: 50px;
+        font-size: 11px;
+        font-weight: 700;
+        background: #f5f5f5;
+        color: #555;
+        border: 1px solid #eee;
+    }
+
+    .delete-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 5px 12px;
+        border: 1.5px solid #fee2e2;
+        border-radius: 7px;
+        background: #fff;
+        color: #e53e3e;
+        font-family: 'Barlow', sans-serif;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background .2s, border-color .2s;
+    }
+
+        .delete-btn:hover {
+            background: #fff5f5;
+            border-color: #e53e3e;
+        }
+
+    @@keyframes fadeUp {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<!-- Page Header -->
+<div class="page-header">
+    <div class="page-title">Add Vehicle</div>
+    <div class="page-sub">Register a new vehicle name and type into the system.</div>
+</div>
+
+<!-- Success / Error alerts -->
+@if (TempData["Success"] != null)
+{
+    <div class="alert-success">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
+            <polyline points="22 4 12 14.01 9 11.01" />
+        </svg>
+        @TempData["Success"]
+    </div>
+}
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert-error">
+        @foreach (var state in ViewData.ModelState.Values)
+        {
+            foreach (var err in state.Errors)
+            {
+                <div>@err.ErrorMessage</div>
+            }
+        }
+    </div>
+}
+
+<!-- Form Card -->
+<div class="form-card">
+    <div class="form-card-header">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F5C518" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="1" y="3" width="15" height="13" rx="1" />
+            <path d="M16 8h4l3 4v3h-7V8z" />
+            <circle cx="5.5" cy="18.5" r="2.5" />
+            <circle cx="18.5" cy="18.5" r="2.5" />
+        </svg>
+        <span class="form-card-title">Vehicle Information</span>
+    </div>
+
+    <div class="form-card-body">
+        @using (Html.BeginForm("Create", "VehicleType", FormMethod.Post))
+        {
+            @Html.AntiForgeryToken()
+
+            <div class="field-row">
+                <!-- Vehicle Name -->
+                <div class="field">
+                    <label class="field-label">
+                        Vehicle Name <span class="required-dot">*</span>
+                    </label>
+                    @Html.TextBoxFor(m => m.VehicleName, new
+                    {
+                        @class = "input-" + (ViewData.ModelState["VehicleName"]?.Errors.Count > 0 ? "error" : "ok"),
+                        placeholder = "e.g. Toyota Fortuner"
+                    })
+                    <span class="field-hint">Enter the full name of the vehicle.</span>
+                </div>
+
+                <!-- Vehicle Type -->
+                <div class="field">
+                    <label class="field-label">
+                        Vehicle Type <span class="required-dot">*</span>
+                    </label>
+                    @Html.HiddenFor(m => m.VehicleType, new { id = "vehicleTypeInput" })
+                    <input type="text"
+                           id="vehicleTypeDisplay"
+                           placeholder="e.g. SUV, Bus, Mini Truck..."
+                           readonly
+                           style="cursor:pointer;"
+                           value="@Model.VehicleType" />
+
+                    <!-- Quick-pick chips -->
+                    <div class="type-chips">
+                        @foreach (var t in typeOptions)
+                        {
+                            <span class="type-chip @(Model.VehicleType == t ? "selected" : "")"
+                                  onclick="selectType(this, '@t')">@t</span>
+                            }
+                    </div>
+                </div>
+            </div>
+
+            <hr class="form-divider" />
+
+            <div class="form-actions">
+                <button type="submit" class="btn-save">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    Save Vehicle
+                </button>
+                <a href="@Url.Action("Index", "Dashboard")" class="btn-cancel">Cancel</a>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Registered Vehicles List -->
+<div class="list-card">
+    @if (!vehicles.Any())
+    {
+        <div class="empty-state">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="1" y="3" width="15" height="13" rx="1" />
+                <path d="M16 8h4l3 4v3h-7V8z" />
+                <circle cx="5.5" cy="18.5" r="2.5" />
+                <circle cx="18.5" cy="18.5" r="2.5" />
+            </svg>
+            <p>No vehicles registered yet. Add one above.</p>
+        </div>
+    }
+    else
+    {
+        <table class="v-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Vehicle Name</th>
+                    <th>Type</th>
+                    <th>Added On</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @{ int i = 1; }
+                @foreach (var v in vehicles)
+                {
+                    <tr>
+                        <td style="color:#ccc; font-size:12px;">@i</td>
+                        <td><span class="v-name">@v.VehicleName</span></td>
+                        <td><span class="type-tag">@v.VehicleType</span></td>
+                        <td style="color:#aaa; font-size:12px;">@v.CreatedAt.ToString("dd MMM yyyy")</td>
+                        <td>
+                            @using (Html.BeginForm("Delete", "VehicleType", new { id = v.Id }, FormMethod.Post, new { style = "display:inline;" }))
+                            {
+                                @Html.AntiForgeryToken()
+                                <button type="submit" class="delete-btn"
+                                        onclick="return confirm('Remove this vehicle?')">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="3 6 5 6 21 6" />
+                                        <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" />
+                                    </svg>
+                                    Remove
+                                </button>
+                            }
+                        </td>
+                    </tr>
+                    i++;
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function selectType(chip, value) {
+            // Deselect all
+            document.querySelectorAll('.type-chip').forEach(c => c.classList.remove('selected'));
+            // Select clicked
+            chip.classList.add('selected');
+            // Set hidden input + display input
+            document.getElementById('vehicleTypeInput').value = value;
+            document.getElementById('vehicleTypeDisplay').value = value;
+        }
+
+        // On page load, if a type is already selected (e.g. after validation fail), sync display
+        (function () {
+            var val = document.getElementById('vehicleTypeInput').value;
+            if (val) {
+                document.getElementById('vehicleTypeDisplay').value = val;
+            }
+        })();
+    </script>
+}

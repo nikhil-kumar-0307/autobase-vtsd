@@ -1,0 +1,576 @@
+﻿@{
+    ViewBag.Title = "Dashboard";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+
+    string role = Session["Role"]?.ToString() ?? "";
+    string fullName = Session["FullName"]?.ToString() ?? "User";
+    string empNo = Session["EmployeeNumber"]?.ToString() ?? "";
+
+    // Dummy data
+    int totalVehicles = 0;
+    int available = 0;
+    int allocated = 0;
+    int totalUsers = 2;
+}
+
+<style>
+    .welcome-banner {
+        background: linear-gradient(135deg, #fffbea 0%, #fff8d6 100%);
+        border: 1px solid #f5e090;
+        border-radius: 14px;
+        padding: 24px 28px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 24px;
+        animation: fadeUp .4s ease both;
+    }
+
+    .welcome-title {
+        font-size: 22px;
+        font-weight: 800;
+        color: #0d0d0d;
+        letter-spacing: -.3px;
+    }
+
+    .welcome-sub {
+        font-size: 13px;
+        color: #888;
+        margin-top: 4px;
+    }
+
+        .welcome-sub span {
+            font-weight: 700;
+            color: #0d0d0d;
+        }
+
+    .role-badge {
+        background: #F5C518;
+        color: #0d0d0d;
+        font-size: 12px;
+        font-weight: 700;
+        padding: 6px 16px;
+        border-radius: 50px;
+        letter-spacing: .3px;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 28px;
+        animation: fadeUp .45s ease .05s both;
+    }
+
+    .stat-card {
+        background: #fff;
+        border-radius: 14px;
+        padding: 20px 22px;
+        border: 1px solid #f0f0f0;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+        }
+
+        .stat-card.yellow::before {
+            background: #F5C518;
+        }
+
+        .stat-card.green::before {
+            background: #38a169;
+        }
+
+        .stat-card.blue::before {
+            background: #3182ce;
+        }
+
+        .stat-card.purple::before {
+            background: #805ad5;
+        }
+
+    .stat-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 14px;
+    }
+
+        .stat-icon.yellow {
+            background: #fff8dc;
+            color: #c9a000;
+        }
+
+        .stat-icon.green {
+            background: #f0fff4;
+            color: #38a169;
+        }
+
+        .stat-icon.blue {
+            background: #ebf8ff;
+            color: #3182ce;
+        }
+
+        .stat-icon.purple {
+            background: #faf5ff;
+            color: #805ad5;
+        }
+
+    .stat-number {
+        font-size: 32px;
+        font-weight: 800;
+        color: #0d0d0d;
+        line-height: 1;
+    }
+
+    .stat-label {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 1.2px;
+        text-transform: uppercase;
+        color: #aaa;
+        margin-top: 5px;
+    }
+
+    .section-title {
+        font-size: 15px;
+        font-weight: 700;
+        color: #0d0d0d;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 16px;
+    }
+
+        .section-title svg {
+            color: #F5C518;
+        }
+
+    .quick-actions-section {
+        margin-bottom: 28px;
+        animation: fadeUp .5s ease .1s both;
+    }
+
+    .quick-actions-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+    }
+
+    .qa-card {
+        background: #fff;
+        border: 1px solid #f0f0f0;
+        border-radius: 12px;
+        padding: 18px 18px;
+        display: flex;
+        align-items: flex-start;
+        gap: 13px;
+        text-decoration: none;
+        color: inherit;
+        transition: border-color .2s, box-shadow .2s, transform .15s;
+        cursor: pointer;
+    }
+
+        .qa-card:hover {
+            border-color: #F5C518;
+            box-shadow: 0 4px 16px rgba(245,197,24,.15);
+            transform: translateY(-1px);
+        }
+
+    .qa-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        background: #fff8dc;
+        border: 1px solid #f5e090;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        color: #c9a000;
+    }
+
+    .qa-label {
+        font-size: 13px;
+        font-weight: 700;
+        color: #0d0d0d;
+    }
+
+    .qa-sub {
+        font-size: 11px;
+        color: #aaa;
+        margin-top: 2px;
+    }
+
+    .bottom-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        animation: fadeUp .55s ease .15s both;
+    }
+
+    .data-card {
+        background: #fff;
+        border: 1px solid #f0f0f0;
+        border-radius: 14px;
+        overflow: hidden;
+    }
+
+    .data-card-header {
+        padding: 16px 20px;
+        border-bottom: 1px solid #f5f5f5;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .data-card-title {
+        font-size: 14px;
+        font-weight: 700;
+        color: #0d0d0d;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+        .data-card-title svg {
+            color: #F5C518;
+        }
+
+    .view-all-link {
+        font-size: 12px;
+        font-weight: 600;
+        color: #F5C518;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+
+        .view-all-link:hover {
+            color: #c9a000;
+        }
+
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .data-table th {
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            color: #bbb;
+            padding: 10px 20px;
+            text-align: left;
+            border-bottom: 1px solid #f5f5f5;
+            background: #fafafa;
+        }
+
+        .data-table td {
+            padding: 12px 20px;
+            font-size: 13px;
+            color: #444;
+            border-bottom: 1px solid #f9f9f9;
+        }
+
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+
+    .empty-state {
+        padding: 36px 20px;
+        text-align: center;
+        color: #bbb;
+        font-size: 13px;
+    }
+
+    .user-row-avatar {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: #F5C518;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 700;
+        color: #0d0d0d;
+    }
+
+    .user-row-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .user-row-name {
+        font-size: 13px;
+        font-weight: 600;
+        color: #0d0d0d;
+    }
+
+    .role-tag {
+        display: inline-block;
+        font-size: 10px;
+        font-weight: 700;
+        padding: 3px 10px;
+        border-radius: 50px;
+        letter-spacing: .3px;
+    }
+
+        .role-tag.superadmin {
+            background: #fef9c3;
+            color: #a16207;
+            border: 1px solid #fde68a;
+        }
+
+        .role-tag.admin {
+            background: #dbeafe;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
+        }
+
+        .role-tag.employee {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+    @@keyframes fadeUp {
+        from {
+            opacity: 0;
+            transform: translateY(12px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<!-- Welcome Banner -->
+<div class="welcome-banner">
+    <div>
+        <div class="welcome-title">Welcome back, @fullName 👋</div>
+        <div class="welcome-sub">Here's what's happening with your fleet today. &nbsp;| Emp No: <span>#@empNo</span></div>
+    </div>
+    <div class="role-badge">@role</div>
+</div>
+
+<!-- Stats -->
+<div class="stats-grid">
+    <div class="stat-card yellow">
+        <div class="stat-icon yellow">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="1" y="3" width="15" height="13" rx="1" />
+                <path d="M16 8h4l3 4v3h-7V8z" />
+                <circle cx="5.5" cy="18.5" r="2.5" />
+                <circle cx="18.5" cy="18.5" r="2.5" />
+            </svg>
+        </div>
+        <div class="stat-number">@totalVehicles</div>
+        <div class="stat-label">Total Vehicles</div>
+    </div>
+    <div class="stat-card green">
+        <div class="stat-icon green">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
+                <polyline points="22 4 12 14.01 9 11.01" />
+            </svg>
+        </div>
+        <div class="stat-number">@available</div>
+        <div class="stat-label">Available</div>
+    </div>
+    <div class="stat-card blue">
+        <div class="stat-icon blue">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+                <circle cx="12" cy="10" r="3" />
+            </svg>
+        </div>
+        <div class="stat-number">@allocated</div>
+        <div class="stat-label">Allocated</div>
+    </div>
+    <div class="stat-card purple">
+        <div class="stat-icon purple">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M23 21v-2a4 4 0 00-3-3.87" />
+                <path d="M16 3.13a4 4 0 010 7.75" />
+            </svg>
+        </div>
+        <div class="stat-number">@totalUsers</div>
+        <div class="stat-label">Total Users</div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="quick-actions-section">
+    <div class="section-title">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+        </svg>
+        Quick Actions
+    </div>
+    <div class="quick-actions-grid">
+        <a href="@Url.Action("Add", "Vehicle")" class="qa-card">
+            <div class="qa-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="8" x2="12" y2="16" />
+                    <line x1="8" y1="12" x2="16" y2="12" />
+                </svg>
+            </div>
+            <div>
+                <div class="qa-label">Add Vehicle</div>
+                <div class="qa-sub">Register new vehicle</div>
+            </div>
+        </a>
+        <a href="@Url.Action("Edit", "Vehicle")" class="qa-card">
+            <div class="qa-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
+                    <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
+                </svg>
+            </div>
+            <div>
+                <div class="qa-label">Edit Vehicle</div>
+                <div class="qa-sub">Update vehicle details</div>
+            </div>
+        </a>
+        <a href="@Url.Action("Add", "User")" class="qa-card">
+            <div class="qa-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                    <line x1="19" y1="8" x2="19" y2="14" />
+                    <line x1="22" y1="11" x2="16" y2="11" />
+                </svg>
+            </div>
+            <div>
+                <div class="qa-label">Add User</div>
+                <div class="qa-sub">Register employee</div>
+            </div>
+        </a>
+        <a href="@Url.Action("Index", "Request")" class="qa-card">
+            <div class="qa-icon">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                    <line x1="16" y1="13" x2="8" y2="13" />
+                    <line x1="16" y1="17" x2="8" y2="17" />
+                </svg>
+            </div>
+            <div>
+                <div class="qa-label">See Requests</div>
+                <div class="qa-sub">Review pending requests</div>
+            </div>
+        </a>
+    </div>
+</div>
+
+<!-- Recent Vehicles + Recent Users -->
+<div class="bottom-grid">
+    <!-- Recent Vehicles -->
+    <div class="data-card">
+        <div class="data-card-header">
+            <div class="data-card-title">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="1" y="3" width="15" height="13" rx="1" />
+                    <path d="M16 8h4l3 4v3h-7V8z" />
+                    <circle cx="5.5" cy="18.5" r="2.5" />
+                    <circle cx="18.5" cy="18.5" r="2.5" />
+                </svg>
+                Recent Vehicles
+            </div>
+            <a href="@Url.Action("Index", "Vehicle")" class="view-all-link">
+                View all
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                    <polyline points="12 5 19 12 12 19" />
+                </svg>
+            </a>
+        </div>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Vehicle</th>
+                    <th>Type</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="3" class="empty-state">No vehicles added yet.</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Recent Users -->
+    <div class="data-card">
+        <div class="data-card-header">
+            <div class="data-card-title">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+                    <circle cx="9" cy="7" r="4" />
+                    <path d="M23 21v-2a4 4 0 00-3-3.87" />
+                    <path d="M16 3.13a4 4 0 010 7.75" />
+                </svg>
+                Recent Users
+            </div>
+            <a href="@Url.Action("Index", "User")" class="view-all-link">
+                View all
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                    <polyline points="12 5 19 12 12 19" />
+                </svg>
+            </a>
+        </div>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Emp No.</th>
+                    <th>Role</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>
+                        <div class="user-row-info">
+                            <div class="user-row-avatar">S</div>
+                            <div class="user-row-name">SA001</div>
+                        </div>
+                    </td>
+                    <td style="color:#888;">#1000</td>
+                    <td><span class="role-tag employee">Employee</span></td>
+                </tr>
+                <tr>
+                    <td>
+                        <div class="user-row-info">
+                            <div class="user-row-avatar">S</div>
+                            <div class="user-row-name">Super Admin</div>
+                        </div>
+                    </td>
+                    <td style="color:#888;">#SA001</td>
+                    <td><span class="role-tag superadmin">SuperAdmin</span></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
