@@ -14,7 +14,7 @@ namespace autobase.Controllers
 
             // Employees must not access the admin dashboard
             if (role == "Employee")
-                return RedirectToAction("Employee");
+                return RedirectToAction("EmployeeDashboard");
 
             return View();   // Views/Dashboard/Index.cshtml  (uses _AdminLayout)
         }

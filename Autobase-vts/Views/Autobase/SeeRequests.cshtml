@@ -1,0 +1,1106 @@
+﻿@model autobase.Models.DTOs.SeeRequestDto
+@{
+    ViewBag.Title = "See Requests";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <style>
+        .page-title {
+            font-size: 22px;
+            font-weight: 800;
+            color: #0d0d0d;
+        }
+
+        .page-sub {
+            font-size: 12.5px;
+            color: #aaa;
+            margin-top: 3px;
+            margin-bottom: 22px;
+        }
+
+        /* Alert */
+        .alert {
+            padding: 13px 16px;
+            border-radius: 9px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 9px;
+        }
+
+        .alert-success {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        /* Stat cards */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 14px;
+            margin-bottom: 22px;
+        }
+
+        .stat-card {
+            background: #fff;
+            border: 1px solid #efefef;
+            border-radius: 12px;
+            padding: 18px 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .stat-card::after {
+                content: '';
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: 3px;
+            }
+
+            .stat-card.c-gray::after {
+                background: #aaa;
+            }
+
+            .stat-card.c-amber::after {
+                background: #d97706;
+            }
+
+            .stat-card.c-green::after {
+                background: #16a34a;
+            }
+
+            .stat-card.c-red::after {
+                background: #dc2626;
+            }
+
+            .stat-card.c-blue::after {
+                background: #2563eb;
+            }
+
+        .stat-lbl {
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 1.3px;
+            text-transform: uppercase;
+            color: #bbb;
+            margin-bottom: 8px;
+        }
+
+        .stat-num {
+            font-size: 32px;
+            font-weight: 800;
+            color: #0d0d0d;
+            line-height: 1;
+        }
+
+        /* Search + filter bar */
+        .bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        .search-wrap {
+            flex: 1;
+            position: relative;
+        }
+
+            .search-wrap svg {
+                position: absolute;
+                left: 13px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: #ccc;
+                pointer-events: none;
+            }
+
+            .search-wrap input {
+                width: 100%;
+                height: 42px;
+                padding: 0 14px 0 40px;
+                border: 1.5px solid #e8e8e8;
+                border-radius: 9px;
+                font-family: 'Barlow', sans-serif;
+                font-size: 13px;
+                font-weight: 500;
+                color: #0d0d0d;
+                background: #fff;
+                outline: none;
+                transition: border-color .2s, box-shadow .2s;
+            }
+
+                .search-wrap input:focus {
+                    border-color: #F5C518;
+                    box-shadow: 0 0 0 3px rgba(245,197,24,.12);
+                }
+
+        .filter-tabs {
+            display: flex;
+            gap: 6px;
+        }
+
+        .ftab {
+            height: 42px;
+            padding: 0 18px;
+            border: 1.5px solid #e8e8e8;
+            border-radius: 9px;
+            font-family: 'Barlow', sans-serif;
+            font-size: 12.5px;
+            font-weight: 600;
+            color: #666;
+            background: #fff;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            transition: border-color .15s, background .15s, color .15s;
+            white-space: nowrap;
+        }
+
+            .ftab:hover {
+                border-color: #ccc;
+                color: #0d0d0d;
+            }
+
+            .ftab.f-all {
+                background: #0d0d0d;
+                border-color: #0d0d0d;
+                color: #fff;
+            }
+
+            .ftab.f-pending {
+                background: #d97706;
+                border-color: #d97706;
+                color: #fff;
+            }
+
+            .ftab.f-approved {
+                background: #16a34a;
+                border-color: #16a34a;
+                color: #fff;
+            }
+
+            .ftab.f-rejected {
+                background: #dc2626;
+                border-color: #dc2626;
+                color: #fff;
+            }
+
+            .ftab.f-completed {
+                background: #2563eb;
+                border-color: #2563eb;
+                color: #fff;
+            }
+
+        /* Table card */
+        .table-card {
+            background: #fff;
+            border: 1px solid #efefef;
+            border-radius: 13px;
+            overflow: hidden;
+        }
+
+        .tc-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid #f5f5f5;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tc-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #0d0d0d;
+        }
+
+        .req-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+            .req-table th {
+                font-size: 8.5px;
+                font-weight: 700;
+                letter-spacing: 1.2px;
+                text-transform: uppercase;
+                color: #bbb;
+                padding: 10px 16px;
+                text-align: left;
+                background: #fafafa;
+                border-bottom: 1px solid #f0f0f0;
+                white-space: nowrap;
+            }
+
+            .req-table td {
+                padding: 13px 16px;
+                font-size: 12.5px;
+                color: #555;
+                border-bottom: 1px solid #f9f9f9;
+                vertical-align: middle;
+            }
+
+            .req-table tr:last-child td {
+                border-bottom: none;
+            }
+
+            .req-table tr:hover td {
+                background: #fafafa;
+            }
+
+            .req-table tr.overdue-row td:first-child {
+                border-left: 3px solid #F5C518;
+            }
+
+        .row-num {
+            font-size: 11.5px;
+            color: #ccc;
+            font-weight: 600;
+        }
+
+        /* Employee cell */
+        .emp-cell {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .emp-av {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: #F5C518;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+            color: #0d0d0d;
+            flex-shrink: 0;
+        }
+
+        .emp-name {
+            font-size: 13px;
+            font-weight: 700;
+            color: #0d0d0d;
+        }
+
+        .emp-meta {
+            font-size: 11px;
+            color: #aaa;
+            margin-top: 1px;
+        }
+
+        .emp-dept {
+            font-size: 11px;
+            color: #bbb;
+        }
+
+        /* Vehicle cell */
+        .v-name-cell {
+            font-size: 13px;
+            font-weight: 700;
+            color: #0d0d0d;
+        }
+
+        .overdue-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            background: #fff1f1;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+            padding: 2px 8px;
+            border-radius: 5px;
+            margin-top: 4px;
+        }
+
+        /* Reg tag */
+        .reg-tag {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 9px;
+            border-radius: 6px;
+            background: #f5f5f5;
+            color: #555;
+            border: 1px solid #eee;
+            letter-spacing: .4px;
+        }
+
+        /* Date */
+        .date-main {
+            font-size: 12.5px;
+            font-weight: 600;
+            color: #0d0d0d;
+        }
+
+        .date-sub {
+            font-size: 11px;
+            color: #bbb;
+            margin-top: 1px;
+        }
+
+        /* Duration */
+        .dur-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12.5px;
+            font-weight: 700;
+            color: #2563eb;
+        }
+
+        /* Purpose */
+        .purpose-cell {
+            max-width: 130px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 12.5px;
+        }
+
+        /* Status pills */
+        .s-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 11px;
+            border-radius: 50px;
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .s-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+        }
+
+        .s-pill.pending {
+            background: #fef9c3;
+            color: #a16207;
+            border: 1px solid #fde68a;
+        }
+
+        .s-dot.pending {
+            background: #ca8a04;
+        }
+
+        .s-pill.approved {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        .s-dot.approved {
+            background: #16a34a;
+        }
+
+        .s-pill.rejected {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .s-dot.rejected {
+            background: #dc2626;
+        }
+
+        .s-pill.returned {
+            background: #dbeafe;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
+        }
+
+        .s-dot.returned {
+            background: #2563eb;
+        }
+
+        /* Admin notes */
+        .note-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: #f5f5f5;
+            border: 1px solid #eee;
+            border-radius: 6px;
+            padding: 4px 10px;
+            font-size: 11.5px;
+            color: #555;
+            max-width: 120px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+            .note-tag svg {
+                flex-shrink: 0;
+                color: #aaa;
+            }
+
+        .note-empty {
+            font-size: 12px;
+            color: #ddd;
+        }
+
+        /* Action buttons */
+        .btn-approve {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 12px;
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+            border-radius: 7px;
+            font-family: 'Barlow', sans-serif;
+            font-size: 11.5px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background .15s;
+            white-space: nowrap;
+        }
+
+            .btn-approve:hover {
+                background: #bbf7d0;
+            }
+
+        .btn-reject {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 12px;
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+            border-radius: 7px;
+            font-family: 'Barlow', sans-serif;
+            font-size: 11.5px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background .15s;
+            white-space: nowrap;
+        }
+
+            .btn-reject:hover {
+                background: #fecaca;
+            }
+
+        .btn-returned {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 12px;
+            background: #eff6ff;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
+            border-radius: 7px;
+            font-family: 'Barlow', sans-serif;
+            font-size: 11.5px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background .15s;
+            white-space: nowrap;
+        }
+
+            .btn-returned:hover {
+                background: #dbeafe;
+            }
+
+        .btn-print {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 12px;
+            background: #f5f5f5;
+            color: #555;
+            border: 1px solid #e8e8e8;
+            border-radius: 7px;
+            font-family: 'Barlow', sans-serif;
+            font-size: 11.5px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background .15s;
+            white-space: nowrap;
+            text-decoration: none;
+        }
+
+            .btn-print:hover {
+                background: #eee;
+            }
+
+        .action-col {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 56px 20px;
+        }
+
+            .empty-state svg {
+                color: #e0e0e0;
+                margin-bottom: 12px;
+            }
+
+            .empty-state p {
+                font-size: 13px;
+                color: #bbb;
+            }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,.4);
+            backdrop-filter: blur(4px);
+            z-index: 999;
+            align-items: center;
+            justify-content: center;
+        }
+
+            .modal-overlay.open {
+                display: flex;
+            }
+
+        .modal {
+            background: #fff;
+            border-radius: 16px;
+            width: 420px;
+            max-width: 96vw;
+            box-shadow: 0 20px 50px rgba(0,0,0,.18);
+            overflow: hidden;
+            animation: modalIn .22s ease both;
+        }
+
+        @@keyframes modalIn {
+            from {
+                opacity: 0;
+                transform: scale(.94) translateY(16px);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .modal-header {
+            padding: 18px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+            .modal-header.approve-hdr {
+                background: #f0fdf4;
+            }
+
+            .modal-header.reject-hdr {
+                background: #fff5f5;
+            }
+
+        .modal-title {
+            font-size: 16px;
+            font-weight: 800;
+            color: #0d0d0d;
+        }
+
+        .modal-close {
+            width: 28px;
+            height: 28px;
+            border: none;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #aaa;
+            border-radius: 6px;
+            transition: background .15s, color .15s;
+        }
+
+            .modal-close:hover {
+                background: #fee2e2;
+                color: #e53e3e;
+            }
+
+        .modal-body {
+            padding: 18px 20px 20px;
+        }
+
+        .modal-info {
+            background: #f8f8f8;
+            border-radius: 10px;
+            padding: 12px 14px;
+            margin-bottom: 16px;
+        }
+
+        .modal-info-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: #0d0d0d;
+        }
+
+        .modal-info-sub {
+            font-size: 12px;
+            color: #aaa;
+            margin-top: 3px;
+        }
+
+        .modal-label {
+            display: block;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #999;
+            margin-bottom: 7px;
+        }
+
+        .modal-textarea {
+            width: 100%;
+            height: 90px;
+            padding: 10px 12px;
+            border: 1.5px solid #e8e8e8;
+            border-radius: 9px;
+            font-family: 'Barlow', sans-serif;
+            font-size: 13px;
+            color: #0d0d0d;
+            outline: none;
+            resize: vertical;
+            transition: border-color .2s;
+        }
+
+            .modal-textarea:focus {
+                border-color: #F5C518;
+            }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .modal-btn {
+            flex: 1;
+            height: 44px;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Barlow', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background .2s;
+        }
+
+            .modal-btn.confirm-approve {
+                background: #16a34a;
+                color: #fff;
+            }
+
+                .modal-btn.confirm-approve:hover {
+                    background: #15803d;
+                }
+
+            .modal-btn.confirm-reject {
+                background: #dc2626;
+                color: #fff;
+            }
+
+                .modal-btn.confirm-reject:hover {
+                    background: #b91c1c;
+                }
+
+            .modal-btn.cancel {
+                background: #f5f5f5;
+                color: #555;
+            }
+
+                .modal-btn.cancel:hover {
+                    background: #eee;
+                }
+    </style>
+}
+
+<!-- Page heading -->
+<div class="page-title">Vehicle Requests</div>
+<div class="page-sub">Review, approve or reject incoming vehicle requests from employees.</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
+            <polyline points="22 4 12 14.01 9 11.01" />
+        </svg>
+        @TempData["SuccessMessage"]
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-error">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="15" y1="9" x2="9" y2="15" />
+            <line x1="9" y1="9" x2="15" y2="15" />
+        </svg>
+        @TempData["ErrorMessage"]
+    </div>
+}
+
+<!-- Stat cards -->
+<div class="stats-row">
+    <div class="stat-card c-gray">
+        <div class="stat-lbl">Total</div>
+        <div class="stat-num">@Model.TotalCount</div>
+    </div>
+    <div class="stat-card c-amber">
+        <div class="stat-lbl">Pending</div>
+        <div class="stat-num">@Model.PendingCount</div>
+    </div>
+    <div class="stat-card c-green">
+        <div class="stat-lbl">Approved</div>
+        <div class="stat-num">@Model.ApprovedCount</div>
+    </div>
+    <div class="stat-card c-red">
+        <div class="stat-lbl">Rejected</div>
+        <div class="stat-num">@Model.RejectedCount</div>
+    </div>
+    <div class="stat-card c-blue">
+        <div class="stat-lbl">Completed</div>
+        <div class="stat-num">@Model.CompletedCount</div>
+    </div>
+</div>
+
+<!-- Search + filter -->
+<div class="bar">
+    <div class="search-wrap">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+        <input type="text" id="searchInput"
+               placeholder="Search by name, vehicle, emp no, reg no..."
+               value="@Model.SearchTerm"
+               oninput="liveSearch(this.value)" />
+    </div>
+    <div class="filter-tabs">
+        <a href="@Url.Action("SeeRequests","Autobase", new { filter="All",       search=Model.SearchTerm })"
+           class="ftab @(Model.ActiveFilter=="All"       ? "f-all"       : "")">All</a>
+        <a href="@Url.Action("SeeRequests","Autobase", new { filter="Pending",   search=Model.SearchTerm })"
+           class="ftab @(Model.ActiveFilter=="Pending"   ? "f-pending"   : "")">Pending</a>
+        <a href="@Url.Action("SeeRequests","Autobase", new { filter="Approved",  search=Model.SearchTerm })"
+           class="ftab @(Model.ActiveFilter=="Approved"  ? "f-approved"  : "")">Approved</a>
+        <a href="@Url.Action("SeeRequests","Autobase", new { filter="Rejected",  search=Model.SearchTerm })"
+           class="ftab @(Model.ActiveFilter=="Rejected"  ? "f-rejected"  : "")">Rejected</a>
+        <a href="@Url.Action("SeeRequests","Autobase", new { filter="Completed", search=Model.SearchTerm })"
+           class="ftab @(Model.ActiveFilter=="Completed" ? "f-completed" : "")">Completed</a>
+    </div>
+</div>
+
+<!-- Table -->
+<div class="table-card">
+    <div class="tc-header">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F5C518" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+            <polyline points="14 2 14 8 20 8" />
+        </svg>
+        <span class="tc-title">Vehicle Requests (@Model.Requests.Count)</span>
+    </div>
+
+    @if (!Model.Requests.Any())
+    {
+        <div class="empty-state">
+            <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+            </svg>
+            <p>No requests found.</p>
+        </div>
+    }
+    else
+    {
+        <table class="req-table" id="reqTable">
+            <thead>
+                <tr>
+                    <th style="width:40px;">#</th>
+                    <th>Employee</th>
+                    <th>Vehicle</th>
+                    <th>Reg No</th>
+                    <th>Start</th>
+                    <th>End</th>
+                    <th>Duration</th>
+                    <th>Purpose</th>
+                    <th>Requested On</th>
+                    <th>Status</th>
+                    <th>Admin Notes</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{ int i = 1; }
+                @foreach (var r in Model.Requests)
+                {
+                    string sc = r.Status == "Approved" ? "approved"
+                              : r.Status == "Rejected" ? "rejected"
+                              : r.Status == "Returned" ? "returned"
+                              : "pending";
+
+                    double hrs = r.DurationHours;
+                    string durLabel = hrs >= 1
+                        ? hrs.ToString("0.#") + " hrs"
+                        : ((int)(hrs * 60)) + " min";
+
+                    string empInitials = string.IsNullOrEmpty(r.EmployeeName) ? "E"
+                        : string.Join("", r.EmployeeName.Split(' ')
+                            .Where(w => w.Length > 0).Take(2)
+                            .Select(w => w[0].ToString().ToUpper()));
+
+                    <tr class="req-row @(r.IsOverdue ? "overdue-row" : "")"
+                        data-name="@r.EmployeeName.ToLower()"
+                        data-empno="@r.EmployeeNumber.ToLower()"
+                        data-vehicle="@r.VehicleName.ToLower()"
+                        data-reg="@r.RegistrationNo.ToLower()">
+                        <td><span class="row-num">@i</span></td>
+                        <td>
+                            <div class="emp-cell">
+                                <div class="emp-av">@empInitials</div>
+                                <div>
+                                    <div class="emp-name">@r.EmployeeName</div>
+                                    <div class="emp-meta">@r.EmployeeNumber &middot; @r.EmployeePhone</div>
+                                    <div class="emp-dept">@r.Designation &middot; @r.Department</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="v-name-cell">@r.VehicleName</div>
+                            @if (r.IsOverdue)
+                            {
+                                <div class="overdue-tag">
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <circle cx="12" cy="12" r="10" />
+                                        <line x1="12" y1="8" x2="12" y2="12" />
+                                        <line x1="12" y1="16" x2="12.01" y2="16" />
+                                    </svg>
+                                    Overdue
+                                </div>
+                            }
+                        </td>
+                        <td><span class="reg-tag">@r.RegistrationNo</span></td>
+                        <td>
+                            <div class="date-main">@r.RequiredFrom.ToString("dd MMM yyyy")</div>
+                            <div class="date-sub">@r.RequiredFrom.ToString("hh:mm tt")</div>
+                        </td>
+                        <td>
+                            <div class="date-main">@r.RequiredUntil.ToString("dd MMM yyyy")</div>
+                            <div class="date-sub">@r.RequiredUntil.ToString("hh:mm tt")</div>
+                        </td>
+                        <td>
+                            <span class="dur-pill">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <polyline points="12 6 12 12 16 14" />
+                                </svg>
+                                @durLabel
+                            </span>
+                        </td>
+                        <td><span class="purpose-cell" title="@r.Purpose">@r.Purpose</span></td>
+                        <td>
+                            <div class="date-main">@r.RequestedOn.ToString("dd MMM yy")</div>
+                            <div class="date-sub">@r.RequestedOn.ToString("hh:mm tt")</div>
+                        </td>
+                        <td>
+                            <span class="s-pill @sc">
+                                <span class="s-dot @sc"></span>
+                                @r.Status
+                            </span>
+                        </td>
+                        <td>
+                            @if (!string.IsNullOrEmpty(r.AdminNotes))
+                            {
+                                <span class="note-tag" title="@r.AdminNotes">
+                                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+                                    </svg>
+                                    @r.AdminNotes
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="note-empty">—</span>
+                            }
+                        </td>
+                        <td>
+                            <div class="action-col">
+                                @if (r.Status == "Pending")
+                                {
+                                    <button class="btn-approve"
+                                            onclick="openModal('approve', @r.RequestId, '@r.VehicleName', '@r.EmployeeName')">
+                                        ✓ Approve
+                                    </button>
+                                    <button class="btn-reject"
+                                            onclick="openModal('reject', @r.RequestId, '@r.VehicleName', '@r.EmployeeName')">
+                                        ✕ Reject
+                                    </button>
+                                }
+                                else if (r.Status == "Approved")
+                                {
+                                    using (Html.BeginForm("MarkReturned", "Autobase", FormMethod.Post, new { style = "display:inline;" }))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="requestId" value="@r.RequestId" />
+                                        <button type="submit" class="btn-returned"
+                                                onclick="return confirm('Mark this vehicle as returned?')">
+                                            ✓ Mark Returned
+                                        </button>
+                                    }
+                                    <a href="@Url.Action("PrintRequest","Autobase", new { id = r.RequestId })"
+                                       class="btn-print" target="_blank">🖨 Print</a>
+                                }
+                                else if (r.Status == "Returned")
+                                {
+                                    <a href="@Url.Action("PrintRequest","Autobase", new { id = r.RequestId })"
+                                       class="btn-print" target="_blank">🖨 Print</a>
+                                }
+                                else
+                                {
+                                    <span style="font-size:12px;color:#ccc;">—</span>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                    i++;
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+<!-- Approve / Reject Modal -->
+<div class="modal-overlay" id="actionModal">
+    <div class="modal">
+        <div class="modal-header" id="modalHeader">
+            <span class="modal-title" id="modalTitle">Action</span>
+            <button class="modal-close" onclick="closeModal()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="modal-info">
+                <div class="modal-info-name" id="modalVehicle">—</div>
+                <div class="modal-info-sub" id="modalEmp">—</div>
+            </div>
+            <label class="modal-label">Admin Notes (optional)</label>
+            <textarea class="modal-textarea" id="modalNotes"
+                      placeholder="Add a note for the employee..."></textarea>
+            <div class="modal-actions">
+                <button class="modal-btn cancel" onclick="closeModal()">Cancel</button>
+                <button class="modal-btn" id="modalConfirmBtn" onclick="submitAction()">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden forms -->
+@using (Html.BeginForm("ApproveRequest", "Autobase", FormMethod.Post, new { id = "approveForm" }))
+{
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="requestId" id="approveId" />
+    <input type="hidden" name="adminNotes" id="approveNotes" />
+}
+@using (Html.BeginForm("RejectRequest", "Autobase", FormMethod.Post, new { id = "rejectForm" }))
+{
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="requestId" id="rejectId" />
+    <input type="hidden" name="adminNotes" id="rejectNotes" />
+}
+
+@section Scripts {
+    <script>
+        var _mode = '', _reqId = 0;
+
+        function openModal(mode, id, vehicle, emp) {
+            _mode = mode; _reqId = id;
+            var hdr = document.getElementById('modalHeader');
+            var btn = document.getElementById('modalConfirmBtn');
+            document.getElementById('modalVehicle').textContent = vehicle;
+            document.getElementById('modalEmp').textContent = 'Requested by: ' + emp;
+            document.getElementById('modalNotes').value = '';
+
+            if (mode === 'approve') {
+                document.getElementById('modalTitle').textContent = '✓ Approve Request';
+                hdr.className = 'modal-header approve-hdr';
+                btn.className = 'modal-btn confirm-approve';
+                btn.textContent = 'Approve';
+            } else {
+                document.getElementById('modalTitle').textContent = '✕ Reject Request';
+                hdr.className = 'modal-header reject-hdr';
+                btn.className = 'modal-btn confirm-reject';
+                btn.textContent = 'Reject';
+            }
+            document.getElementById('actionModal').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('actionModal').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+
+        function submitAction() {
+            var notes = document.getElementById('modalNotes').value;
+            if (_mode === 'approve') {
+                document.getElementById('approveId').value = _reqId;
+                document.getElementById('approveNotes').value = notes;
+                document.getElementById('approveForm').submit();
+            } else {
+                document.getElementById('rejectId').value = _reqId;
+                document.getElementById('rejectNotes').value = notes;
+                document.getElementById('rejectForm').submit();
+            }
+        }
+
+        document.getElementById('actionModal').addEventListener('click', function (e) {
+            if (e.target === this) closeModal();
+        });
+
+        function liveSearch(val) {
+            val = val.toLowerCase().trim();
+            document.querySelectorAll('.req-row').forEach(function (row) {
+                var n = row.getAttribute('data-name') || '';
+                var en = row.getAttribute('data-empno') || '';
+                var v = row.getAttribute('data-vehicle') || '';
+                var r = row.getAttribute('data-reg') || '';
+                row.style.display = (!val || n.includes(val) || en.includes(val)
+                    || v.includes(val) || r.includes(val))
+                    ? '' : 'none';
+            });
+        }
+    </script>
+}

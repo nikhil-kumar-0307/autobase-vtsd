@@ -1,0 +1,694 @@
+﻿@model Autobase_vts.Models.DTOs.AllocatedVehicleDto
+@{
+    ViewBag.Title = "Allocated Vehicles";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<style>
+    /* ── Page header ── */
+    .page-title {
+        font-size: 24px;
+        font-weight: 800;
+        color: #0d0d0d;
+        letter-spacing: -.3px;
+    }
+
+    .page-sub {
+        font-size: 13px;
+        color: #aaa;
+        margin-top: 3px;
+    }
+
+    /* ── Stat cards ── */
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin: 20px 0;
+        animation: fadeUp .35s ease both;
+    }
+
+    .stat-card {
+        background: #fff;
+        border: 1px solid #efefef;
+        border-radius: 14px;
+        padding: 20px 24px;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+        }
+
+        .stat-card.blue::after {
+            background: #3182ce;
+        }
+
+        .stat-card.green::after {
+            background: #38a169;
+        }
+
+        .stat-card.red::after {
+            background: #e53e3e;
+        }
+
+    .stat-label {
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: #bbb;
+        margin-bottom: 10px;
+    }
+
+    .stat-num {
+        font-size: 34px;
+        font-weight: 800;
+        color: #0d0d0d;
+        line-height: 1;
+    }
+
+    .stat-desc {
+        font-size: 11px;
+        color: #bbb;
+        margin-top: 5px;
+    }
+
+    /* ── Search + filter bar ── */
+    .search-bar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
+        animation: fadeUp .4s ease .05s both;
+    }
+
+    .search-wrap {
+        flex: 1;
+        position: relative;
+    }
+
+        .search-wrap svg {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #ccc;
+            pointer-events: none;
+        }
+
+        .search-wrap input {
+            width: 100%;
+            height: 44px;
+            padding: 0 16px 0 42px;
+            border: 1.5px solid #e8e8e8;
+            border-radius: 10px;
+            font-family: 'Barlow', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            color: #0d0d0d;
+            background: #fff;
+            outline: none;
+            transition: border-color .2s, box-shadow .2s;
+        }
+
+            .search-wrap input:focus {
+                border-color: #F5C518;
+                box-shadow: 0 0 0 3px rgba(245,197,24,.12);
+            }
+
+    .filter-tabs {
+        display: flex;
+        gap: 6px;
+    }
+
+    .filter-tab {
+        height: 44px;
+        padding: 0 20px;
+        border: 1.5px solid #e8e8e8;
+        border-radius: 10px;
+        font-family: 'Barlow', sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        color: #666;
+        background: #fff;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        transition: border-color .15s, background .15s, color .15s;
+        white-space: nowrap;
+    }
+
+        .filter-tab:hover {
+            border-color: #ccc;
+            color: #0d0d0d;
+        }
+
+        .filter-tab.active {
+            background: #0d0d0d;
+            border-color: #0d0d0d;
+            color: #fff;
+        }
+
+        .filter-tab.active-blue {
+            background: #3182ce;
+            border-color: #3182ce;
+            color: #fff;
+        }
+
+        .filter-tab.active-red {
+            background: #e53e3e;
+            border-color: #e53e3e;
+            color: #fff;
+        }
+
+    /* ── Alert ── */
+    .alert {
+        padding: 14px 18px;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .alert-success {
+        background: #dcfce7;
+        color: #166534;
+        border: 1px solid #bbf7d0;
+    }
+
+    /* ── Cards grid ── */
+    .cards-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 16px;
+        animation: fadeUp .42s ease .08s both;
+    }
+
+    /* ── Single vehicle card ── */
+    .v-card {
+        background: #fff;
+        border: 1px solid #efefef;
+        border-radius: 14px;
+        overflow: hidden;
+        transition: box-shadow .2s;
+    }
+
+        .v-card:hover {
+            box-shadow: 0 4px 20px rgba(0,0,0,.07);
+        }
+
+        .v-card.overdue {
+            background: #fff5f5;
+            border-color: #fecaca;
+        }
+
+    /* Card top row */
+    .card-top {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        padding: 16px 18px 10px;
+    }
+
+    .card-vname {
+        font-size: 17px;
+        font-weight: 800;
+        color: #0d0d0d;
+    }
+
+    .card-reg {
+        font-size: 12px;
+        color: #aaa;
+        margin-top: 3px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .reg-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+    }
+
+        .reg-dot.overdue-dot {
+            background: #e53e3e;
+        }
+
+        .reg-dot.inuse-dot {
+            background: #38a169;
+        }
+
+    .reg-text {
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: .5px;
+        color: #555;
+    }
+
+    .type-badge {
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: .8px;
+        text-transform: uppercase;
+        padding: 4px 10px;
+        border-radius: 6px;
+        background: #f5f5f5;
+        color: #555;
+        border: 1px solid #eee;
+        white-space: nowrap;
+    }
+
+        .type-badge.overdue-badge {
+            background: #fee2e2;
+            color: #991b1b;
+            border-color: #fecaca;
+        }
+
+    /* Status badge */
+    .status-row {
+        padding: 0 18px 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 3px 10px;
+        border-radius: 50px;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+        .status-pill.inuse {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        .status-pill.overdue {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+    .status-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+    }
+
+        .status-dot.inuse {
+            background: #38a169;
+        }
+
+        .status-dot.overdue {
+            background: #e53e3e;
+        }
+
+    /* Details grid */
+    .card-details {
+        border-top: 1px solid #f0f0f0;
+        padding: 14px 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 9px;
+    }
+
+    .detail-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 13px;
+    }
+
+    .detail-label {
+        color: #aaa;
+        font-weight: 500;
+    }
+
+    .detail-value {
+        color: #0d0d0d;
+        font-weight: 600;
+    }
+
+        .detail-value.overdue-time {
+            color: #e53e3e;
+            font-weight: 700;
+        }
+
+    /* Progress bar */
+    .progress-wrap {
+        margin: 4px 0 2px;
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .progress-label {
+        display: flex;
+        justify-content: space-between;
+        font-size: 11px;
+        color: #e53e3e;
+        font-weight: 600;
+    }
+
+    .progress-bar {
+        height: 5px;
+        background: #fecaca;
+        border-radius: 99px;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        border-radius: 99px;
+        background: #e53e3e;
+        transition: width .4s ease;
+    }
+
+    /* Employee section */
+    .card-employee {
+        border-top: 1px solid #f0f0f0;
+        padding: 12px 18px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .emp-avatar {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        background: #F5C518;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 800;
+        color: #0d0d0d;
+        flex-shrink: 0;
+    }
+
+    .emp-name {
+        font-size: 13px;
+        font-weight: 700;
+        color: #0d0d0d;
+    }
+
+    .emp-meta {
+        font-size: 11px;
+        color: #aaa;
+        margin-top: 2px;
+    }
+
+    /* Action buttons */
+    .card-actions {
+        border-top: 1px solid #f0f0f0;
+        padding: 12px 18px;
+        display: flex;
+        gap: 10px;
+    }
+
+    .btn-return {
+        flex: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        padding: 9px 14px;
+        background: #dcfce7;
+        color: #166534;
+        border: 1px solid #bbf7d0;
+        border-radius: 8px;
+        font-family: 'Barlow', sans-serif;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background .2s, border-color .2s;
+        white-space: nowrap;
+    }
+
+        .btn-return:hover {
+            background: #bbf7d0;
+            border-color: #86efac;
+        }
+
+    .btn-details {
+        flex: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 9px 14px;
+        background: #fff;
+        color: #555;
+        border: 1.5px solid #e8e8e8;
+        border-radius: 8px;
+        font-family: 'Barlow', sans-serif;
+        font-size: 12px;
+        font-weight: 700;
+        text-decoration: none;
+        cursor: pointer;
+        transition: border-color .2s, color .2s;
+    }
+
+        .btn-details:hover {
+            border-color: #ccc;
+            color: #0d0d0d;
+        }
+
+    /* Empty state */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+    }
+
+        .empty-state svg {
+            color: #e0e0e0;
+            margin-bottom: 12px;
+        }
+
+        .empty-state p {
+            font-size: 13px;
+            color: #bbb;
+        }
+
+    @@keyframes fadeUp {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<!-- Page header -->
+<div style="animation: fadeUp .3s ease both;">
+    <div class="page-title">&#128295; Allocated Vehicles</div>
+    <div class="page-sub">All vehicles currently checked out and in use by employees.</div>
+</div>
+
+<!-- Stat cards -->
+<div class="stats-row">
+    <div class="stat-card blue">
+        <div class="stat-label">Total Allocated</div>
+        <div class="stat-num">@Model.TotalAllocated</div>
+        <div class="stat-desc">Approved &amp; out</div>
+    </div>
+    <div class="stat-card green">
+        <div class="stat-label">In Use</div>
+        <div class="stat-num">@Model.InUseCount</div>
+        <div class="stat-desc">Within time</div>
+    </div>
+    <div class="stat-card red">
+        <div class="stat-label">Overdue</div>
+        <div class="stat-num">@Model.OverdueCount</div>
+        <div class="stat-desc">Past return time</div>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
+            <polyline points="22 4 12 14.01 9 11.01" />
+        </svg>
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+<!-- Search + filter bar -->
+<div class="search-bar">
+    <div class="search-wrap">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+        <input type="text"
+               id="searchInput"
+               placeholder="Search by employee, vehicle, reg no..."
+               value="@Model.SearchTerm"
+               oninput="liveSearch(this.value)" />
+    </div>
+    <div class="filter-tabs">
+        <a href="@Url.Action("AllocatedVehicle", "Autobase", new { filter = "All",     search = Model.SearchTerm })"
+           class="filter-tab @(Model.ActiveFilter == "All"     ? "active"      : "")">All</a>
+        <a href="@Url.Action("AllocatedVehicle", "Autobase", new { filter = "InUse",   search = Model.SearchTerm })"
+           class="filter-tab @(Model.ActiveFilter == "InUse"   ? "active-blue" : "")">In Use</a>
+        <a href="@Url.Action("AllocatedVehicle", "Autobase", new { filter = "Overdue", search = Model.SearchTerm })"
+           class="filter-tab @(Model.ActiveFilter == "Overdue" ? "active-red"  : "")">Overdue</a>
+    </div>
+</div>
+
+<!-- Cards -->
+@if (!Model.Items.Any())
+{
+    <div class="empty-state">
+        <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="1" y="3" width="15" height="13" rx="1" />
+            <path d="M16 8h4l3 4v3h-7V8z" />
+            <circle cx="5.5" cy="18.5" r="2.5" />
+            <circle cx="18.5" cy="18.5" r="2.5" />
+        </svg>
+        <p>No vehicles currently allocated.</p>
+    </div>
+}
+else
+{
+    <div class="cards-grid" id="cardsGrid">
+        @foreach (var item in Model.Items)
+        {
+            string cardClass = item.IsOverdue ? "v-card overdue" : "v-card";
+            string statusClass = item.IsOverdue ? "overdue" : "inuse";
+            string statusLabel = item.IsOverdue ? "Overdue" : "In Use";
+            string badgeClass = item.IsOverdue ? "type-badge overdue-badge" : "type-badge";
+            string dotClass = item.IsOverdue ? "reg-dot overdue-dot" : "reg-dot inuse-dot";
+            string timeClass = item.IsOverdue ? "detail-value overdue-time" : "detail-value";
+
+            string overdueText = item.IsOverdue
+                ? "Overdue by " + (int)item.OverdueBy.TotalHours + "h " + item.OverdueBy.Minutes + "m"
+                : "";
+
+            <div class="@cardClass v-card-item"
+                 data-name="@item.VehicleName.ToLower()"
+                 data-reg="@item.RegistrationNo.ToLower()"
+                 data-emp="@item.EmployeeName.ToLower()"
+                 data-empno="@item.EmployeeNumber.ToLower()">
+
+                <!-- Top: name + type badge -->
+                <div class="card-top">
+                    <div>
+                        <div class="card-vname">@item.VehicleName</div>
+                        <div class="card-reg">
+                            <span class="@dotClass"></span>
+                            <span class="reg-text">@item.RegistrationNo</span>
+                        </div>
+                    </div>
+                    <span class="@badgeClass">@item.VehicleType.ToUpper()</span>
+                </div>
+
+                <!-- Status pill -->
+                <div class="status-row">
+                    <span class="status-pill @statusClass">
+                        <span class="status-dot @statusClass"></span>
+                        @statusLabel
+                    </span>
+                </div>
+
+                <!-- Details -->
+                <div class="card-details">
+                    <div class="detail-row">
+                        <span class="detail-label">Start</span>
+                        <span class="detail-value">@item.StartTime.ToString("dd MMM yy, hh:mm tt")</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Due Return</span>
+                        <span class="@timeClass">@item.DueReturn.ToString("dd MMM yy, hh:mm tt")</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Duration</span>
+                        <span class="detail-value">@item.DurationHours h @item.DurationMins m</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Purpose</span>
+                        <span class="detail-value" style="max-width:180px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="@item.Purpose">@item.Purpose</span>
+                    </div>
+
+                    @if (item.IsOverdue)
+                    {
+                        <div class="progress-wrap">
+                            <div class="progress-label">
+                                <span>&#9651; @overdueText</span>
+                                <span>@item.OverduePercent%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width:@item.OverduePercent%"></div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <!-- Employee -->
+                <div class="card-employee">
+                    <div class="emp-avatar">@item.Initials</div>
+                    <div>
+                        <div class="emp-name">@item.EmployeeName</div>
+                        <div class="emp-meta">@item.EmployeeNumber &middot; @item.EmployeePhone</div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="card-actions">
+                    @using (Html.BeginForm("MarkReturnedFromAllocated", "Autobase", FormMethod.Post, new { style = "flex:1;" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="requestId" value="@item.RequestId" />
+                        <button type="submit" class="btn-return"
+                                onclick="return confirm('Mark @Html.Raw(item.VehicleName) as returned?')">
+                            &#10003; Mark as Returned
+                        </button>
+                    }
+                    <a href="@Url.Action("SeeRequests", "Autobase", new { search = item.RegistrationNo })"
+                       class="btn-details">Details</a>
+                </div>
+
+            </div>
+        }
+    </div>
+}
+
+@section Scripts {
+    <script>
+        function liveSearch(val) {
+            val = val.toLowerCase().trim();
+            document.querySelectorAll('.v-card-item').forEach(function (card) {
+                var name = card.getAttribute('data-name');
+                var reg = card.getAttribute('data-reg');
+                var emp = card.getAttribute('data-emp');
+                var empno = card.getAttribute('data-empno');
+                card.style.display = (!val ||
+                    name.includes(val) || reg.includes(val) ||
+                    emp.includes(val) || empno.includes(val)) ? '' : 'none';
+            });
+        }
+    </script>
+}

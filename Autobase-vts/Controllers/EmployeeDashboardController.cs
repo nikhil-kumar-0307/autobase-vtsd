@@ -20,7 +20,7 @@ namespace autobase.Controllers
             if (role != "Employee")
                 return RedirectToAction("Login", "Account");
 
-            return View();
+            return View("~/Views/Dashboard/EmployeeDashboard.cshtml");
         }
 
         // ── GET: /EmployeeDashboard/AvailableVehicles ────────────────────────
@@ -93,25 +93,104 @@ namespace autobase.Controllers
                 return RedirectToAction("Login", "Account");
 
             var vehicles = _db.Vehicles
-                .Where(v => v.IsActive && v.Status == "Available")
+                .Where(v => v.IsActive && (v.Status == "Available" || v.Status == "Allocated"))
                 .OrderBy(v => v.VehicleType)
                 .ThenBy(v => v.VehicleName)
                 .ToList()
-                .Select(v => new AvailableVehicleItem
+                .Select(v =>
                 {
-                    VehicleId = v.Id,            // Vehicle PK is "Id"
-                    VehicleName = v.VehicleName,
-                    RegistrationNo = v.RegistrationNo,
-                    VehicleTypeName = v.VehicleType,   // plain string column
-                    YearOfManufacture = v.YearOfManufacture,
-                    FuelType = "—",             // not in Vehicle model
-                    SeatingCapacity = 0,               // not in Vehicle model
-                    Notes = v.Notes
+            // Find the active approved request for this vehicle
+            var activeRequest = _db.VehicleRequests
+                        .Where(r => r.VehicleId == v.Id && r.Status == "Approved")
+                        .OrderByDescending(r => r.RequiredUntil)
+                        .FirstOrDefault();
+
+                    DateTime? freeAt = activeRequest?.RequiredUntil;
+
+                    return new AvailableVehicleItem
+                    {
+                        VehicleId = v.Id,
+                        VehicleName = v.VehicleName,
+                        RegistrationNo = v.RegistrationNo,
+                        VehicleTypeName = v.VehicleType,
+                        YearOfManufacture = v.YearOfManufacture,
+                        FuelType = "—",
+                        SeatingCapacity = 0,
+                        Notes = v.Notes,
+                        IsAvailable = v.Status == "Available",
+                        FreeAt = freeAt
+                    };
                 })
                 .ToList();
 
             var model = new NewRequestDto { AvailableVehicles = vehicles };
             return View(model);
+        }
+
+        // ── GET: /EmployeeDashboard/MyRequests ───────────────────────────────
+        [HttpGet]
+        public ActionResult MyRequests()
+        {
+            string role = Session["Role"]?.ToString();
+            if (role != "Employee")
+                return RedirectToAction("Login", "Account");
+
+            string empNo = Session["EmployeeNumber"]?.ToString();
+
+            var requests = _db.VehicleRequests
+                .Where(r => r.EmployeeNumber == empNo)
+                .OrderByDescending(r => r.RequestedOn)
+                .ToList()
+                .Select(r => new MyRequestItem
+                {
+                    RequestId = r.RequestId,
+                    VehicleName = r.VehicleName,
+                    RegistrationNo = r.RegistrationNo,
+                    Purpose = r.Purpose,
+                    RequiredFrom = r.RequiredFrom,
+                    RequiredUntil = r.RequiredUntil,
+                    Status = r.Status,
+                    AdminNotes = r.AdminNotes,
+                    RequestedOn = r.RequestedOn
+                })
+                .ToList();
+
+            var dto = new MyRequestDto { Requests = requests };
+            return View(dto);
+        }
+
+        // ── POST: /EmployeeDashboard/ReturnVehicle ───────────────────────────
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult ReturnVehicle(int requestId)
+        {
+            string role = Session["Role"]?.ToString();
+            if (role != "Employee")
+                return RedirectToAction("Login", "Account");
+
+            string empNo = Session["EmployeeNumber"]?.ToString();
+
+            var request = _db.VehicleRequests
+                .FirstOrDefault(r => r.RequestId == requestId && r.EmployeeNumber == empNo);
+
+            if (request != null && request.Status == "Approved")
+            {
+                request.Status = "Returned";
+
+                // Set the vehicle back to Available
+                var vehicle = _db.Vehicles.Find(request.VehicleId);
+                if (vehicle != null)
+                    vehicle.Status = "Available";
+
+                _db.SaveChanges();
+                TempData["SuccessMessage"] = "Vehicle returned successfully.";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Could not process return request.";
+            }
+
+            return RedirectToAction("MyRequests");
         }
 
         // ── POST: /EmployeeDashboard/SubmitRequest ───────────────────────────

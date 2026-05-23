@@ -30,6 +30,8 @@ namespace autobase.Models
 
         // Status
         public string Status { get; set; }   // Pending / Approved / Rejected
+
+        public string AdminNotes { get; set; }
         public DateTime RequestedOn { get; set; }
     }
 }

@@ -1,8 +1,9 @@
-﻿// Controllers/AutobaseController.cs
+﻿using System;
 using System.Linq;
 using System.Web.Mvc;
 using autobase.Data;
 using autobase.Models.DTOs;
+using Autobase_vts.Models.DTOs;
 
 namespace autobase.Controllers
 {
@@ -11,7 +12,7 @@ namespace autobase.Controllers
     {
         private readonly AutobaseDbContext _db = new AutobaseDbContext();
 
-        // GET: /Autobase/AvailableVehicle
+        // ── GET: /Autobase/AvailableVehicle ──────────────────────────────────
         [HttpGet]
         public ActionResult AvailableVehicle(string filter = "All", string search = "")
         {
@@ -69,6 +70,285 @@ namespace autobase.Controllers
             };
 
             return View(dto);
+        }
+
+        // ── GET: /Autobase/AllocatedVehicle ──────────────────────────────────
+        [HttpGet]
+        public ActionResult AllocatedVehicle(string filter = "All", string search = "")
+        {
+            string role = Session["Role"]?.ToString();
+            if (role != "SuperAdmin" && role != "Admin")
+                return RedirectToAction("Login", "Account");
+
+            var now = DateTime.Now;
+
+            var approvedRequests = _db.VehicleRequests
+                .Where(r => r.Status == "Approved")
+                .ToList();
+
+            var employees = _db.Employees.ToList();
+
+            // Load vehicles so we can get VehicleType (not stored on VehicleRequest)
+            var vehicles = _db.Vehicles.ToList();
+
+            var allItems = approvedRequests.Select(r =>
+            {
+                var emp = employees.FirstOrDefault(e => e.EmployeeNumber == r.EmployeeNumber);
+                string name = emp != null ? emp.FullName : r.EmployeeNumber;
+                string phone = emp != null ? emp.MobileNumber : "—";
+
+                // Get VehicleType from the Vehicles table using VehicleId
+                var veh = vehicles.FirstOrDefault(v => v.Id == r.VehicleId);
+                string vehicleType = veh != null ? veh.VehicleType : "—";
+
+                bool isOverdue = now > r.RequiredUntil;
+                TimeSpan overdueBy = isOverdue ? (now - r.RequiredUntil) : TimeSpan.Zero;
+                TimeSpan totalSpan = r.RequiredUntil - r.RequiredFrom;
+                int durH = (int)totalSpan.TotalHours;
+                int durM = totalSpan.Minutes;
+                int totalMins = (int)totalSpan.TotalMinutes;
+
+                int overduePercent = 0;
+                if (isOverdue && totalMins > 0)
+                    overduePercent = Math.Min(100, (int)((overdueBy.TotalMinutes / totalMins) * 100));
+
+                // Build two-letter initials
+                string initials = "?";
+                if (!string.IsNullOrEmpty(name))
+                {
+                    var parts = name.Split(' ');
+                    initials = parts.Length > 1
+                        ? parts[0][0].ToString().ToUpper() + parts[1][0].ToString().ToUpper()
+                        : parts[0][0].ToString().ToUpper();
+                }
+
+                return new AllocatedVehicleItem
+                {
+                    RequestId = r.RequestId,
+                    VehicleId = r.VehicleId,
+                    VehicleName = r.VehicleName,
+                    VehicleType = vehicleType,          // ← from Vehicles table, not VehicleRequest
+                    RegistrationNo = r.RegistrationNo,
+                    EmployeeName = name,
+                    EmployeeNumber = r.EmployeeNumber,
+                    EmployeePhone = phone,
+                    Initials = initials,
+                    StartTime = r.RequiredFrom,
+                    DueReturn = r.RequiredUntil,
+                    Purpose = r.Purpose,
+                    IsOverdue = isOverdue,
+                    OverdueBy = overdueBy,
+                    DurationHours = durH,
+                    DurationMins = durM,
+                    OverduePercent = overduePercent
+                };
+            }).ToList();
+
+            // Search
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                string s = search.Trim().ToLower();
+                allItems = allItems.Where(x =>
+                    x.VehicleName.ToLower().Contains(s) ||
+                    x.RegistrationNo.ToLower().Contains(s) ||
+                    x.EmployeeName.ToLower().Contains(s) ||
+                    x.EmployeeNumber.ToLower().Contains(s)
+                ).ToList();
+            }
+
+            // Filter
+            if (filter == "InUse")
+                allItems = allItems.Where(x => !x.IsOverdue).ToList();
+            else if (filter == "Overdue")
+                allItems = allItems.Where(x => x.IsOverdue).ToList();
+
+            // Overdue first, then soonest due return
+            allItems = allItems
+                .OrderByDescending(x => x.IsOverdue)
+                .ThenBy(x => x.DueReturn)
+                .ToList();
+
+            // Totals always from full unfiltered approved list
+            var allApproved = _db.VehicleRequests.Where(r => r.Status == "Approved").ToList();
+
+            var dto = new AllocatedVehicleDto
+            {
+                TotalAllocated = allApproved.Count,
+                InUseCount = allApproved.Count(r => now <= r.RequiredUntil),
+                OverdueCount = allApproved.Count(r => now > r.RequiredUntil),
+                ActiveFilter = filter,
+                SearchTerm = search,
+                Items = allItems
+            };
+
+            return View(dto);   // -> Views/Autobase/AllocatedVehicle.cshtml
+        }
+
+        // ── POST: /Autobase/MarkReturnedFromAllocated ─────────────────────────
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult MarkReturnedFromAllocated(int requestId)
+        {
+            string role = Session["Role"]?.ToString();
+            if (role != "SuperAdmin" && role != "Admin")
+                return RedirectToAction("Login", "Account");
+
+            var request = _db.VehicleRequests.Find(requestId);
+            if (request != null && request.Status == "Approved")
+            {
+                request.Status = "Returned";
+
+                var vehicle = _db.Vehicles.Find(request.VehicleId);
+                if (vehicle != null)
+                    vehicle.Status = "Available";
+
+                _db.SaveChanges();
+                TempData["SuccessMessage"] = $"{request.VehicleName} marked as returned successfully.";
+            }
+
+            return RedirectToAction("AllocatedVehicle");
+        }
+
+        // ── GET: /Autobase/SeeRequests ────────────────────────────────────────
+        [HttpGet]
+        public ActionResult SeeRequests(string filter = "All", string search = "")
+        {
+            string role = Session["Role"]?.ToString();
+            if (role != "SuperAdmin" && role != "Admin")
+                return RedirectToAction("Login", "Account");
+
+            var requestsQuery = _db.VehicleRequests.AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                string s = search.Trim().ToLower();
+                requestsQuery = requestsQuery.Where(r =>
+                    r.VehicleName.ToLower().Contains(s) ||
+                    r.RegistrationNo.ToLower().Contains(s) ||
+                    r.EmployeeNumber.ToLower().Contains(s) ||
+                    r.Purpose.ToLower().Contains(s));
+            }
+
+            if (filter == "Pending")
+                requestsQuery = requestsQuery.Where(r => r.Status == "Pending");
+            else if (filter == "Approved")
+                requestsQuery = requestsQuery.Where(r => r.Status == "Approved");
+            else if (filter == "Rejected")
+                requestsQuery = requestsQuery.Where(r => r.Status == "Rejected");
+            else if (filter == "Completed")
+                requestsQuery = requestsQuery.Where(r => r.Status == "Returned");
+
+            var allRequests = _db.VehicleRequests.ToList();
+            var filtered = requestsQuery.OrderByDescending(r => r.RequestedOn).ToList();
+            var employees = _db.Employees.ToList();
+
+            var items = filtered.Select(r =>
+            {
+                var emp = employees.FirstOrDefault(e => e.EmployeeNumber == r.EmployeeNumber);
+                return new SeeRequestItem
+                {
+                    RequestId = r.RequestId,
+                    EmployeeName = emp != null ? emp.FullName : r.EmployeeNumber,
+                    EmployeeNumber = r.EmployeeNumber,
+                    EmployeePhone = emp != null ? emp.MobileNumber : "—",
+                    Department = emp != null ? emp.Department : "—",
+                    Designation = emp != null ? emp.Designation : "—",
+                    VehicleName = r.VehicleName,
+                    RegistrationNo = r.RegistrationNo,
+                    Purpose = r.Purpose,
+                    RequiredFrom = r.RequiredFrom,
+                    RequiredUntil = r.RequiredUntil,
+                    Status = r.Status,
+                    AdminNotes = r.AdminNotes,
+                    RequestedOn = r.RequestedOn
+                };
+            }).ToList();
+
+            var dto = new SeeRequestDto
+            {
+                TotalCount = allRequests.Count,
+                PendingCount = allRequests.Count(r => r.Status == "Pending"),
+                ApprovedCount = allRequests.Count(r => r.Status == "Approved"),
+                RejectedCount = allRequests.Count(r => r.Status == "Rejected"),
+                CompletedCount = allRequests.Count(r => r.Status == "Returned"),
+                ActiveFilter = filter,
+                SearchTerm = search,
+                Requests = items
+            };
+
+            return View(dto);
+        }
+
+        // ── POST: /Autobase/ApproveRequest ────────────────────────────────────
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult ApproveRequest(int requestId, string adminNotes)
+        {
+            string role = Session["Role"]?.ToString();
+            if (role != "SuperAdmin" && role != "Admin")
+                return RedirectToAction("Login", "Account");
+
+            var request = _db.VehicleRequests.Find(requestId);
+            if (request != null)
+            {
+                request.Status = "Approved";
+                request.AdminNotes = adminNotes;
+
+                var vehicle = _db.Vehicles.Find(request.VehicleId);
+                if (vehicle != null)
+                    vehicle.Status = "Allocated";
+
+                _db.SaveChanges();
+                TempData["SuccessMessage"] = "Request approved successfully.";
+            }
+
+            return RedirectToAction("SeeRequests");
+        }
+
+        // ── POST: /Autobase/RejectRequest ─────────────────────────────────────
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult RejectRequest(int requestId, string adminNotes)
+        {
+            string role = Session["Role"]?.ToString();
+            if (role != "SuperAdmin" && role != "Admin")
+                return RedirectToAction("Login", "Account");
+
+            var request = _db.VehicleRequests.Find(requestId);
+            if (request != null)
+            {
+                request.Status = "Rejected";
+                request.AdminNotes = adminNotes;
+                _db.SaveChanges();
+                TempData["SuccessMessage"] = "Request rejected.";
+            }
+
+            return RedirectToAction("SeeRequests");
+        }
+
+        // ── POST: /Autobase/MarkReturned ──────────────────────────────────────
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult MarkReturned(int requestId)
+        {
+            string role = Session["Role"]?.ToString();
+            if (role != "SuperAdmin" && role != "Admin")
+                return RedirectToAction("Login", "Account");
+
+            var request = _db.VehicleRequests.Find(requestId);
+            if (request != null && request.Status == "Approved")
+            {
+                request.Status = "Returned";
+
+                var vehicle = _db.Vehicles.Find(request.VehicleId);
+                if (vehicle != null)
+                    vehicle.Status = "Available";
+
+                _db.SaveChanges();
+                TempData["SuccessMessage"] = "Vehicle marked as returned.";
+            }
+
+            return RedirectToAction("SeeRequests");
         }
 
         protected override void Dispose(bool disposing)

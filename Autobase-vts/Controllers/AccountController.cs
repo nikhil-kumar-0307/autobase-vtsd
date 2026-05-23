@@ -69,18 +69,16 @@ namespace autobase.Controllers
             return RedirectToAction("Login");
         }
 
-        // ── Helpers ──────────────────────────────────────────────────────────
+        // ── Helpers ──────────────────────────────────────────────────────────        
 
         private ActionResult RedirectToRole(string role = null)
         {
             role = role ?? Session["Role"]?.ToString() ?? "Employee";
-
             if (role == "SuperAdmin" || role == "Admin")
                 return RedirectToAction("Index", "Dashboard");
 
             return RedirectToAction("Employee", "Dashboard");
         }
-
         protected override void Dispose(bool disposing)
         {
             if (disposing) _db.Dispose();

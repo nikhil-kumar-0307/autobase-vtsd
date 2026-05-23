@@ -93,15 +93,17 @@
         }
 
         <div class="nav-section-label">Autobase</div>
-        <a href="@Url.Action("Allocated", "Vehicle")" class="nav-item @(currentController == "Vehicle" && currentAction == "Allocated" ? "active" : "")">
+        <a href="@Url.Action("AllocatedVehicle", "Autobase")" class="nav-item @(currentController == "Autobase" && currentAction == "AllocatedVehicle" ? "active" : "")">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
                 <circle cx="12" cy="10" r="3" />
             </svg>
             Allocated Vehicle
         </a>
-        <a href="@Url.Action("Index", "Request")" class="nav-item @(currentController == "Request" ? "active" : "")">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <a href="@Url.Action("SeeRequests", "Autobase")"
+           class="nav-item @(currentController == "Autobase" && currentAction == "SeeRequests" ? "active" : "")">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
                 <polyline points="14 2 14 8 20 8" />
                 <line x1="16" y1="13" x2="8" y2="13" />
@@ -110,7 +112,7 @@
             </svg>
             See Requests
         </a>
-        <a href="@Url.Action("AvailableVehicle", "Autobase")" class="nav-item @(currentController == "Vehicle" && currentAction == "Available" ? "active" : "")">
+        <a href="@Url.Action("AvailableVehicle", "Autobase")" class="nav-item @(currentController == "Autobase" && currentAction == "AvailableVehicle" ? "active" : "")">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
                 <polyline points="22 4 12 14.01 9 11.01" />

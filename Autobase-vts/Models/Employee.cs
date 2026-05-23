@@ -33,5 +33,6 @@ namespace autobase.Models
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
         public DateTime? LastLoginAt { get; set; }
+
     }
 }
