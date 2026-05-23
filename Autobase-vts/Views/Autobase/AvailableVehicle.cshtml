@@ -1,0 +1,640 @@
+﻿@model autobase.Models.DTOs.AvailableVehicleDto
+@{
+    ViewBag.Title = "Available Vehicle";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<style>
+    /* ── Page header ── */
+    .page-title {
+        font-size: 24px;
+        font-weight: 800;
+        color: #0d0d0d;
+        letter-spacing: -.3px;
+    }
+
+    .page-sub {
+        font-size: 13px;
+        color: #aaa;
+        margin-top: 3px;
+    }
+
+    /* ── Stat cards ── */
+    .stats-row {
+        display: grid;
+        grid-template-columns: repeat(4,1fr);
+        gap: 16px;
+        margin: 20px 0;
+        animation: fadeUp .35s ease both;
+    }
+
+    .stat-card {
+        background: #fff;
+        border: 1px solid #efefef;
+        border-radius: 14px;
+        padding: 20px 22px;
+        position: relative;
+        overflow: hidden;
+    }
+
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+        }
+
+        .stat-card.gray::after {
+            background: #aaa;
+        }
+
+        .stat-card.green::after {
+            background: #38a169;
+        }
+
+        .stat-card.blue::after {
+            background: #3182ce;
+        }
+
+        .stat-card.amber::after {
+            background: #d69e2e;
+        }
+
+    .stat-label {
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        color: #bbb;
+        margin-bottom: 10px;
+    }
+
+    .stat-num {
+        font-size: 34px;
+        font-weight: 800;
+        color: #0d0d0d;
+        line-height: 1;
+    }
+
+    .stat-desc {
+        font-size: 11px;
+        color: #bbb;
+        margin-top: 5px;
+    }
+
+    /* ── Search + filter bar ── */
+    .search-bar {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
+        animation: fadeUp .4s ease .05s both;
+    }
+
+    .search-wrap {
+        flex: 1;
+        position: relative;
+    }
+
+        .search-wrap svg {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #ccc;
+            pointer-events: none;
+        }
+
+        .search-wrap input {
+            width: 100%;
+            height: 44px;
+            padding: 0 16px 0 42px;
+            border: 1.5px solid #e8e8e8;
+            border-radius: 10px;
+            font-family: 'Barlow', sans-serif;
+            font-size: 14px;
+            font-weight: 500;
+            color: #0d0d0d;
+            background: #fff;
+            outline: none;
+            transition: border-color .2s, box-shadow .2s;
+        }
+
+            .search-wrap input:focus {
+                border-color: #F5C518;
+                box-shadow: 0 0 0 3px rgba(245,197,24,.12);
+            }
+
+    .filter-tabs {
+        display: flex;
+        gap: 6px;
+    }
+
+    .filter-tab {
+        height: 44px;
+        padding: 0 18px;
+        border: 1.5px solid #e8e8e8;
+        border-radius: 10px;
+        font-family: 'Barlow', sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        color: #666;
+        background: #fff;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        transition: border-color .15s, background .15s, color .15s;
+        white-space: nowrap;
+    }
+
+        .filter-tab:hover {
+            border-color: #ccc;
+            color: #0d0d0d;
+        }
+
+        .filter-tab.active {
+            background: #0d0d0d;
+            border-color: #0d0d0d;
+            color: #fff;
+        }
+
+        .filter-tab.active-green {
+            background: #38a169;
+            border-color: #38a169;
+            color: #fff;
+        }
+
+        .filter-tab.active-blue {
+            background: #3182ce;
+            border-color: #3182ce;
+            color: #fff;
+        }
+
+        .filter-tab.active-amber {
+            background: #d69e2e;
+            border-color: #d69e2e;
+            color: #fff;
+        }
+
+    /* ── Group card ── */
+    .group-card {
+        background: #fff;
+        border: 1px solid #efefef;
+        border-radius: 14px;
+        overflow: hidden;
+        margin-bottom: 16px;
+        animation: fadeUp .42s ease .08s both;
+    }
+
+    .group-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 20px;
+        border-bottom: 1px solid #f5f5f5;
+        cursor: pointer;
+        user-select: none;
+    }
+
+        .group-header:hover {
+            background: #fafafa;
+        }
+
+    .group-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .type-emoji {
+        width: 36px;
+        height: 36px;
+        background: #f5f5f5;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+    }
+
+    .group-name {
+        font-size: 15px;
+        font-weight: 700;
+        color: #0d0d0d;
+    }
+
+    .group-right {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .group-count {
+        font-size: 12px;
+        font-weight: 600;
+        color: #888;
+        background: #f5f5f5;
+        padding: 4px 10px;
+        border-radius: 6px;
+    }
+
+    .group-badge {
+        font-size: 11px;
+        font-weight: 700;
+        padding: 3px 10px;
+        border-radius: 50px;
+    }
+
+        .group-badge.avail {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        .group-badge.maint {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .group-badge.inuse {
+            background: #dbeafe;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
+        }
+
+    /* Progress bar */
+    .progress-wrap {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .progress-bar {
+        width: 80px;
+        height: 5px;
+        background: #f0f0f0;
+        border-radius: 99px;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        border-radius: 99px;
+        background: #38a169;
+        transition: width .4s ease;
+    }
+
+    .progress-pct {
+        font-size: 11px;
+        font-weight: 700;
+        color: #888;
+    }
+
+    .chevron-icon {
+        color: #ccc;
+        transition: transform .2s;
+    }
+
+        .chevron-icon.open {
+            transform: rotate(180deg);
+        }
+
+    /* ── Vehicle table ── */
+    .v-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .v-table th {
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 1.3px;
+            text-transform: uppercase;
+            color: #bbb;
+            padding: 10px 20px;
+            text-align: left;
+            background: #fafafa;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .v-table td {
+            padding: 13px 20px;
+            font-size: 13px;
+            color: #555;
+            border-bottom: 1px solid #f9f9f9;
+            vertical-align: middle;
+        }
+
+        .v-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .v-table tr:hover td {
+            background: #fafafa;
+        }
+
+    .row-num {
+        font-size: 12px;
+        color: #ddd;
+        font-weight: 600;
+    }
+
+    .v-name {
+        font-size: 14px;
+        font-weight: 700;
+        color: #0d0d0d;
+    }
+
+    .reg-tag {
+        display: inline-block;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 6px;
+        background: #f5f5f5;
+        color: #555;
+        border: 1px solid #eee;
+        letter-spacing: .5px;
+    }
+
+    .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 12px;
+        border-radius: 50px;
+        font-size: 11px;
+        font-weight: 700;
+    }
+
+        .status-pill.avail {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        .status-pill.inuse {
+            background: #dbeafe;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
+        }
+
+        .status-pill.maint {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+    .status-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+    }
+
+        .status-dot.avail {
+            background: #38a169;
+        }
+
+        .status-dot.inuse {
+            background: #3182ce;
+        }
+
+        .status-dot.maint {
+            background: #e53e3e;
+        }
+
+    .notes-cell {
+        font-size: 12px;
+        color: #bbb;
+        max-width: 180px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* ── Empty state ── */
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+    }
+
+        .empty-state svg {
+            color: #e0e0e0;
+            margin-bottom: 12px;
+        }
+
+        .empty-state p {
+            font-size: 13px;
+            color: #bbb;
+        }
+
+    @@keyframes fadeUp {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+</style>
+
+<!-- Header -->
+<div style="animation: fadeUp .3s ease both;">
+    <div class="page-title">Fleet Overview</div>
+    <div class="page-sub">Live inventory of all vehicles grouped by type — with availability breakdown.</div>
+</div>
+
+<!-- Stats row -->
+<div class="stats-row">
+    <div class="stat-card gray">
+        <div class="stat-label">Total Fleet</div>
+        <div class="stat-num">@Model.TotalFleet</div>
+        <div class="stat-desc">Active vehicles</div>
+    </div>
+    <div class="stat-card green">
+        <div class="stat-label">Available</div>
+        <div class="stat-num">@Model.TotalAvailable</div>
+        <div class="stat-desc">Ready to assign</div>
+    </div>
+    <div class="stat-card blue">
+        <div class="stat-label">In Use</div>
+        <div class="stat-num">@Model.TotalInUse</div>
+        <div class="stat-desc">Currently deployed</div>
+    </div>
+    <div class="stat-card amber">
+        <div class="stat-label">Maintenance</div>
+        <div class="stat-num">@Model.TotalMaintenance</div>
+        <div class="stat-desc">Under service</div>
+    </div>
+</div>
+
+<!-- Search + filter -->
+<div class="search-bar">
+    <div class="search-wrap">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        </svg>
+        <input type="text"
+               id="searchInput"
+               placeholder="Search by vehicle name or registration..."
+               value="@Model.SearchTerm"
+               oninput="liveSearch(this.value)" />
+    </div>
+    <div class="filter-tabs">
+        <a href="@Url.Action("AvailableVehicle", "Autobase", new { filter = "All",         search = Model.SearchTerm })"
+           class="filter-tab @(Model.ActiveFilter == "All" ? "active" : "")">All</a>
+
+        <a href="@Url.Action("AvailableVehicle", "Autobase", new { filter = "Available",   search = Model.SearchTerm })"
+           class="filter-tab @(Model.ActiveFilter == "Available" ? "active-green" : "")">Available</a>
+
+        <a href="@Url.Action("AvailableVehicle", "Autobase", new { filter = "InUse",       search = Model.SearchTerm })"
+           class="filter-tab @(Model.ActiveFilter == "InUse" ? "active-blue" : "")">In Use</a>
+
+        <a href="@Url.Action("AvailableVehicle", "Autobase", new { filter = "Maintenance", search = Model.SearchTerm })"
+           class="filter-tab @(Model.ActiveFilter == "Maintenance" ? "active-amber" : "")">Maintenance</a>
+    </div>
+</div>
+
+<!-- Groups -->
+@if (!Model.Groups.Any())
+{
+    <div class="group-card">
+        <div class="empty-state">
+            <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="1" y="3" width="15" height="13" rx="1" />
+                <path d="M16 8h4l3 4v3h-7V8z" />
+                <circle cx="5.5" cy="18.5" r="2.5" />
+                <circle cx="18.5" cy="18.5" r="2.5" />
+            </svg>
+            <p>No vehicles found. <a href="@Url.Action("Add","Vehicle")" style="color:#F5C518; font-weight:700;">Add one now →</a></p>
+        </div>
+    </div>
+}
+else
+{
+    foreach (var g in Model.Groups)
+    {
+        string emoji = g.TypeName == "SUV" ? "🚙"
+                     : g.TypeName == "Sedan" ? "🚗"
+                     : g.TypeName == "Hatchback" ? "🚘"
+                     : g.TypeName == "Bus" ? "🚌"
+                     : g.TypeName == "Mini Truck" ? "🚛"
+                     : g.TypeName == "Van" ? "🚐"
+                     : g.TypeName == "Pickup" ? "🛻"
+                     : g.TypeName == "Bike" ? "🏍️"
+                     : "🚗";
+
+        <div class="group-card">
+            <!-- Group header (clickable to collapse) -->
+            <div class="group-header" onclick="toggleGroup('@g.TypeName.Replace(" ","_")')">
+                <div class="group-left">
+                    <div class="type-emoji">@emoji</div>
+                    <div class="group-name">@g.TypeName</div>
+                </div>
+                <div class="group-right">
+                    <span class="group-count">@g.Total Total</span>
+                    @if (g.Available > 0)
+                    {
+                        <span class="group-badge avail">@g.Available Available</span>
+                    }
+                    @if (g.Maintenance > 0)
+                    {
+                        <span class="group-badge maint">@g.Maintenance Maintenance</span>
+                    }
+                    @if (g.InUse > 0)
+                    {
+                        <span class="group-badge inuse">@g.InUse In Use</span>
+                    }
+                    <div class="progress-wrap">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width:@g.Percent%"></div>
+                        </div>
+                        <span class="progress-pct">@g.Percent%</span>
+                    </div>
+                    <svg class="chevron-icon open" id="chevron_@g.TypeName.Replace(" ","_")"
+                         width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Vehicle table -->
+            <div id="group_@g.TypeName.Replace(" ","_")">
+                <table class="v-table">
+                    <thead>
+                        <tr>
+                            <th style="width:48px;">#</th>
+                            <th>Vehicle Name</th>
+                            <th>Registration No.</th>
+                            <th>Year</th>
+                            <th>Status</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{ int i = 1; }
+                        @foreach (var v in g.Vehicles)
+                        {
+                            string sc = v.Status == "Available" ? "avail"
+                                      : v.Status == "Allocated" ? "inuse"
+                                      : "maint";
+                            string sl = v.Status == "Allocated" ? "In Use" : v.Status;
+
+                            <tr class="vehicle-row"
+                                data-name="@v.VehicleName.ToLower()"
+                                data-reg="@v.RegistrationNo.ToLower()">
+                                <td><span class="row-num">@i</span></td>
+                                <td><span class="v-name">@v.VehicleName</span></td>
+                                <td><span class="reg-tag">@v.RegistrationNo</span></td>
+                                <td>@v.YearOfManufacture</td>
+                                <td>
+                                    <span class="status-pill @sc">
+                                        <span class="status-dot @sc"></span>
+                                        @sl
+                                    </span>
+                                </td>
+                                <td><span class="notes-cell">@(string.IsNullOrEmpty(v.Notes) ? "—" : v.Notes)</span></td>
+                            </tr>
+                            i++;
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+}
+
+@section Scripts {
+    <script>
+        // Toggle group expand/collapse
+        function toggleGroup(key) {
+            var body = document.getElementById('group_' + key);
+            var chevron = document.getElementById('chevron_' + key);
+            if (body.style.display === 'none') {
+                body.style.display = '';
+                chevron.classList.add('open');
+            } else {
+                body.style.display = 'none';
+                chevron.classList.remove('open');
+            }
+        }
+
+        // Live client-side search (filters rows across all groups)
+        function liveSearch(val) {
+            val = val.toLowerCase().trim();
+            document.querySelectorAll('.vehicle-row').forEach(function (row) {
+                var name = row.getAttribute('data-name');
+                var reg = row.getAttribute('data-reg');
+                row.style.display = (!val || name.includes(val) || reg.includes(val)) ? '' : 'none';
+            });
+        }
+    </script>
+}

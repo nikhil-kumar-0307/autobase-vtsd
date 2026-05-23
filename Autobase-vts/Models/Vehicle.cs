@@ -35,6 +35,11 @@ namespace autobase.Models
         [MaxLength(500)]
         public string Notes { get; set; }
 
+        [MaxLength(20)]
+        public string FuelType { get; set; }
+
+        public int SeatingCapacity { get; set; }
+
         public bool IsActive { get; set; } = true;
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;

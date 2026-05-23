@@ -14,6 +14,7 @@ namespace autobase.Data
 
         public DbSet<VehicleTypes> VehicleTypes { get; set; }
         public DbSet<Vehicle> Vehicles { get; set; }
+        public DbSet<VehicleRequest> VehicleRequests { get; set; }
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
