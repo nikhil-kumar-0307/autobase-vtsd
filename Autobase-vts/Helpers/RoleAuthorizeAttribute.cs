@@ -1,5 +1,4 @@
-﻿// Helpers/RoleAuthorizeAttribute.cs
-using System.Web.Mvc;
+﻿using System.Web.Mvc;
 using System.Web;
 
 namespace autobase.Helpers

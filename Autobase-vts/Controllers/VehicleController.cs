@@ -220,7 +220,7 @@ namespace autobase.Controllers
                 return RedirectToAction("Delete");
             }
 
-            vehicle.IsActive = false;          // soft-delete — data stays in DB
+            vehicle.IsActive = false; // soft-delete — data stays in DB
             _db.SaveChanges();
 
             TempData["Success"] = $"Vehicle \"{vehicle.VehicleName}\" ({vehicle.RegistrationNo}) has been disabled successfully.";

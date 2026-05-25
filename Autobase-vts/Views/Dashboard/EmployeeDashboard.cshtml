@@ -1,12 +1,13 @@
-﻿@{
+﻿@model autobase.Models.DTOs.EmployeeDashboardDto
+@{
     ViewBag.Title = "My Dashboard";
     Layout = null;
 
     string fullName = Session["FullName"]?.ToString() ?? "Employee";
-    string empNo = Session["EmployeeNumber"]?.ToString() ?? "";
+    string empNo    = Session["EmployeeNumber"]?.ToString() ?? "";
     string initials = string.IsNullOrEmpty(fullName) ? "E" : fullName.Substring(0, 1).ToUpper();
 
-    var now = DateTime.Now;
+    var now  = DateTime.Now;
     int hour = now.Hour;
     string greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
 }
@@ -288,7 +289,7 @@
             padding: 28px;
         }
 
-        /* ── Welcome ── */
+        /* ── Welcome banner ── */
         .emp-welcome {
             background: linear-gradient(135deg, #fffbea 0%, #fff8d6 100%);
             border: 1px solid #f5e090;
@@ -328,13 +329,13 @@
             letter-spacing: .3px;
         }
 
-        /* ── Stats ── */
+        /* ── Stat cards ── */
         .emp-stats {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             gap: 16px;
-            margin-bottom: 28px;
-            animation: fadeUp .45s ease .05s both;
+            margin-bottom: 24px;
+            animation: fadeUp .42s ease .05s both;
         }
 
         .emp-stat {
@@ -344,7 +345,15 @@
             padding: 20px 22px;
             position: relative;
             overflow: hidden;
+            text-decoration: none;
+            display: block;
+            transition: box-shadow .2s, transform .2s;
         }
+
+            .emp-stat:hover {
+                box-shadow: 0 6px 20px rgba(0,0,0,.06);
+                transform: translateY(-2px);
+            }
 
             .emp-stat::before {
                 content: '';
@@ -364,6 +373,10 @@
             }
 
             .emp-stat.s3::before {
+                background: #3182ce;
+            }
+
+            .emp-stat.s4::before {
                 background: #e53e3e;
             }
 
@@ -387,13 +400,18 @@
                 color: #38a169;
             }
 
+            .emp-stat-icon.b {
+                background: #ebf8ff;
+                color: #3182ce;
+            }
+
             .emp-stat-icon.r {
                 background: #fff5f5;
                 color: #e53e3e;
             }
 
         .emp-stat-num {
-            font-size: 32px;
+            font-size: 34px;
             font-weight: 800;
             color: #0d0d0d;
         }
@@ -407,14 +425,15 @@
             margin-top: 5px;
         }
 
-        /* ── Sections ── */
+        /* ── Bottom two-column grid ── */
         .emp-bottom-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1.3fr 1fr;
             gap: 20px;
-            animation: fadeUp .5s ease .1s both;
+            animation: fadeUp .48s ease .1s both;
         }
 
+        /* ── Card shell ── */
         .emp-card {
             background: #fff;
             border: 1px solid #f0f0f0;
@@ -443,6 +462,19 @@
                 color: #F5C518;
             }
 
+        .view-all-link {
+            font-size: 12px;
+            font-weight: 600;
+            color: #999;
+            text-decoration: none;
+            transition: color .15s;
+        }
+
+            .view-all-link:hover {
+                color: #0d0d0d;
+            }
+
+        /* ── Recent requests table ── */
         .emp-table {
             width: 100%;
             border-collapse: collapse;
@@ -454,32 +486,64 @@
                 letter-spacing: 1.2px;
                 text-transform: uppercase;
                 color: #bbb;
-                padding: 10px 20px;
+                padding: 10px 18px;
                 text-align: left;
                 border-bottom: 1px solid #f5f5f5;
                 background: #fafafa;
+                white-space: nowrap;
             }
 
             .emp-table td {
-                padding: 12px 20px;
+                padding: 12px 18px;
                 font-size: 13px;
                 color: #444;
                 border-bottom: 1px solid #f9f9f9;
+                vertical-align: middle;
             }
 
             .emp-table tr:last-child td {
                 border-bottom: none;
             }
 
-        .empty-state {
-            padding: 36px 20px;
-            text-align: center;
-            color: #bbb;
+            .emp-table tr:hover td {
+                background: #fafafa;
+            }
+
+        .v-name-sm {
             font-size: 13px;
+            font-weight: 700;
+            color: #0d0d0d;
+        }
+
+        .v-reg-sm {
+            display: inline-block;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 5px;
+            background: #f5f5f5;
+            color: #555;
+            border: 1px solid #eee;
+            margin-top: 2px;
+            letter-spacing: .4px;
+        }
+
+        .date-sm {
+            font-size: 12px;
+            font-weight: 600;
+            color: #0d0d0d;
+        }
+
+        .date-sub-sm {
+            font-size: 10px;
+            color: #bbb;
+            margin-top: 1px;
         }
 
         .status-badge {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
             font-size: 10px;
             font-weight: 700;
             padding: 3px 10px;
@@ -487,109 +551,219 @@
             letter-spacing: .3px;
         }
 
-            .status-badge.pending {
-                background: #fef9c3;
-                color: #a16207;
-                border: 1px solid #fde68a;
-            }
-
-            .status-badge.approved {
-                background: #dcfce7;
-                color: #166534;
-                border: 1px solid #bbf7d0;
-            }
-
-            .status-badge.rejected {
-                background: #fee2e2;
-                color: #991b1b;
-                border: 1px solid #fecaca;
-            }
-
-        /* ── Request form card ── */
-        .req-card {
-            background: #fff;
-            border: 1px solid #f0f0f0;
-            border-radius: 14px;
-            padding: 24px;
-            margin-bottom: 20px;
-            animation: fadeUp .45s ease .08s both;
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
         }
 
-        .req-card-title {
-            font-size: 15px;
-            font-weight: 700;
-            color: #0d0d0d;
-            margin-bottom: 16px;
+        .status-badge.pending {
+            background: #fef9c3;
+            color: #a16207;
+            border: 1px solid #fde68a;
+        }
+
+        .status-dot.pending {
+            background: #ca8a04;
+        }
+
+        .status-badge.approved {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        .status-dot.approved {
+            background: #38a169;
+        }
+
+        .status-badge.rejected {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .status-dot.rejected {
+            background: #e53e3e;
+        }
+
+        .status-badge.returned {
+            background: #dbeafe;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
+        }
+
+        .status-dot.returned {
+            background: #3182ce;
+        }
+
+        /* ── Allocated vehicle cards ── */
+        .alloc-list {
+            padding: 14px;
             display: flex;
-            align-items: center;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .alloc-mini-card {
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #f0f0f0;
+        }
+
+            .alloc-mini-card.overdue {
+                border-color: #fecaca;
+            }
+
+        .amc-top {
+            padding: 12px 14px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
             gap: 8px;
         }
 
-            .req-card-title svg {
-                color: #F5C518;
+            .amc-top.overdue-bg {
+                background: #fff5f5;
             }
 
-        .req-form {
+            .amc-top.normal-bg {
+                background: #f0fff4;
+            }
+
+        .amc-name {
+            font-size: 14px;
+            font-weight: 800;
+            color: #0d0d0d;
+        }
+
+        .amc-reg {
+            display: inline-block;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 5px;
+            background: #fff;
+            color: #555;
+            border: 1px solid #e0e0e0;
+            letter-spacing: .4px;
+            margin-top: 3px;
+        }
+
+        .amc-badge-inuse {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 9px;
+            border-radius: 50px;
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+            font-size: 10px;
+            font-weight: 700;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .amc-badge-overdue {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 9px;
+            border-radius: 50px;
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+            font-size: 10px;
+            font-weight: 700;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .amc-bdot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+            .amc-bdot.g {
+                background: #38a169;
+            }
+
+            .amc-bdot.r {
+                background: #e53e3e;
+            }
+
+        .amc-bottom {
+            padding: 10px 14px;
+            background: #fff;
             display: flex;
-            gap: 12px;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
             flex-wrap: wrap;
         }
 
-        .req-field {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            flex: 1;
-            min-width: 160px;
+        .amc-time-info {
+            font-size: 11px;
+            color: #888;
         }
 
-            .req-field label {
-                font-size: 10px;
-                font-weight: 700;
-                letter-spacing: 1.2px;
-                text-transform: uppercase;
-                color: #888;
-            }
-
-            .req-field input, .req-field select, .req-field textarea {
-                padding: 10px 14px;
-                border: 1.5px solid #eee;
-                border-radius: 8px;
-                font-family: 'Barlow', sans-serif;
-                font-size: 13px;
-                font-weight: 500;
+            .amc-time-info strong {
                 color: #0d0d0d;
-                background: #fafafa;
-                outline: none;
-                transition: border-color .2s, background .2s;
+                font-weight: 700;
             }
 
-                .req-field input:focus, .req-field select:focus, .req-field textarea:focus {
-                    border-color: #F5C518;
-                    background: #fff;
-                    box-shadow: 0 0 0 3px rgba(245,197,24,.15);
-                }
+            .amc-time-info.red {
+                color: #e53e3e;
+            }
 
-        .req-submit {
-            align-self: flex-end;
-            height: 42px;
-            padding: 0 24px;
-            background: #F5C518;
-            color: #0d0d0d;
+        .btn-return-mini {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 12px;
+            border-radius: 7px;
             font-family: 'Barlow', sans-serif;
-            font-size: 13px;
+            font-size: 11px;
             font-weight: 700;
-            border: none;
-            border-radius: 8px;
             cursor: pointer;
-            transition: background .2s, box-shadow .2s;
-            box-shadow: 0 3px 10px rgba(245,197,24,.3);
+            border: 1px solid;
+            transition: background .2s;
             white-space: nowrap;
         }
 
-            .req-submit:hover {
-                background: #d4a800;
-                box-shadow: 0 5px 16px rgba(245,197,24,.4);
+            .btn-return-mini.normal {
+                background: #dcfce7;
+                color: #166534;
+                border-color: #bbf7d0;
+            }
+
+                .btn-return-mini.normal:hover {
+                    background: #bbf7d0;
+                }
+
+            .btn-return-mini.overdue {
+                background: #fee2e2;
+                color: #991b1b;
+                border-color: #fecaca;
+            }
+
+                .btn-return-mini.overdue:hover {
+                    background: #fecaca;
+                }
+
+        /* ── Empty state ── */
+        .empty-state {
+            padding: 36px 20px;
+            text-align: center;
+            color: #bbb;
+            font-size: 13px;
+        }
+
+            .empty-state svg {
+                color: #e0e0e0;
+                margin-bottom: 10px;
             }
 
         @@keyframes fadeUp {
@@ -612,7 +786,7 @@
         <aside class="emp-sidebar">
             <div class="emp-logo">
                 <div class="emp-logo-icon">
-                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <svg viewBox="0 0 24 24" fill="none">
                         <rect x="1" y="5" width="15" height="11" rx="1" fill="#1a1a1a" />
                         <path d="M16 9h4l3 4v3h-7V9z" fill="#1a1a1a" />
                         <circle cx="5.5" cy="18.5" r="2.5" fill="#1a1a1a" />
@@ -621,10 +795,9 @@
                 </div>
                 <span class="emp-logo-text">AUTO<span class="logo-y">BASE</span></span>
             </div>
-
             <nav class="emp-nav">
                 <div class="nav-label">Overview</div>
-                <a href="@Url.Action(" Index", "EmployeeDashboard" )" class="nav-link active">
+                <a href="@Url.Action("Index","EmployeeDashboard")" class="nav-link active">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <rect x="3" y="3" width="7" height="7" />
                         <rect x="14" y="3" width="7" height="7" />
@@ -633,25 +806,23 @@
                     </svg>
                     Dashboard
                 </a>
-
                 <div class="nav-label">Vehicles</div>
-                <a href="@Url.Action("AvailableVehicles", "EmployeeDashboard")" class="nav-link">
+                <a href="@Url.Action("AvailableVehicles","EmployeeDashboard")" class="nav-link">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
                         <polyline points="22 4 12 14.01 9 11.01" />
                     </svg>
                     Available Vehicles
                 </a>
-                <a href="@Url.Action("AllocatedVehicle", "EmployeeDashboard")" class="nav-link">
+                <a href="@Url.Action("AllocatedVehicle","EmployeeDashboard")" class="nav-link">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
                         <circle cx="12" cy="10" r="3" />
                     </svg>
                     My Allocated Vehicle
                 </a>
-
                 <div class="nav-label">Requests</div>
-                <a href="@Url.Action("MyRequests", "EmployeeDashboard")" class="nav-link">
+                <a href="@Url.Action("MyRequests","EmployeeDashboard")" class="nav-link">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
                         <polyline points="14 2 14 8 20 8" />
@@ -660,7 +831,7 @@
                     </svg>
                     My Requests
                 </a>
-                <a href="@Url.Action("NewRequest", "EmployeeDashboard")" class="nav-link">
+                <a href="@Url.Action("NewRequest","EmployeeDashboard")" class="nav-link">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="10" />
                         <line x1="12" y1="8" x2="12" y2="16" />
@@ -669,7 +840,6 @@
                     New Request
                 </a>
             </nav>
-
             <div class="emp-sidebar-footer">
                 <div class="emp-s-avatar">@initials</div>
                 <div class="emp-s-info">
@@ -681,10 +851,9 @@
 
         <!-- Main -->
         <div class="emp-main">
-            <!-- Topbar -->
             <header class="emp-topbar">
                 <div>
-                    <div class="topbar-greet">@greeting, @fullName ??</div>
+                    <div class="topbar-greet">@greeting, @fullName</div>
                     <div class="topbar-sub">Here's your vehicle status for today</div>
                 </div>
                 <div class="topbar-right">
@@ -698,7 +867,7 @@
                             <polyline points="6 9 12 15 18 9" />
                         </svg>
                     </div>
-                    <a href="@Url.Action("Logout", "Account")" class="logout-btn">
+                    <a href="@Url.Action("Logout","Account")" class="logout-btn">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
                             <polyline points="16 17 21 12 16 7" />
@@ -710,38 +879,51 @@
             </header>
 
             <div class="emp-body">
-                <!-- Welcome -->
+
+                <!-- Welcome banner -->
                 <div class="emp-welcome">
                     <div>
-                        <div class="emp-welcome-title">Welcome back, @fullName 👋</div>
-                        <div class="emp-welcome-sub">Your vehicle dashboard &nbsp;| Emp No: <span>#@empNo</span></div>
+                        <div class="emp-welcome-title">Welcome back, @fullName &#128075;</div>
+                        <div class="emp-welcome-sub">
+                            Your vehicle dashboard &nbsp;|&nbsp; Emp No: <span>#@empNo</span>
+                        </div>
                     </div>
                     <div class="emp-badge">Employee</div>
                 </div>
 
-                <!-- Stats -->
+                <!-- Stat cards (real data, clickable) -->
                 <div class="emp-stats">
-                    <div class="emp-stat s1">
+                    <a href="@Url.Action("MyRequests","EmployeeDashboard")" class="emp-stat s1">
                         <div class="emp-stat-icon y">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
                                 <polyline points="14 2 14 8 20 8" />
                             </svg>
                         </div>
-                        <div class="emp-stat-num">0</div>
+                        <div class="emp-stat-num">@Model.TotalRequests</div>
                         <div class="emp-stat-lbl">Total Requests</div>
-                    </div>
-                    <div class="emp-stat s2">
+                    </a>
+                    <a href="@Url.Action("AllocatedVehicle","EmployeeDashboard")" class="emp-stat s2">
                         <div class="emp-stat-icon g">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
-                                <polyline points="22 4 12 14.01 9 11.01" />
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+                                <circle cx="12" cy="10" r="3" />
                             </svg>
                         </div>
-                        <div class="emp-stat-num">0</div>
-                        <div class="emp-stat-lbl">Approved</div>
-                    </div>
-                    <div class="emp-stat s3">
+                        <div class="emp-stat-num">@Model.AllocatedCount</div>
+                        <div class="emp-stat-lbl">In Use Now</div>
+                    </a>
+                    <a href="@Url.Action("MyRequests","EmployeeDashboard")" class="emp-stat s3">
+                        <div class="emp-stat-icon b">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10" />
+                                <polyline points="12 6 12 12 16 14" />
+                            </svg>
+                        </div>
+                        <div class="emp-stat-num">@Model.PendingCount</div>
+                        <div class="emp-stat-lbl">Pending</div>
+                    </a>
+                    <a href="@Url.Action("MyRequests","EmployeeDashboard")" class="emp-stat s4">
                         <div class="emp-stat-icon r">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <circle cx="12" cy="12" r="10" />
@@ -749,40 +931,15 @@
                                 <line x1="9" y1="9" x2="15" y2="15" />
                             </svg>
                         </div>
-                        <div class="emp-stat-num">0</div>
+                        <div class="emp-stat-num">@Model.RejectedCount</div>
                         <div class="emp-stat-lbl">Rejected</div>
-                    </div>
+                    </a>
                 </div>
 
-                <!-- New Request Quick Form -->
-                <div class="req-card">
-                    <div class="req-card-title">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-                        </svg>
-                        Quick Vehicle Request
-                    </div>
-                    @using (Html.BeginForm("New", "Request", FormMethod.Post, new { @class = "req-form" }))
-                    {
-                        @Html.AntiForgeryToken()
-                        <div class="req-field">
-                            <label>Purpose</label>
-                            <input type="text" name="Purpose" placeholder="e.g. Client visit, site inspection" />
-                        </div>
-                        <div class="req-field">
-                            <label>From Date</label>
-                            <input type="date" name="FromDate" />
-                        </div>
-                        <div class="req-field">
-                            <label>To Date</label>
-                            <input type="date" name="ToDate" />
-                        </div>
-                        <button type="submit" class="req-submit">Submit Request</button>
-                    }
-                </div>
-
-                <!-- Recent Activity -->
+                <!-- Bottom grid: Recent requests + Allocated vehicles -->
                 <div class="emp-bottom-grid">
+
+                    <!-- Recent Requests table -->
                     <div class="emp-card">
                         <div class="emp-card-header">
                             <div class="emp-card-title">
@@ -792,50 +949,157 @@
                                 </svg>
                                 My Recent Requests
                             </div>
+                            <a href="@Url.Action(" MyRequests","EmployeeDashboard")" class="view-all-link">
+                                View all &rarr;
+                            </a>
                         </div>
-                        <table class="emp-table">
-                            <thead>
-                                <tr>
-                                    <th>Purpose</th>
-                                    <th>Date</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td colspan="3" class="empty-state">No requests submitted yet.</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
 
-                    <div class="emp-card">
-                        <div class="emp-card-header">
-                            <div class="emp-card-title">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <rect x="1" y="3" width="15" height="13" rx="1" />
-                                    <path d="M16 8h4l3 4v3h-7V8z" />
-                                    <circle cx="5.5" cy="18.5" r="2.5" />
-                                    <circle cx="18.5" cy="18.5" r="2.5" />
-                                </svg>
-                                My Allocated Vehicle
-                            </div>
+                        @if (!Model.RecentRequests.Any())
+                        {
+                        <div class="empty-state">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                                <polyline points="14 2 14 8 20 8" />
+                            </svg>
+                            <p>No requests submitted yet.</p>
                         </div>
+                        }
+                        else
+                        {
                         <table class="emp-table">
                             <thead>
                                 <tr>
                                     <th>Vehicle</th>
-                                    <th>Type</th>
-                                    <th>Until</th>
+                                    <th>Requested On</th>
+                                    <th>Status</th>
                                 </tr>
                             </thead>
                             <tbody>
+                                @foreach (var r in Model.RecentRequests)
+                                {
+                                string sc = r.Status == "Approved" ? "approved"
+                                : r.Status == "Rejected" ? "rejected"
+                                : r.Status == "Returned" ? "returned"
+                                : "pending";
                                 <tr>
-                                    <td colspan="3" class="empty-state">No vehicle allocated yet.</td>
+                                    <td>
+                                        <div class="v-name-sm">@r.VehicleName</div>
+                                        <span class="v-reg-sm">@r.RegistrationNo</span>
+                                    </td>
+                                    <td>
+                                        <div class="date-sm">@r.RequestedOn.ToString("dd MMM yyyy")</div>
+                                        <div class="date-sub-sm">@r.RequestedOn.ToString("hh:mm tt")</div>
+                                    </td>
+                                    <td>
+                                        <span class="status-badge @sc">
+                                            <span class="status-dot @sc"></span>
+                                            @r.Status
+                                        </span>
+                                    </td>
                                 </tr>
+                                }
                             </tbody>
                         </table>
+                        }
                     </div>
+
+                    <!-- Allocated vehicles panel -->
+                    <div class="emp-card">
+                        <div class="emp-card-header">
+                            <div class="emp-card-title">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+                                    <circle cx="12" cy="10" r="3" />
+                                </svg>
+                                My Allocated Vehicle
+                            </div>
+                            @if (Model.AllocatedVehicles.Any())
+                            {
+                            <a href="@Url.Action(" AllocatedVehicle","EmployeeDashboard")" class="view-all-link">
+                                View all &rarr;
+                            </a>
+                            }
+                        </div>
+
+                        @if (!Model.AllocatedVehicles.Any())
+                        {
+                        <div class="empty-state">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+                                <circle cx="12" cy="10" r="3" />
+                            </svg>
+                            <p>No vehicle allocated at the moment.</p>
+                        </div>
+                        }
+                        else
+                        {
+                        <div class="alloc-list">
+                            @foreach (var a in Model.AllocatedVehicles)
+                            {
+                            string durText = a.DurationHours > 0
+                            ? a.DurationHours + "h " + a.DurationMins + "m"
+                            : a.DurationMins + " min";
+
+                            string overdueText = a.IsOverdue
+                            ? ((int)a.OverdueBy.TotalHours > 0
+                            ? (int)a.OverdueBy.TotalHours + "h " + a.OverdueBy.Minutes + "m overdue"
+                            : a.OverdueBy.Minutes + " min overdue")
+                            : "";
+
+                            <div class="alloc-mini-card @(a.IsOverdue ? " overdue" : "" )">
+                                <div class="amc-top @(a.IsOverdue ? " overdue-bg" : "normal-bg" )">
+                                    <div>
+                                        <div class="amc-name">@a.VehicleName</div>
+                                        <span class="amc-reg">@a.RegistrationNo</span>
+                                    </div>
+                                    @if (a.IsOverdue)
+                                    {
+                                    <span class="amc-badge-overdue">
+                                        <span class="amc-bdot r"></span>Overdue
+                                    </span>
+                                    }
+                                    else
+                                    {
+                                    <span class="amc-badge-inuse">
+                                        <span class="amc-bdot g"></span>In Use
+                                    </span>
+                                    }
+                                </div>
+                                <div class="amc-bottom">
+                                    <div>
+                                        <div class="amc-time-info">
+                                            Due: <strong>@a.DueReturn.ToString("dd MMM, hh:mm tt")</strong>
+                                        </div>
+                                        @if (a.IsOverdue)
+                                        {
+                                        <div class="amc-time-info red">&#9888; @overdueText</div>
+                                        }
+                                        else
+                                        {
+                                        <div class="amc-time-info">Duration: <strong>@durText</strong></div>
+                                        }
+                                    </div>
+                                    @using (Html.BeginForm("ReturnVehicle", "EmployeeDashboard", FormMethod.Post, new { style = "margin:0;" }))
+                                    {
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="requestId" value="@a.RequestId" />
+                                    <button type="submit"
+                                            class="btn-return-mini @(a.IsOverdue ? " overdue" : "normal" )"
+                                            onclick="return confirm('Confirm return of @a.VehicleName?')">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
+                                            <polyline points="22 4 12 14.01 9 11.01" />
+                                        </svg>
+                                        Return
+                                    </button>
+                                    }
+                                </div>
+                            </div>
+                            }
+                        </div>
+                        }
+                    </div>
+
                 </div>
             </div>
         </div>

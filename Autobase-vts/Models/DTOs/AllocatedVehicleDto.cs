@@ -8,8 +8,8 @@ namespace Autobase_vts.Models.DTOs
     public class AllocatedVehicleDto
     {
         public int TotalAllocated { get; set; }
-        public int InUseCount { get; set; }   // within return time
-        public int OverdueCount { get; set; }   // past due return time
+        public int InUseCount { get; set; }   
+        public int OverdueCount { get; set; }   
 
         public string ActiveFilter { get; set; } = "All";
         public string SearchTerm { get; set; } = "";

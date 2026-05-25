@@ -21,7 +21,81 @@ namespace autobase.Controllers
             if (role != "Employee")
                 return RedirectToAction("Login", "Account");
 
-            return View("~/Views/Dashboard/EmployeeDashboard.cshtml");
+            string empNo = Session["EmployeeNumber"]?.ToString();
+            string empName = Session["FullName"]?.ToString() ?? "Employee";
+            var now = DateTime.Now;
+
+            // ── All requests for this employee ──────────────────────────────────
+            var allRequests = _db.VehicleRequests
+                .Where(r => r.EmployeeNumber == empNo)
+                .OrderByDescending(r => r.RequestedOn)
+                .ToList();
+
+            // ── Recent 5 (for the table) ────────────────────────────────────────
+            var recentItems = allRequests
+                .Take(5)
+                .Select(r => new MyRequestItem
+                {
+                    RequestId = r.RequestId,
+                    VehicleName = r.VehicleName,
+                    RegistrationNo = r.RegistrationNo,
+                    Purpose = r.Purpose,
+                    RequiredFrom = r.RequiredFrom,
+                    RequiredUntil = r.RequiredUntil,
+                    Status = r.Status,
+                    AdminNotes = r.AdminNotes,
+                    RequestedOn = r.RequestedOn
+                })
+                .ToList();
+
+            // ── Currently approved (allocated) vehicles ─────────────────────────
+            var approvedRequests = allRequests
+                .Where(r => r.Status == "Approved")
+                .ToList();
+
+            var allocatedItems = approvedRequests.Select(r =>
+            {
+                var duration = r.RequiredUntil - r.RequiredFrom;
+                bool isOverdue = now > r.RequiredUntil;
+                var overdueBy = isOverdue ? now - r.RequiredUntil : TimeSpan.Zero;
+                int overduePercent = 0;
+                if (isOverdue && duration.TotalMinutes > 0)
+                    overduePercent = (int)Math.Min(100, (overdueBy.TotalMinutes / duration.TotalMinutes) * 100);
+
+                return new AllocatedVehicleItem
+                {
+                    RequestId = r.RequestId,
+                    VehicleId = r.VehicleId,
+                    VehicleName = r.VehicleName,
+                    VehicleType = "",
+                    RegistrationNo = r.RegistrationNo,
+                    EmployeeName = empName,
+                    EmployeeNumber = empNo,
+                    EmployeePhone = "",
+                    Initials = empName.Substring(0, 1).ToUpper(),
+                    StartTime = r.RequiredFrom,
+                    DueReturn = r.RequiredUntil,
+                    Purpose = r.Purpose,
+                    IsOverdue = isOverdue,
+                    OverdueBy = overdueBy,
+                    DurationHours = (int)duration.TotalHours,
+                    DurationMins = duration.Minutes,
+                    OverduePercent = overduePercent
+                };
+            }).ToList();
+
+            var dto = new EmployeeDashboardDto
+            {
+                TotalRequests = allRequests.Count,
+                ApprovedCount = allRequests.Count(r => r.Status == "Approved"),
+                PendingCount = allRequests.Count(r => r.Status == "Pending"),
+                RejectedCount = allRequests.Count(r => r.Status == "Rejected"),
+                AllocatedCount = approvedRequests.Count,
+                RecentRequests = recentItems,
+                AllocatedVehicles = allocatedItems
+            };
+
+            return View("~/Views/Dashboard/EmployeeDashboard.cshtml", dto);
         }
 
         // ── GET: /EmployeeDashboard/AvailableVehicles ────────────────────────
@@ -257,7 +331,7 @@ namespace autobase.Controllers
 
             var now = DateTime.Now;
 
-            // Only grab this employee's Approved requests
+            // Only grab this employee Approved requests
             var approvedRequests = _db.VehicleRequests
                 .Where(r => r.EmployeeNumber == empNo && r.Status == "Approved")
                 .OrderByDescending(r => r.RequiredFrom)
@@ -285,13 +359,13 @@ namespace autobase.Controllers
                     RequestId = r.RequestId,
                     VehicleId = r.VehicleId,
                     VehicleName = r.VehicleName,
-                    VehicleType = "", // not stored on VehicleRequest; leave blank or join Vehicles
+                    VehicleType = "", 
                     RegistrationNo = r.RegistrationNo,
 
-                    // Employee fields — filled from session (this page is employee-only)
+                    
                     EmployeeName = empName,
                     EmployeeNumber = empNo,
-                    EmployeePhone = "",   // not in session; add if you store it
+                    EmployeePhone = "", 
                     Initials = string.IsNullOrEmpty(empName) ? "E"
                                      : empName.Substring(0, 1).ToUpper(),
 

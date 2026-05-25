@@ -1,5 +1,4 @@
-﻿// Models/DTOs/LoginDto.cs
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace autobase.Models.DTOs
 {
