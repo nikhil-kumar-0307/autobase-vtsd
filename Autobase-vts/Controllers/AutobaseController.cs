@@ -5,6 +5,7 @@ using autobase.Data;
 using autobase.Models.DTOs;
 using Autobase_vts.Models.DTOs;
 
+
 namespace autobase.Controllers
 {
     [Authorize]
@@ -88,7 +89,6 @@ namespace autobase.Controllers
 
             var employees = _db.Employees.ToList();
 
-            // Load vehicles so we can get VehicleType (not stored on VehicleRequest)
             var vehicles = _db.Vehicles.ToList();
 
             var allItems = approvedRequests.Select(r =>
@@ -97,7 +97,6 @@ namespace autobase.Controllers
                 string name = emp != null ? emp.FullName : r.EmployeeNumber;
                 string phone = emp != null ? emp.MobileNumber : "—";
 
-                // Get VehicleType from the Vehicles table using VehicleId
                 var veh = vehicles.FirstOrDefault(v => v.Id == r.VehicleId);
                 string vehicleType = veh != null ? veh.VehicleType : "—";
 
@@ -112,7 +111,6 @@ namespace autobase.Controllers
                 if (isOverdue && totalMins > 0)
                     overduePercent = Math.Min(100, (int)((overdueBy.TotalMinutes / totalMins) * 100));
 
-                // Build two-letter initials
                 string initials = "?";
                 if (!string.IsNullOrEmpty(name))
                 {
@@ -127,7 +125,7 @@ namespace autobase.Controllers
                     RequestId = r.RequestId,
                     VehicleId = r.VehicleId,
                     VehicleName = r.VehicleName,
-                    VehicleType = vehicleType,          // ← from Vehicles table, not VehicleRequest
+                    VehicleType = vehicleType,
                     RegistrationNo = r.RegistrationNo,
                     EmployeeName = name,
                     EmployeeNumber = r.EmployeeNumber,
@@ -144,7 +142,6 @@ namespace autobase.Controllers
                 };
             }).ToList();
 
-            // Search
             if (!string.IsNullOrWhiteSpace(search))
             {
                 string s = search.Trim().ToLower();
@@ -156,19 +153,16 @@ namespace autobase.Controllers
                 ).ToList();
             }
 
-            // Filter
             if (filter == "InUse")
                 allItems = allItems.Where(x => !x.IsOverdue).ToList();
             else if (filter == "Overdue")
                 allItems = allItems.Where(x => x.IsOverdue).ToList();
 
-            // Overdue first, then soonest due return
             allItems = allItems
                 .OrderByDescending(x => x.IsOverdue)
                 .ThenBy(x => x.DueReturn)
                 .ToList();
 
-            // Totals always from full unfiltered approved list
             var allApproved = _db.VehicleRequests.Where(r => r.Status == "Approved").ToList();
 
             var dto = new AllocatedVehicleDto
@@ -181,7 +175,7 @@ namespace autobase.Controllers
                 Items = allItems
             };
 
-            return View(dto);   // -> Views/Autobase/AllocatedVehicle.cshtml
+            return View(dto);
         }
 
         // ── POST: /Autobase/MarkReturnedFromAllocated ─────────────────────────
@@ -349,6 +343,48 @@ namespace autobase.Controllers
             }
 
             return RedirectToAction("SeeRequests");
+        }
+
+        // ── GET: /Autobase/PrintRequest ───────────────────────────────────────
+        [HttpGet]
+        public ActionResult PrintRequest(int id)
+        {
+            string role = Session["Role"]?.ToString();
+            if (role != "SuperAdmin" && role != "Admin")
+                return RedirectToAction("Login", "Account");
+
+            // Fetch the vehicle request
+            var req = _db.VehicleRequests.Find(id);
+            if (req == null)
+                return HttpNotFound();
+
+            // Fetch matching employee (same pattern as SeeRequests)
+            var emp = _db.Employees
+                         .FirstOrDefault(e => e.EmployeeNumber == req.EmployeeNumber);
+
+            // Calculate duration
+            double durationHours = (req.RequiredUntil - req.RequiredFrom).TotalHours;
+
+            var dto = new PrintRequestDto
+            {
+                RequestId = req.RequestId,
+                EmployeeName = emp != null ? emp.FullName : req.EmployeeNumber,
+                EmployeeNumber = req.EmployeeNumber ?? string.Empty,
+                EmployeePhone = emp != null ? emp.MobileNumber : "—",
+                Designation = emp != null ? emp.Designation : "—",
+                Department = emp != null ? emp.Department : "—",
+                VehicleName = req.VehicleName ?? string.Empty,
+                RegistrationNo = req.RegistrationNo ?? string.Empty,
+                RequiredFrom = req.RequiredFrom,
+                RequiredUntil = req.RequiredUntil,
+                DurationHours = durationHours,
+                Purpose = req.Purpose ?? string.Empty,
+                AdminNotes = req.AdminNotes ?? string.Empty,
+                RequestedOn = req.RequestedOn,
+                Status = req.Status ?? string.Empty,
+            };
+
+            return View(dto);   // → Views/Autobase/PrintRequest.cshtml
         }
 
         protected override void Dispose(bool disposing)

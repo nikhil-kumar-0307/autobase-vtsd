@@ -1,0 +1,450 @@
+﻿@* Views/Autobase/PrintRequest.cshtml *@
+@model autobase.Models.DTOs.PrintRequestDto
+@{
+    Layout = null; @* No _AdminLayout — standalone print page *@
+    ViewBag.Title = "Vehicle Requisition Form";
+
+    string startDate = Model.RequiredFrom.ToString("dd MMM yyyy");
+    string startTime = Model.RequiredFrom.ToString("hh:mm tt").ToUpper();
+    string endDate = Model.RequiredUntil.ToString("dd MMM yyyy");
+    string endTime = Model.RequiredUntil.ToString("hh:mm tt").ToUpper();
+
+    string fileName = string.Format("VehicleRequisition_{0}_{1}_{2}",
+                            Model.VehicleName.Replace(" ", "_"),
+                            Model.EmployeeName.Replace(" ", "_"),
+                            DateTime.Today.ToString("yyyy-MM-dd"));
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewBag.Title</title>
+    <style>
+        /* ── Reset ── */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            color: #000;
+            background: #fff;
+        }
+
+        /* ── Screen toolbar (hidden when printing) ── */
+        .screen-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 24px;
+            background: #0d0d0d;
+            color: #fff;
+            gap: 12px;
+        }
+
+            .screen-bar span {
+                font-size: 13px;
+                font-weight: 700;
+            }
+
+        .btn-print-now {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 8px 20px;
+            background: #F5C518;
+            color: #0d0d0d;
+            border: none;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-close {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 8px 16px;
+            background: transparent;
+            color: #ccc;
+            border: 1px solid #444;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        /* ── Print page wrapper ── */
+        .page {
+            width: 210mm;
+            min-height: 297mm;
+            margin: 16px auto;
+            padding: 18mm 14mm 14mm;
+            background: #fff;
+            position: relative;
+        }
+
+        /* ── Top header row ── */
+        .hdr-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 10px;
+        }
+
+        .logo-box {
+            border: 2px solid #000;
+            padding: 6px 10px;
+            display: inline-block;
+            text-align: center;
+            line-height: 1.3;
+        }
+
+        .logo-hi {
+            font-size: 10px;
+            color: #1a5ca8;
+            letter-spacing: 1px;
+        }
+
+        .logo-en {
+            font-size: 13px;
+            color: #1a5ca8;
+            font-weight: 900;
+            letter-spacing: 2px;
+        }
+
+        .form-title {
+            font-size: 17px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            text-decoration: underline;
+            text-align: center;
+        }
+
+        .loc-box {
+            border: 2px solid #000;
+            padding: 6px 12px;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .loc-hi {
+            font-size: 11px;
+            font-weight: 700;
+            font-style: italic;
+        }
+
+        .loc-en {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        /* ── Main form table ── */
+        .form-table {
+            width: 100%;
+            border-collapse: collapse;
+            border: 1.5px solid #000;
+        }
+
+            .form-table td {
+                border: 1px solid #000;
+                padding: 6px 8px;
+                vertical-align: top;
+            }
+
+        .num-cell {
+            width: 4%;
+            font-weight: 700;
+        }
+
+        .half-cell {
+            width: 46%;
+        }
+
+        /* dotted underline spans */
+        .fill {
+            border-bottom: 1px dotted #000;
+            display: inline-block;
+            min-width: 80px;
+        }
+
+        .fill-lg {
+            min-width: 160px;
+        }
+
+        .fill-xl {
+            min-width: 200px;
+        }
+
+        .fill-xxl {
+            min-width: 280px;
+        }
+
+        .fill-3xl {
+            min-width: 300px;
+        }
+
+        /* section heading */
+        .section-hdr {
+            text-align: center;
+            font-weight: 900;
+            font-size: 12px;
+            background: #f0f0f0;
+            letter-spacing: .5px;
+        }
+
+        .indent-hdr {
+            font-weight: 700;
+            font-size: 12px;
+            background: #f0f0f0;
+        }
+
+        /* signature row */
+        .sig-gap {
+            height: 55px;
+        }
+
+        .sig-gap-sm {
+            height: 40px;
+        }
+
+        /* sign-off */
+        .sign-off {
+            text-align: right;
+            margin-top: 30px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        /* ── Status badge (screen only) ── */
+        .status-badge {
+            display: inline-block;
+            padding: 3px 12px;
+            border-radius: 50px;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        /* ── Print media ── */
+        @@media print {
+            .screen-bar {
+                display: none !important;
+            }
+
+            body {
+                margin: 0;
+            }
+
+            .page {
+                margin: 0;
+                padding: 14mm 12mm 12mm;
+                width: 100%;
+                min-height: auto;
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ── Screen toolbar ── -->
+    <div class="screen-bar">
+        <span>🖨&nbsp; Vehicle Requisition — @Model.EmployeeName (@Model.EmployeeNumber)</span>
+        <div style="display:flex;gap:10px;">
+            <a class="btn-close" href="javascript:window.close()">✕ Close</a>
+            <button class="btn-print-now" onclick="window.print()">🖨 Print / Save PDF</button>
+        </div>
+    </div>
+
+    <!-- ── Print page ── -->
+    <div class="page">
+
+        <!-- Top header -->
+        <table class="hdr-table">
+            <tr>
+                <td style="width:18%;vertical-align:middle;">
+                    <div class="logo-box">
+                        <div class="logo-hi">एनटीपीसी</div>
+                        <div class="logo-en">NTPC</div>
+                    </div>
+                </td>
+                <td style="text-align:center;vertical-align:middle;">
+                    <div class="form-title">VEHICLE REQUISITION FORM</div>
+                </td>
+                <td style="width:20%;vertical-align:middle;text-align:right;">
+                    <div class="loc-box">
+                        <div class="loc-hi">कहलगांव</div>
+                        <div class="loc-en">KAHALGAON</div>
+                    </div>
+                </td>
+            </tr>
+        </table>
+
+        <!-- Main form table -->
+        <table class="form-table">
+
+            <!-- Row 1: Name | Employee No -->
+            <tr>
+                <td class="num-cell">1</td>
+                <td class="half-cell">
+                    Name&nbsp;: <strong>@Model.EmployeeName</strong>
+                </td>
+                <td class="num-cell">2</td>
+                <td>
+                    Employee No.&nbsp;: <strong>@Model.EmployeeNumber</strong>
+                </td>
+            </tr>
+
+            <!-- Row 2: Designation | Department -->
+            <tr>
+                <td class="num-cell">3</td>
+                <td>
+                    Designation:
+                    <span class="fill fill-lg">&nbsp;<strong>@(string.IsNullOrEmpty(Model.Designation) ? "—" : Model.Designation)</strong>&nbsp;</span>
+                </td>
+                <td class="num-cell">4</td>
+                <td>
+                    Department:
+                    <span class="fill fill-lg">&nbsp;<strong>@(string.IsNullOrEmpty(Model.Department) ? "—" : Model.Department)</strong>&nbsp;</span>
+                </td>
+            </tr>
+
+            <!-- Row 3: Vehicle & dates -->
+            <tr>
+                <td class="num-cell">5</td>
+                <td colspan="3" style="line-height:2.2;">
+                    Type of Vehicle Required&nbsp;:
+                    <span class="fill">&nbsp;<strong>@Model.VehicleName</strong>&nbsp;</span>
+                    &nbsp;To report at (place)/Qtr. No.
+                    <span class="fill">&nbsp;</span>
+                    (on date)
+                    <span class="fill">&nbsp;<strong>@startDate</strong>&nbsp;</span>
+                    <br />
+                    (time) from
+                    <span class="fill">&nbsp;<strong>@startTime</strong>&nbsp;</span>
+                    &nbsp;.....to.....&nbsp;
+                    <span class="fill">&nbsp;<strong>@endTime</strong>&nbsp;</span>
+                    &nbsp;for
+                    <span class="fill">&nbsp;<strong>@Model.DurationLabel</strong>&nbsp;</span>
+                    <br />
+                    Personal / Official use&nbsp;:
+                    <span class="fill fill-xl">&nbsp;Official&nbsp;</span>
+                </td>
+            </tr>
+
+            <!-- Row 4: Purpose -->
+            <tr>
+                <td class="num-cell">(**)</td>
+                <td colspan="3">
+                    Please mention the purpose of Requirement&nbsp;:
+                    <span class="fill fill-3xl">
+                        &nbsp;<strong>@(string.IsNullOrEmpty(Model.Purpose) ? "—" : Model.Purpose)</strong>&nbsp;
+                    </span>
+                </td>
+            </tr>
+
+            <!-- Row 5: Signatures -->
+            <tr>
+                <td class="num-cell">6</td>
+                <td>
+                    <div style="font-size:11px;font-weight:700;">Signature of Indentor</div>
+                    <div class="sig-gap"></div>
+                </td>
+                <td>
+                    <div style="font-size:11px;font-weight:700;">Signature of H.O.D</div>
+                    <div class="sig-gap"></div>
+                </td>
+                <td>
+                    <div style="font-size:11px;font-weight:700;">
+                        Signature of Approving Authority<br />(Out station Journey)
+                    </div>
+                    <div class="sig-gap-sm"></div>
+                </td>
+            </tr>
+
+            <!-- Row 6: Requisition received -->
+            <tr>
+                <td class="num-cell">7</td>
+                <td colspan="3">
+                    Requisition received at Auto-Base Date
+                    <span class="fill fill-xl">&nbsp;</span>
+                </td>
+            </tr>
+
+            <!-- Row 7: Vehicle allotted -->
+            <tr>
+                <td class="num-cell">8</td>
+                <td colspan="3">
+                    Time
+                    <span class="fill">&nbsp;</span>
+                    &nbsp;&nbsp;&nbsp;
+                    Vehicle allotted / Not available&nbsp;:
+                    <span class="fill fill-xl">&nbsp;<strong>@Model.VehicleName — @Model.RegistrationNo</strong>&nbsp;</span>
+                </td>
+            </tr>
+
+            <!-- FOR USE IN AUTO-BASE header -->
+            <tr>
+                <td colspan="2" class="section-hdr">FOR USE IN AUTO-BASE</td>
+                <td colspan="2" class="indent-hdr">
+                    INDENT No.&nbsp;<span class="fill fill-lg">&nbsp;</span>
+                </td>
+            </tr>
+
+            <!-- Driver instructions -->
+            <tr>
+                <td class="num-cell">(*)</td>
+                <td colspan="3" style="line-height:2.2;">
+                    <strong>Instruction to the Driver:</strong> Return this slip to Auto-Base after journey:<br />
+                    Name of the Driver&nbsp;:
+                    <span class="fill fill-xxl">&nbsp;</span>
+                    <br />
+                    Vehicle Number&nbsp;&nbsp;&nbsp;:
+                    <span class="fill fill-xxl">&nbsp;<strong>@Model.RegistrationNo</strong>&nbsp;</span>
+                    <br />
+                    K.M. Reading (out)&nbsp;:
+                    <span class="fill">&nbsp;</span>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    K.M. Reading (in)&nbsp;:
+                    <span class="fill">&nbsp;</span>
+                    <br />
+                    You are requested to report to Shri
+                    <span class="fill fill-xl">&nbsp;</span>
+                    journey<br />
+                    From
+                    <span class="fill">&nbsp;<strong>@startDate</strong>&nbsp;</span>
+                    &nbsp;.....to.....&nbsp;
+                    <span class="fill">&nbsp;<strong>@endDate</strong>&nbsp;</span>
+                    at
+                    <span class="fill">&nbsp;</span>
+                    <br />
+                    today, i.e. (date) time
+                    <span class="fill">&nbsp;</span>
+                    &nbsp;&nbsp;&nbsp;Period
+                    <span class="fill">&nbsp;<strong>@Model.DurationLabel</strong>&nbsp;</span>
+                    &nbsp;for
+                    <span class="fill">&nbsp;</span>
+                </td>
+            </tr>
+
+        </table>
+
+        <!-- Sign-off -->
+        <div class="sign-off">Signature of In-Charge</div>
+
+    </div>
+
+    <script>
+        // Auto-trigger print dialog when the page loads in a new tab
+        window.addEventListener('load', function () {
+            window.print();
+        });
+    </script>
+</body>
+</html>
