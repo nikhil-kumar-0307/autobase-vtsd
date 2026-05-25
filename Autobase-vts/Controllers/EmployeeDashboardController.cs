@@ -4,6 +4,7 @@ using System.Web.Mvc;
 using autobase.Data;
 using autobase.Models;
 using autobase.Models.DTOs;
+using Autobase_vts.Models.DTOs;
 
 namespace autobase.Controllers
 {
@@ -244,6 +245,81 @@ namespace autobase.Controllers
             }
 
             return RedirectToAction("NewRequest");
+        }
+        [HttpGet]
+        public ActionResult AllocatedVehicle()
+        {
+            string role = Session["Role"]?.ToString();
+            if (role != "Employee")
+                return RedirectToAction("Login", "Account");
+
+            string empNo = Session["EmployeeNumber"]?.ToString();
+
+            var now = DateTime.Now;
+
+            // Only grab this employee's Approved requests
+            var approvedRequests = _db.VehicleRequests
+                .Where(r => r.EmployeeNumber == empNo && r.Status == "Approved")
+                .OrderByDescending(r => r.RequiredFrom)
+                .ToList();
+
+            var items = approvedRequests.Select(r =>
+            {
+                var duration = r.RequiredUntil - r.RequiredFrom;
+                bool isOverdue = now > r.RequiredUntil;
+                var overdueBy = isOverdue ? now - r.RequiredUntil : TimeSpan.Zero;
+
+                // Overdure progress: 0-100 capped, based on how far past due-time we are
+                // relative to total duration (so a short overdue on a long booking feels right)
+                int overduePercent = 0;
+                if (isOverdue && duration.TotalMinutes > 0)
+                {
+                    overduePercent = (int)Math.Min(100,
+                        (overdueBy.TotalMinutes / duration.TotalMinutes) * 100);
+                }
+
+                string empName = Session["FullName"]?.ToString() ?? "Employee";
+
+                return new AllocatedVehicleItem
+                {
+                    RequestId = r.RequestId,
+                    VehicleId = r.VehicleId,
+                    VehicleName = r.VehicleName,
+                    VehicleType = "", // not stored on VehicleRequest; leave blank or join Vehicles
+                    RegistrationNo = r.RegistrationNo,
+
+                    // Employee fields — filled from session (this page is employee-only)
+                    EmployeeName = empName,
+                    EmployeeNumber = empNo,
+                    EmployeePhone = "",   // not in session; add if you store it
+                    Initials = string.IsNullOrEmpty(empName) ? "E"
+                                     : empName.Substring(0, 1).ToUpper(),
+
+                    // Request timing
+                    StartTime = r.RequiredFrom,
+                    DueReturn = r.RequiredUntil,
+                    Purpose = r.Purpose,
+
+                    // Computed
+                    IsOverdue = isOverdue,
+                    OverdueBy = overdueBy,
+                    DurationHours = (int)duration.TotalHours,
+                    DurationMins = duration.Minutes,
+                    OverduePercent = overduePercent
+                };
+            }).ToList();
+
+            var dto = new AllocatedVehicleDto
+            {
+                TotalAllocated = items.Count,
+                InUseCount = items.Count(x => !x.IsOverdue),
+                OverdueCount = items.Count(x => x.IsOverdue),
+                ActiveFilter = "All",
+                SearchTerm = "",
+                Items = items
+            };
+
+            return View(dto);    // renders Views/EmployeeDashboard/AllocatedVehicle.cshtml
         }
 
         protected override void Dispose(bool disposing)

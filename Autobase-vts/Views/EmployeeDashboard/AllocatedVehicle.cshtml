@@ -1,0 +1,1019 @@
+﻿@model Autobase_vts.Models.DTOs.AllocatedVehicleDto
+@{
+    ViewBag.Title = "My Allocated Vehicle";
+    Layout = null;
+
+    string fullName = Session["FullName"]?.ToString() ?? "Employee";
+    string empNo = Session["EmployeeNumber"]?.ToString() ?? "";
+    string initials = string.IsNullOrEmpty(fullName) ? "E" : fullName.Substring(0, 1).ToUpper();
+
+    var now = DateTime.Now;
+    int hour = now.Hour;
+    string greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AutoBase — My Allocated Vehicle</title>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&family=Barlow+Condensed:wght@700;800&display=swap" rel="stylesheet" />
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Barlow', sans-serif;
+            background: #f8f8f8;
+            color: #0d0d0d;
+            min-height: 100vh;
+        }
+
+        .emp-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* ── Sidebar ── */
+        .emp-sidebar {
+            width: 200px;
+            min-width: 200px;
+            background: #fff;
+            border-right: 1px solid #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 100;
+        }
+
+        .emp-logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 20px 16px 16px;
+            border-bottom: 1px solid #f5f5f5;
+        }
+
+        .emp-logo-icon {
+            width: 32px;
+            height: 32px;
+            background: #F5C518;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+            .emp-logo-icon svg {
+                width: 20px;
+                height: 20px;
+            }
+
+        .emp-logo-text {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 17px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            color: #0d0d0d;
+        }
+
+        .logo-y {
+            color: #F5C518;
+        }
+
+        .emp-nav {
+            flex: 1;
+            padding: 12px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+        }
+
+        .nav-label {
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: #bbb;
+            padding: 10px 8px 4px;
+            margin-top: 4px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #555;
+            text-decoration: none;
+            transition: background .15s, color .15s;
+        }
+
+            .nav-link svg {
+                flex-shrink: 0;
+                opacity: .7;
+            }
+
+            .nav-link:hover {
+                background: #f7f7f7;
+                color: #0d0d0d;
+            }
+
+                .nav-link:hover svg {
+                    opacity: 1;
+                }
+
+            .nav-link.active {
+                background: #fff8dc;
+                color: #0d0d0d;
+                font-weight: 600;
+            }
+
+                .nav-link.active svg {
+                    opacity: 1;
+                    color: #c9a000;
+                }
+
+        .emp-sidebar-footer {
+            padding: 14px;
+            border-top: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .emp-s-avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: #F5C518;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 700;
+            color: #0d0d0d;
+            flex-shrink: 0;
+        }
+
+        .emp-s-info {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .emp-s-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: #0d0d0d;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .emp-s-meta {
+            font-size: 10px;
+            color: #999;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* ── Topbar ── */
+        .emp-topbar {
+            height: 60px;
+            background: #fff;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 28px;
+            position: fixed;
+            top: 0;
+            left: 200px;
+            right: 0;
+            z-index: 99;
+        }
+
+        .topbar-greet {
+            font-size: 14px;
+            font-weight: 600;
+            color: #0d0d0d;
+        }
+
+        .topbar-sub {
+            font-size: 12px;
+            color: #aaa;
+            margin-top: 1px;
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-pill {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            background: #f7f7f7;
+            border: 1px solid #ebebeb;
+            border-radius: 50px;
+            padding: 5px 12px 5px 5px;
+        }
+
+        .pill-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #F5C518;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+            color: #0d0d0d;
+        }
+
+        .pill-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: #0d0d0d;
+        }
+
+        .pill-role {
+            font-size: 10px;
+            color: #999;
+        }
+
+        .logout-btn {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            padding: 8px 16px;
+            border: 1.5px solid #eee;
+            border-radius: 8px;
+            font-family: 'Barlow', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            color: #555;
+            text-decoration: none;
+            background: #fff;
+            transition: border-color .2s, color .2s, background .2s;
+        }
+
+            .logout-btn:hover {
+                border-color: #e53e3e;
+                color: #e53e3e;
+                background: #fff5f5;
+            }
+
+        /* ── Main ── */
+        .emp-main {
+            margin-left: 200px;
+            padding-top: 60px;
+            flex: 1;
+        }
+
+        .emp-body {
+            padding: 28px;
+        }
+
+        .page-title {
+            font-size: 24px;
+            font-weight: 800;
+            color: #0d0d0d;
+            letter-spacing: -.3px;
+            animation: fadeUp .3s ease both;
+        }
+
+        .page-sub {
+            font-size: 13px;
+            color: #aaa;
+            margin-top: 3px;
+            margin-bottom: 24px;
+            animation: fadeUp .3s ease both;
+        }
+
+        /* ── Alert ── */
+        .alert {
+            padding: 14px 18px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            animation: fadeUp .3s ease both;
+        }
+
+        .alert-success {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        /* ── Summary chips ── */
+        .summary-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 22px;
+            animation: fadeUp .35s ease .05s both;
+        }
+
+        .summary-chip {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #fff;
+            border: 1px solid #efefef;
+            border-radius: 10px;
+            padding: 12px 18px;
+            min-width: 120px;
+        }
+
+        .chip-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+            .chip-dot.all {
+                background: #aaa;
+            }
+
+            .chip-dot.inuse {
+                background: #38a169;
+            }
+
+            .chip-dot.overdue {
+                background: #e53e3e;
+            }
+
+        .chip-num {
+            font-size: 22px;
+            font-weight: 800;
+            color: #0d0d0d;
+        }
+
+        .chip-lbl {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: #aaa;
+        }
+
+        /* ── Cards grid ── */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 16px;
+            animation: fadeUp .4s ease .1s both;
+        }
+
+        .alloc-card {
+            background: #fff;
+            border: 1px solid #f0f0f0;
+            border-radius: 14px;
+            overflow: hidden;
+            transition: box-shadow .2s, transform .2s;
+        }
+
+            .alloc-card:hover {
+                box-shadow: 0 8px 24px rgba(0,0,0,.06);
+                transform: translateY(-2px);
+            }
+
+            .alloc-card.overdue {
+                border-color: #fecaca;
+            }
+
+        /* card header strip */
+        .card-header {
+            padding: 14px 18px 12px;
+            border-bottom: 1px solid #f5f5f5;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+            .card-header.overdue-header {
+                background: #fff5f5;
+                border-bottom-color: #fecaca;
+            }
+
+        .v-name-big {
+            font-size: 16px;
+            font-weight: 800;
+            color: #0d0d0d;
+            line-height: 1.2;
+        }
+
+        .reg-tag {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 9px;
+            border-radius: 6px;
+            background: #f5f5f5;
+            color: #555;
+            border: 1px solid #eee;
+            letter-spacing: .5px;
+            margin-top: 4px;
+        }
+
+        .overdue-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 50px;
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .inuse-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 10px;
+            border-radius: 50px;
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .badge-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+        }
+
+            .badge-dot.overdue {
+                background: #e53e3e;
+            }
+
+            .badge-dot.inuse {
+                background: #38a169;
+            }
+
+        /* card body */
+        .card-body {
+            padding: 14px 18px;
+        }
+
+        .info-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .info-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            background: #f7f7f7;
+            border: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            color: #aaa;
+        }
+
+        .info-label {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #bbb;
+        }
+
+        .info-value {
+            font-size: 13px;
+            font-weight: 600;
+            color: #0d0d0d;
+            margin-top: 1px;
+        }
+
+        .info-sub {
+            font-size: 11px;
+            color: #aaa;
+            margin-top: 1px;
+        }
+
+        /* timing row */
+        .timing-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .timing-cell {
+            background: #fafafa;
+            border: 1px solid #f0f0f0;
+            border-radius: 8px;
+            padding: 10px 12px;
+        }
+
+            .timing-cell.overdue-cell {
+                background: #fff5f5;
+                border-color: #fecaca;
+            }
+
+        .timing-lbl {
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            color: #bbb;
+            margin-bottom: 4px;
+        }
+
+        .timing-val {
+            font-size: 13px;
+            font-weight: 700;
+            color: #0d0d0d;
+        }
+
+        .timing-sub {
+            font-size: 10px;
+            color: #aaa;
+            margin-top: 2px;
+        }
+
+        .timing-overdue-val {
+            color: #e53e3e;
+        }
+
+        /* progress bar */
+        .progress-wrap {
+            margin-bottom: 14px;
+        }
+
+        .progress-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .progress-lbl {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #bbb;
+        }
+
+        .progress-val {
+            font-size: 11px;
+            font-weight: 700;
+            color: #e53e3e;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 10px;
+            background: linear-gradient(90deg, #ef4444, #dc2626);
+            transition: width .6s ease;
+        }
+
+        /* purpose pill */
+        .purpose-row {
+            background: #f7f7f7;
+            border: 1px solid #f0f0f0;
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-bottom: 14px;
+            font-size: 12px;
+            color: #555;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .purpose-lbl {
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            color: #bbb;
+            margin-bottom: 3px;
+        }
+
+        /* card footer: return button */
+        .card-footer {
+            padding: 12px 18px;
+            border-top: 1px solid #f5f5f5;
+        }
+
+        .btn-return {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            width: 100%;
+            padding: 10px 14px;
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+            border-radius: 8px;
+            font-family: 'Barlow', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background .2s, border-color .2s;
+        }
+
+            .btn-return:hover {
+                background: #bbf7d0;
+                border-color: #86efac;
+            }
+
+            .btn-return.overdue-btn {
+                background: #fee2e2;
+                color: #991b1b;
+                border-color: #fecaca;
+            }
+
+                .btn-return.overdue-btn:hover {
+                    background: #fecaca;
+                    border-color: #fca5a5;
+                }
+
+        /* ── Empty state ── */
+        .empty-wrap {
+            background: #fff;
+            border: 1px solid #f0f0f0;
+            border-radius: 14px;
+            text-align: center;
+            padding: 70px 20px;
+            animation: fadeUp .4s ease .1s both;
+        }
+
+            .empty-wrap svg {
+                color: #e0e0e0;
+                margin-bottom: 14px;
+            }
+
+            .empty-wrap p {
+                font-size: 13px;
+                color: #bbb;
+                margin-bottom: 16px;
+            }
+
+            .empty-wrap a {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                padding: 10px 22px;
+                background: #F5C518;
+                color: #0d0d0d;
+                border-radius: 8px;
+                font-size: 13px;
+                font-weight: 700;
+                text-decoration: none;
+                transition: background .2s;
+            }
+
+                .empty-wrap a:hover {
+                    background: #d4a800;
+                }
+
+        @@keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="emp-layout">
+
+        <!-- Sidebar -->
+        <aside class="emp-sidebar">
+            <div class="emp-logo">
+                <div class="emp-logo-icon">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="1" y="5" width="15" height="11" rx="1" fill="#1a1a1a" />
+                        <path d="M16 9h4l3 4v3h-7V9z" fill="#1a1a1a" />
+                        <circle cx="5.5" cy="18.5" r="2.5" fill="#1a1a1a" />
+                        <circle cx="18.5" cy="18.5" r="2.5" fill="#1a1a1a" />
+                    </svg>
+                </div>
+                <span class="emp-logo-text">AUTO<span class="logo-y">BASE</span></span>
+            </div>
+            <nav class="emp-nav">
+                <div class="nav-label">Overview</div>
+                <a href="@Url.Action("Index","EmployeeDashboard")" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="7" />
+                        <rect x="14" y="3" width="7" height="7" />
+                        <rect x="14" y="14" width="7" height="7" />
+                        <rect x="3" y="14" width="7" height="7" />
+                    </svg>
+                    Dashboard
+                </a>
+                <div class="nav-label">Vehicles</div>
+                <a href="@Url.Action("AvailableVehicles","EmployeeDashboard")" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
+                        <polyline points="22 4 12 14.01 9 11.01" />
+                    </svg>
+                    Available Vehicles
+                </a>
+                <a href="@Url.Action("AllocatedVehicle","EmployeeDashboard")" class="nav-link active">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+                        <circle cx="12" cy="10" r="3" />
+                    </svg>
+                    My Allocated Vehicle
+                </a>
+                <div class="nav-label">Requests</div>
+                <a href="@Url.Action("MyRequests","EmployeeDashboard")" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                        <polyline points="14 2 14 8 20 8" />
+                        <line x1="16" y1="13" x2="8" y2="13" />
+                        <line x1="16" y1="17" x2="8" y2="17" />
+                    </svg>
+                    My Requests
+                </a>
+                <a href="@Url.Action("NewRequest","EmployeeDashboard")" class="nav-link">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <line x1="12" y1="8" x2="12" y2="16" />
+                        <line x1="8" y1="12" x2="16" y2="12" />
+                    </svg>
+                    New Request
+                </a>
+            </nav>
+            <div class="emp-sidebar-footer">
+                <div class="emp-s-avatar">@initials</div>
+                <div class="emp-s-info">
+                    <span class="emp-s-name">@fullName</span>
+                    <span class="emp-s-meta">Employee &middot; #@empNo</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main -->
+        <div class="emp-main">
+            <header class="emp-topbar">
+                <div>
+                    <div class="topbar-greet">@greeting, @fullName</div>
+                    <div class="topbar-sub">Vehicles currently approved and in your use</div>
+                </div>
+                <div class="topbar-right">
+                    <div class="user-pill">
+                        <div class="pill-avatar">@initials</div>
+                        <div>
+                            <div class="pill-name">@fullName</div>
+                            <div class="pill-role">Employee</div>
+                        </div>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9" />
+                        </svg>
+                    </div>
+                    <a href="@Url.Action("Logout","Account")" class="logout-btn">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
+                            <polyline points="16 17 21 12 16 7" />
+                            <line x1="21" y1="12" x2="9" y2="12" />
+                        </svg>
+                        Logout
+                    </a>
+                </div>
+            </header>
+
+            <div class="emp-body">
+                <div class="page-title">My Allocated Vehicle</div>
+                <div class="page-sub">All vehicles currently approved for your use — return them when done.</div>
+
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
+                            <polyline points="22 4 12 14.01 9 11.01" />
+                        </svg>
+                        @TempData["SuccessMessage"]
+                    </div>
+                }
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-error">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10" />
+                            <line x1="15" y1="9" x2="9" y2="15" />
+                            <line x1="9" y1="9" x2="15" y2="15" />
+                        </svg>
+                        @TempData["ErrorMessage"]
+                    </div>
+                }
+
+                <!-- Summary chips -->
+                <div class="summary-row">
+                    <div class="summary-chip">
+                        <span class="chip-dot all"></span>
+                        <div>
+                            <div class="chip-num">@Model.TotalAllocated</div>
+                            <div class="chip-lbl">Total</div>
+                        </div>
+                    </div>
+                    <div class="summary-chip">
+                        <span class="chip-dot inuse"></span>
+                        <div>
+                            <div class="chip-num">@Model.InUseCount</div>
+                            <div class="chip-lbl">In Use</div>
+                        </div>
+                    </div>
+                    <div class="summary-chip">
+                        <span class="chip-dot overdue"></span>
+                        <div>
+                            <div class="chip-num">@Model.OverdueCount</div>
+                            <div class="chip-lbl">Overdue</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cards or empty -->
+                @if (!Model.Items.Any())
+                {
+                    <div class="empty-wrap">
+                        <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+                            <circle cx="12" cy="10" r="3" />
+                        </svg>
+                        <p>You have no approved vehicles at the moment.</p>
+                        <a href="@Url.Action("NewRequest","EmployeeDashboard")">+ Make a New Request</a>
+                    </div>
+                }
+                else
+                {
+                    <div class="cards-grid">
+                        @foreach (var item in Model.Items)
+                        {
+                            string durText = item.DurationHours > 0
+                                ? item.DurationHours + "h " + item.DurationMins + "m"
+                                : item.DurationMins + " min";
+
+                            string overdueText = item.IsOverdue
+                                ? ((int)item.OverdueBy.TotalHours > 0
+                                    ? (int)item.OverdueBy.TotalHours + "h " + item.OverdueBy.Minutes + "m overdue"
+                                    : item.OverdueBy.Minutes + " min overdue")
+                                : "";
+
+                            <div class="alloc-card @(item.IsOverdue ? "overdue" : "")">
+
+                                <!-- Card header -->
+                                <div class="card-header @(item.IsOverdue ? "overdue-header" : "")">
+                                    <div>
+                                        <div class="v-name-big">@item.VehicleName</div>
+                                        <span class="reg-tag">@item.RegistrationNo</span>
+                                    </div>
+                                    @if (item.IsOverdue)
+                                    {
+                                        <span class="overdue-badge">
+                                            <span class="badge-dot overdue"></span>
+                                            Overdue
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="inuse-badge">
+                                            <span class="badge-dot inuse"></span>
+                                            In Use
+                                        </span>
+                                    }
+                                </div>
+
+                                <!-- Card body -->
+                                <div class="card-body">
+
+                                    <!-- Timing grid -->
+                                    <div class="timing-row">
+                                        <div class="timing-cell">
+                                            <div class="timing-lbl">Start</div>
+                                            <div class="timing-val">@item.StartTime.ToString("dd MMM")</div>
+                                            <div class="timing-sub">@item.StartTime.ToString("hh:mm tt")</div>
+                                        </div>
+                                        <div class="timing-cell @(item.IsOverdue ? "overdue-cell" : "")">
+                                            <div class="timing-lbl">Due Return</div>
+                                            <div class="timing-val @(item.IsOverdue ? "timing-overdue-val" : "")">
+                                                @item.DueReturn.ToString("dd MMM")
+                                            </div>
+                                            <div class="timing-sub">@item.DueReturn.ToString("hh:mm tt")</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Duration row -->
+                                    <div class="info-row">
+                                        <div class="info-icon">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <circle cx="12" cy="12" r="10" />
+                                                <polyline points="12 6 12 12 16 14" />
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <div class="info-label">Duration</div>
+                                            <div class="info-value">@durText</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Overdue progress bar (only when overdue) -->
+                                    @if (item.IsOverdue)
+                                    {
+                                        <div class="progress-wrap">
+                                            <div class="progress-top">
+                                                <span class="progress-lbl">Overdue by</span>
+                                                <span class="progress-val">@overdueText</span>
+                                            </div>
+                                            <div class="progress-bar">
+                                                <div class="progress-fill" style="width:@item.OverduePercent%"></div>
+                                            </div>
+                                        </div>
+                                    }
+
+                                    <!-- Purpose -->
+                                    <div>
+                                        <div class="purpose-lbl">Purpose</div>
+                                        <div class="purpose-row" title="@item.Purpose">@item.Purpose</div>
+                                    </div>
+
+                                </div>
+
+                                <!-- Card footer: return action -->
+                                <div class="card-footer">
+                                    @using (Html.BeginForm("ReturnVehicle", "EmployeeDashboard", FormMethod.Post, new { style = "margin:0;" }))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="requestId" value="@item.RequestId" />
+                                        <button type="submit"
+                                                class="btn-return @(item.IsOverdue ? "overdue-btn" : "")"
+                                                onclick="return confirm('Confirm vehicle return for @item.VehicleName?')">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
+                                                <polyline points="22 4 12 14.01 9 11.01" />
+                                            </svg>
+                                            @(item.IsOverdue ? "Return Now (Overdue)" : "Return Vehicle")
+                                        </button>
+                                    }
+                                </div>
+
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>

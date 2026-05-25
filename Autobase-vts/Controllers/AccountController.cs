@@ -18,8 +18,23 @@ namespace autobase.Controllers
         public ActionResult Login()
         {
             if (User.Identity.IsAuthenticated)
-                return RedirectToRole();
+            {
+                // Restore session if empty (RememberMe case)
+                if (Session["Role"] == null)
+                {
+                    var emp = _db.Employees
+                        .FirstOrDefault(e => e.EmployeeNumber == User.Identity.Name && e.IsActive);
 
+                    if (emp != null)
+                    {
+                        Session["Role"] = emp.Role;
+                        Session["FullName"] = emp.FullName;
+                        Session["EmployeeNumber"] = emp.EmployeeNumber;
+                        Session["EmployeeId"] = emp.Id;
+                    }
+                }
+                return RedirectToRole();
+            }
             return View(new LoginDto());
         }
 
@@ -77,7 +92,7 @@ namespace autobase.Controllers
             if (role == "SuperAdmin" || role == "Admin")
                 return RedirectToAction("Index", "Dashboard");
 
-            return RedirectToAction("Employee", "Dashboard");
+            return RedirectToAction("EmployeeDashboard", "Dashboard");
         }
         protected override void Dispose(bool disposing)
         {

@@ -1,35 +1,32 @@
-﻿// Controllers/DashboardController.cs
-using System.Web.Mvc;
+﻿using System.Web.Mvc;
+using autobase.Filters;
 
 namespace autobase.Controllers
 {
     [Authorize]
+    [SessionRestore]
     public class DashboardController : Controller
     {
-        // GET: /Dashboard  — Admin & SuperAdmin
         [HttpGet]
         public ActionResult Index()
         {
             string role = Session["Role"]?.ToString();
 
-            // Employees must not access the admin dashboard
             if (role == "Employee")
                 return RedirectToAction("EmployeeDashboard");
 
-            return View();   // Views/Dashboard/Index.cshtml  (uses _AdminLayout)
+            return View();
         }
 
-        // GET: /Dashboard/Employee  — Employee-only
         [HttpGet]
-        public ActionResult Employee()
+        public ActionResult EmployeeDashboard()
         {
             string role = Session["Role"]?.ToString();
 
-            // Admins/SuperAdmins sent to admin dashboard
             if (role == "Admin" || role == "SuperAdmin")
                 return RedirectToAction("Index");
 
-            return View("EmployeeDashboard");  // Views/Dashboard/EmployeeDashboard.cshtml
+            return View();
         }
     }
 }
