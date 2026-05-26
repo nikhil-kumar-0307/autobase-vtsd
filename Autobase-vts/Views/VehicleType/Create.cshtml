@@ -155,7 +155,7 @@
         display: flex;
         flex-wrap: wrap;
         gap: 8px;
-        margin-top: 10px;
+        margin-top: 4px;
     }
 
     .type-chip {
@@ -182,6 +182,16 @@
             background: #F5C518;
             color: #0d0d0d;
         }
+
+    /* ── Chips label ── */
+    .chips-label {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: #ccc;
+        margin-top: 2px;
+    }
 
     /* ── Divider ── */
     .form-divider {
@@ -424,16 +434,17 @@
                 <div class="field">
                     <label class="field-label">
                         Vehicle Type <span class="required-dot">*</span>
-                    </label>
-                    @Html.HiddenFor(m => m.VehicleType, new { id = "vehicleTypeInput" })
-                    <input type="text"
-                           id="vehicleTypeDisplay"
-                           placeholder="e.g. SUV, Bus, Mini Truck..."
-                           readonly
-                           style="cursor:pointer;"
-                           value="@Model.VehicleType" />
+                    </label>              
+                    @Html.TextBoxFor(m => m.VehicleType, new
+                    {
+                        id = "vehicleTypeInput",
+                        placeholder = "e.g. SUV, Bus, Mini Truck… or type your own",
+                        autocomplete = "off",
+                        oninput = "syncChips(this.value)"
+                    })                   
 
                     <!-- Quick-pick chips -->
+                    <div class="chips-label">Quick pick</div>
                     <div class="type-chips">
                         @foreach (var t in typeOptions)
                         {
@@ -518,21 +529,28 @@
 
 @section Scripts {
     <script>
+        
         function selectType(chip, value) {
-            // Deselect all
             document.querySelectorAll('.type-chip').forEach(c => c.classList.remove('selected'));
-            // Select clicked
             chip.classList.add('selected');
-            // Set hidden input + display input
             document.getElementById('vehicleTypeInput').value = value;
-            document.getElementById('vehicleTypeDisplay').value = value;
         }
 
-        // On page load, if a type is already selected (e.g. after validation fail), sync display
+        
+        function syncChips(value) {
+            var v = value.trim().toLowerCase();
+            document.querySelectorAll('.type-chip').forEach(function (c) {
+                c.classList.toggle('selected', c.textContent.trim().toLowerCase() === v);
+            });
+        }
+
+        
         (function () {
-            var val = document.getElementById('vehicleTypeInput').value;
+            var val = document.getElementById('vehicleTypeInput').value.trim().toLowerCase();
             if (val) {
-                document.getElementById('vehicleTypeDisplay').value = val;
+                document.querySelectorAll('.type-chip').forEach(function (c) {
+                    c.classList.toggle('selected', c.textContent.trim().toLowerCase() === val);
+                });
             }
         })();
     </script>

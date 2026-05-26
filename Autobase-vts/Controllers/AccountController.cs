@@ -13,7 +13,7 @@ namespace autobase.Controllers
     {
         private readonly AutobaseDbContext _db = new AutobaseDbContext();
 
-        // GET: /Account/Login  (default route lands here)
+        // GET: /Account/Login  
         [HttpGet]
         public ActionResult Login()
         {

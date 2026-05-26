@@ -261,8 +261,14 @@
                 background: #fafafa;
             }
 
+            /* ── yellow left-border for overdue rows ── */
             .req-table tr.overdue-row td:first-child {
                 border-left: 3px solid #F5C518;
+            }
+
+            /* ── blue left-border for scheduled (future) rows ── */
+            .req-table tr.scheduled-row td:first-child {
+                border-left: 3px solid #7c3aed;
             }
 
         .row-num {
@@ -316,6 +322,7 @@
             color: #0d0d0d;
         }
 
+        /* ── Overdue tag (red) ── */
         .overdue-tag {
             display: inline-flex;
             align-items: center;
@@ -325,6 +332,21 @@
             background: #fff1f1;
             color: #dc2626;
             border: 1px solid #fecaca;
+            padding: 2px 8px;
+            border-radius: 5px;
+            margin-top: 4px;
+        }
+
+        /* ── NEW: In-use / scheduled tag (purple) ── */
+        .inuse-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            background: #f5f3ff;
+            color: #7c3aed;
+            border: 1px solid #ddd6fe;
             padding: 2px 8px;
             border-radius: 5px;
             margin-top: 4px;
@@ -432,6 +454,62 @@
         .s-dot.returned {
             background: #2563eb;
         }
+
+        /* ── NEW: Vehicle-in-use context badge shown in Status column ── */
+        .vehicle-inuse-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            margin-top: 6px;
+            padding: 3px 9px;
+            border-radius: 50px;
+            font-size: 10px;
+            font-weight: 700;
+            background: #f5f3ff;
+            color: #7c3aed;
+            border: 1px solid #ddd6fe;
+            white-space: nowrap;
+        }
+
+            .vehicle-inuse-badge svg {
+                flex-shrink: 0;
+            }
+
+        /* ── NEW: Inline info box shown in the approve modal for scheduled requests ── */
+        .modal-schedule-notice {
+            display: none;
+            background: #f5f3ff;
+            border: 1px solid #ddd6fe;
+            border-radius: 9px;
+            padding: 11px 13px;
+            margin-bottom: 14px;
+            gap: 9px;
+            align-items: flex-start;
+        }
+
+            .modal-schedule-notice.visible {
+                display: flex;
+            }
+
+            .modal-schedule-notice svg {
+                flex-shrink: 0;
+                color: #7c3aed;
+                margin-top: 1px;
+            }
+
+        .msn-text {
+            font-size: 12px;
+            font-weight: 600;
+            color: #5b21b6;
+            line-height: 1.55;
+        }
+
+            .msn-text strong {
+                display: block;
+                font-size: 12.5px;
+                margin-bottom: 2px;
+                color: #4c1d95;
+            }
 
         /* Admin notes */
         .note-tag {
@@ -622,6 +700,10 @@
                 background: #fff5f5;
             }
 
+            .modal-header.schedule-hdr {
+                background: #f5f3ff;
+            }
+
         .modal-title {
             font-size: 16px;
             font-weight: 800;
@@ -752,21 +834,14 @@
 @if (TempData["SuccessMessage"] != null)
 {
     <div class="alert alert-success">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
-            <polyline points="22 4 12 14.01 9 11.01" />
-        </svg>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
         @TempData["SuccessMessage"]
     </div>
 }
 @if (TempData["ErrorMessage"] != null)
 {
     <div class="alert alert-error">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="12" cy="12" r="10" />
-            <line x1="15" y1="9" x2="9" y2="15" />
-            <line x1="9" y1="9" x2="15" y2="15" />
-        </svg>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" /></svg>
         @TempData["ErrorMessage"]
     </div>
 }
@@ -798,10 +873,7 @@
 <!-- Search + filter -->
 <div class="bar">
     <div class="search-wrap">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="11" cy="11" r="8" />
-            <line x1="21" y1="21" x2="16.65" y2="16.65" />
-        </svg>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
         <input type="text" id="searchInput"
                placeholder="Search by name, vehicle, emp no, reg no..."
                value="@Model.SearchTerm"
@@ -824,20 +896,14 @@
 <!-- Table -->
 <div class="table-card">
     <div class="tc-header">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F5C518" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
-            <polyline points="14 2 14 8 20 8" />
-        </svg>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F5C518" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
         <span class="tc-title">Vehicle Requests (@Model.Requests.Count)</span>
     </div>
 
     @if (!Model.Requests.Any())
     {
         <div class="empty-state">
-            <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
-                <polyline points="14 2 14 8 20 8" />
-            </svg>
+            <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
             <p>No requests found.</p>
         </div>
     }
@@ -861,7 +927,7 @@
                 </tr>
             </thead>
             <tbody>
-                @{ int i = 1; }
+                @{ int i = 1; var nowTime = DateTime.Now; }
                 @foreach (var r in Model.Requests)
                 {
                     string sc = r.Status == "Approved" ? "approved"
@@ -879,12 +945,32 @@
                             .Where(w => w.Length > 0).Take(2)
                             .Select(w => w[0].ToString().ToUpper()));
 
-                    <tr class="req-row @(r.IsOverdue ? "overdue-row" : "")"
+                    // ── Detect if this is a scheduled/future request for an in-use vehicle ──
+                    // A request is "scheduled" when its start time is in the future
+                    // (meaning the vehicle is currently in use and they booked ahead).
+                    bool isScheduled = r.Status == "Pending" && r.RequiredFrom > nowTime;
+
+                    // Safe strings for JS
+                    string safeVehicle = r.VehicleName.Replace("'", "\\'");
+                    string safeEmp = r.EmployeeName.Replace("'", "\\'");
+                    string safeFrom = r.RequiredFrom.ToString("dd MMM yyyy, hh:mm tt");
+                    string safeUntil = r.RequiredUntil.ToString("dd MMM yyyy, hh:mm tt");
+
+                    string rowCls = r.IsOverdue ? "overdue-row"
+                                  : isScheduled ? "scheduled-row"
+                                  : "";
+
+                    <tr class="req-row @rowCls"
                         data-name="@r.EmployeeName.ToLower()"
                         data-empno="@r.EmployeeNumber.ToLower()"
                         data-vehicle="@r.VehicleName.ToLower()"
-                        data-reg="@r.RegistrationNo.ToLower()">
+                        data-reg="@r.RegistrationNo.ToLower()"
+                        data-scheduled="@(isScheduled ? "1" : "0")"
+                        data-from="@safeFrom"
+                        data-until="@safeUntil">
+
                         <td><span class="row-num">@i</span></td>
+
                         <td>
                             <div class="emp-cell">
                                 <div class="emp-av">@empInitials</div>
@@ -895,21 +981,31 @@
                                 </div>
                             </div>
                         </td>
+
                         <td>
                             <div class="v-name-cell">@r.VehicleName</div>
+
+                            @* Overdue tag (existing) *@
                             @if (r.IsOverdue)
                             {
                                 <div class="overdue-tag">
-                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                        <circle cx="12" cy="12" r="10" />
-                                        <line x1="12" y1="8" x2="12" y2="12" />
-                                        <line x1="12" y1="16" x2="12.01" y2="16" />
-                                    </svg>
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
                                     Overdue
                                 </div>
                             }
+
+                            @* ── NEW: In-Use / Scheduled tag ── *@
+                            @if (isScheduled)
+                            {
+                                <div class="inuse-tag">
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+                                    Vehicle In Use · Scheduled
+                                </div>
+                            }
                         </td>
+
                         <td><span class="reg-tag">@r.RegistrationNo</span></td>
+
                         <td>
                             <div class="date-main">@r.RequiredFrom.ToString("dd MMM yyyy")</div>
                             <div class="date-sub">@r.RequiredFrom.ToString("hh:mm tt")</div>
@@ -918,33 +1014,43 @@
                             <div class="date-main">@r.RequiredUntil.ToString("dd MMM yyyy")</div>
                             <div class="date-sub">@r.RequiredUntil.ToString("hh:mm tt")</div>
                         </td>
+
                         <td>
                             <span class="dur-pill">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <circle cx="12" cy="12" r="10" />
-                                    <polyline points="12 6 12 12 16 14" />
-                                </svg>
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
                                 @durLabel
                             </span>
                         </td>
+
                         <td><span class="purpose-cell" title="@r.Purpose">@r.Purpose</span></td>
+
                         <td>
                             <div class="date-main">@r.RequestedOn.ToString("dd MMM yy")</div>
                             <div class="date-sub">@r.RequestedOn.ToString("hh:mm tt")</div>
                         </td>
+
                         <td>
+                            @* Status pill *@
                             <span class="s-pill @sc">
                                 <span class="s-dot @sc"></span>
                                 @r.Status
                             </span>
+
+                            @* ── NEW: purple "Scheduled from…" badge under the status pill ── *@
+                            @if (isScheduled)
+                            {
+                                <div class="vehicle-inuse-badge">
+                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+                                    Starts @r.RequiredFrom.ToString("dd MMM, hh:mm tt")
+                                </div>
+                            }
                         </td>
+
                         <td>
                             @if (!string.IsNullOrEmpty(r.AdminNotes))
                             {
                                 <span class="note-tag" title="@r.AdminNotes">
-                                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
-                                    </svg>
+                                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" /></svg>
                                     @r.AdminNotes
                                 </span>
                             }
@@ -953,16 +1059,17 @@
                                 <span class="note-empty">—</span>
                             }
                         </td>
+
                         <td>
                             <div class="action-col">
                                 @if (r.Status == "Pending")
                                 {
                                     <button class="btn-approve"
-                                            onclick="openModal('approve', @r.RequestId, '@r.VehicleName', '@r.EmployeeName')">
+                                            onclick="openModal('approve', @r.RequestId, '@safeVehicle', '@safeEmp', @(isScheduled ? "true" : "false"), '@safeFrom', '@safeUntil')">
                                         ✓ Approve
                                     </button>
                                     <button class="btn-reject"
-                                            onclick="openModal('reject', @r.RequestId, '@r.VehicleName', '@r.EmployeeName')">
+                                            onclick="openModal('reject', @r.RequestId, '@safeVehicle', '@safeEmp', @(isScheduled ? "true" : "false"), '@safeFrom', '@safeUntil')">
                                         ✕ Reject
                                     </button>
                                 }
@@ -1005,20 +1112,31 @@
         <div class="modal-header" id="modalHeader">
             <span class="modal-title" id="modalTitle">Action</span>
             <button class="modal-close" onclick="closeModal()">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                    <line x1="18" y1="6" x2="6" y2="18" />
-                    <line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
             </button>
         </div>
         <div class="modal-body">
+
+            <!-- ── NEW: purple warning shown only for scheduled requests ── -->
+            <div class="modal-schedule-notice" id="scheduleNotice">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+                <div class="msn-text">
+                    <strong>Vehicle currently in use — Scheduled request</strong>
+                    This vehicle is occupied right now. The employee has scheduled it from
+                    <span id="noticeFrom">—</span> until <span id="noticeUntil">—</span>.
+                    Approving will queue this request; the vehicle must be free by the start time.
+                </div>
+            </div>
+
             <div class="modal-info">
                 <div class="modal-info-name" id="modalVehicle">—</div>
                 <div class="modal-info-sub" id="modalEmp">—</div>
             </div>
+
             <label class="modal-label">Admin Notes (optional)</label>
             <textarea class="modal-textarea" id="modalNotes"
                       placeholder="Add a note for the employee..."></textarea>
+
             <div class="modal-actions">
                 <button class="modal-btn cancel" onclick="closeModal()">Cancel</button>
                 <button class="modal-btn" id="modalConfirmBtn" onclick="submitAction()">Confirm</button>
@@ -1045,17 +1163,30 @@
     <script>
         var _mode = '', _reqId = 0;
 
-        function openModal(mode, id, vehicle, emp) {
+        // ── Updated openModal: now accepts isScheduled, fromStr, untilStr ──
+        function openModal(mode, id, vehicle, emp, isScheduled, fromStr, untilStr) {
             _mode = mode; _reqId = id;
+
             var hdr = document.getElementById('modalHeader');
             var btn = document.getElementById('modalConfirmBtn');
+            var notice = document.getElementById('scheduleNotice');
+
             document.getElementById('modalVehicle').textContent = vehicle;
             document.getElementById('modalEmp').textContent = 'Requested by: ' + emp;
             document.getElementById('modalNotes').value = '';
 
+            // ── Show/hide the scheduled notice banner ──
+            if (isScheduled) {
+                notice.classList.add('visible');
+                document.getElementById('noticeFrom').textContent = fromStr;
+                document.getElementById('noticeUntil').textContent = untilStr;
+            } else {
+                notice.classList.remove('visible');
+            }
+
             if (mode === 'approve') {
                 document.getElementById('modalTitle').textContent = '✓ Approve Request';
-                hdr.className = 'modal-header approve-hdr';
+                hdr.className = isScheduled ? 'modal-header schedule-hdr' : 'modal-header approve-hdr';
                 btn.className = 'modal-btn confirm-approve';
                 btn.textContent = 'Approve';
             } else {
@@ -1064,6 +1195,7 @@
                 btn.className = 'modal-btn confirm-reject';
                 btn.textContent = 'Reject';
             }
+
             document.getElementById('actionModal').classList.add('open');
             document.body.style.overflow = 'hidden';
         }
@@ -1098,8 +1230,7 @@
                 var v = row.getAttribute('data-vehicle') || '';
                 var r = row.getAttribute('data-reg') || '';
                 row.style.display = (!val || n.includes(val) || en.includes(val)
-                    || v.includes(val) || r.includes(val))
-                    ? '' : 'none';
+                    || v.includes(val) || r.includes(val)) ? '' : 'none';
             });
         }
     </script>
