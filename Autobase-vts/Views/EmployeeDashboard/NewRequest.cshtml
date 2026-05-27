@@ -142,7 +142,7 @@
         .v-request-btn.btn-avail { background: #1aaa78; }
         .v-request-btn.btn-avail:hover { background: #158a61; transform: scale(1.01); }
 
-        /* ── NEW: Schedule-ahead button for in-use vehicles ── */
+        /* Schedule-ahead button for in-use vehicles ── */
         .v-request-btn.btn-schedule { background: #3182ce; }
         .v-request-btn.btn-schedule:hover { background: #2563eb; transform: scale(1.01); }
 
@@ -169,7 +169,7 @@
         .modal-close { width: 30px; height: 30px; border: none; background: transparent; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #888; border-radius: 6px; transition: background .15s, color .15s; }
         .modal-close:hover { background: #fde8e8; color: #e53e3e; }
 
-        /* ── NEW: In-use warning banner inside modal ── */
+        /*  In-use warning banner inside modal ── */
         .modal-inuse-notice { display: none; margin: 14px 22px 0; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 12px 14px; gap: 10px; align-items: flex-start; }
         .modal-inuse-notice.visible { display: flex; }
         .modal-inuse-notice svg { flex-shrink: 0; margin-top: 1px; color: #3182ce; }
@@ -390,7 +390,7 @@
                                 </div>
                             }
 
-                            @* ── CHANGED: in-use vehicles now get an active schedule button ── *@
+                            @* in-use vehicles now get an active schedule button ── *@
                             @if (v.IsAvailable)
                             {
                                 <button class="v-request-btn btn-avail"
@@ -436,7 +436,7 @@
             </button>
         </div>
 
-        @* ── NEW: warning banner shown only for in-use vehicles ── *@
+        @*  warning banner shown only for in-use vehicles ── *@
         <div class="modal-inuse-notice" id="inuseNotice">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
             <div class="modal-inuse-notice-text">
@@ -523,10 +523,6 @@
         });
     }
 
-    // ── Modal ──
-    // isInUse  : true when the vehicle is currently occupied
-    // freeAtIso: ISO datetime string "yyyy-MM-ddTHH:mm" when the vehicle becomes free
-    //            (empty string if unknown)
     function openModal(id, name, reg, type, isInUse, freeAtIso) {
         document.getElementById('hVehicleId').value  = id;
         document.getElementById('hVehicleName').value = name;
