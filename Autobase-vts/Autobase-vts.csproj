@@ -127,9 +127,13 @@
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="App_Start\FilterConfig.cs" />
     <Compile Include="App_Start\RouteConfig.cs" />
+    <Compile Include="App_Start\SessionRestoreAttribute.cs" />
     <Compile Include="Controllers\AccountController.cs" />
+    <Compile Include="Controllers\AutobaseController.cs" />
     <Compile Include="Controllers\DashboardController.cs" />
+    <Compile Include="Controllers\EmployeeDashboardController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\UserController.cs" />
     <Compile Include="Controllers\VehicleController.cs" />
     <Compile Include="Controllers\VehicleTypeController.cs" />
     <Compile Include="Data\AutobaseDbContext.cs" />
@@ -150,12 +154,40 @@
     <Compile Include="Migrations\202605220446004_AddVehicle.designer.cs">
       <DependentUpon>202605220446004_AddVehicle.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\202605221129333_AddVehicleRequests.cs" />
+    <Compile Include="Migrations\202605221129333_AddVehicleRequests.Designer.cs">
+      <DependentUpon>202605221129333_AddVehicleRequests.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202605230337250_UpdateEmployeeTable.cs" />
+    <Compile Include="Migrations\202605230337250_UpdateEmployeeTable.Designer.cs">
+      <DependentUpon>202605230337250_UpdateEmployeeTable.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202605230508410_VehicleRequest.cs" />
+    <Compile Include="Migrations\202605230508410_VehicleRequest.Designer.cs">
+      <DependentUpon>202605230508410_VehicleRequest.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\202605230707455_AddAdminNotesToVehicleRequests.cs" />
+    <Compile Include="Migrations\202605230707455_AddAdminNotesToVehicleRequests.Designer.cs">
+      <DependentUpon>202605230707455_AddAdminNotesToVehicleRequests.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\Configuration.cs" />
+    <Compile Include="Models\DTOs\AddUserDto.cs" />
     <Compile Include="Models\DTOs\AddVehicleDto.cs" />
+    <Compile Include="Models\DTOs\AdminDashboardDto.cs" />
+    <Compile Include="Models\DTOs\AllocatedVehicleDto.cs" />
+    <Compile Include="Models\DTOs\AvailableVehicleDto.cs" />
+    <Compile Include="Models\DTOs\EditUserDto.cs" />
+    <Compile Include="Models\DTOs\EditVehicleDto.cs" />
+    <Compile Include="Models\DTOs\EmployeeDashboardDto.cs" />
     <Compile Include="Models\DTOs\LoginDto.cs" />
+    <Compile Include="Models\DTOs\MyRequestDto.cs" />
+    <Compile Include="Models\DTOs\NewRequestDto.cs" />
+    <Compile Include="Models\DTOs\PrintRequestDto.cs" />
+    <Compile Include="Models\DTOs\SeeRequestDto.cs" />
     <Compile Include="Models\DTOs\VehicleTypesDto.cs" />
     <Compile Include="Models\Employee.cs" />
     <Compile Include="Models\Vehicle.cs" />
+    <Compile Include="Models\VehicleRequest.cs" />
     <Compile Include="Models\VehicleTypes.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -203,6 +235,20 @@
     <Content Include="Views\Dashboard\EmployeeDashboard.cshtml" />
     <Content Include="Views\VehicleType\Create.cshtml" />
     <Content Include="Views\Vehicle\AddVehicle.cshtml" />
+    <Content Include="Views\Autobase\AllocatedVehicle.cshtml" />
+    <Content Include="Views\Autobase\AvailableVehicle.cshtml" />
+    <Content Include="Views\Autobase\PrintRequest.cshtml" />
+    <Content Include="Views\Autobase\SeeRequests.cshtml" />
+    <Content Include="Views\EmployeeDashboard\AllocatedVehicle.cshtml" />
+    <Content Include="Views\EmployeeDashboard\AvailableVehicles.cshtml" />
+    <Content Include="Views\EmployeeDashboard\MyRequests.cshtml" />
+    <Content Include="Views\EmployeeDashboard\NewRequest.cshtml" />
+    <Content Include="Views\User\AddUser.cshtml" />
+    <Content Include="Views\User\EditUser.cshtml" />
+    <Content Include="Views\User\EditUserList.cshtml" />
+    <Content Include="Views\Vehicle\DeleteVehicle.cshtml" />
+    <Content Include="Views\Vehicle\EditVehicle.cshtml" />
+    <Content Include="Views\Vehicle\EditVehicleList.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -229,6 +275,18 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Migrations\202605220446004_AddVehicle.resx">
       <DependentUpon>202605220446004_AddVehicle.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202605221129333_AddVehicleRequests.resx">
+      <DependentUpon>202605221129333_AddVehicleRequests.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202605230337250_UpdateEmployeeTable.resx">
+      <DependentUpon>202605230337250_UpdateEmployeeTable.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202605230508410_VehicleRequest.resx">
+      <DependentUpon>202605230508410_VehicleRequest.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Migrations\202605230707455_AddAdminNotesToVehicleRequests.resx">
+      <DependentUpon>202605230707455_AddAdminNotesToVehicleRequests.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <PropertyGroup>

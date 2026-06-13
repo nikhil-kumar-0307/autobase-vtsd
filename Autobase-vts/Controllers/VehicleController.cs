@@ -14,9 +14,9 @@ namespace autobase.Controllers
 
         // ── ADD ──────────────────────────────────────────────────────────────
 
-        // GET: /Vehicle/Add
+        // GET: /Vehicle/AddVehicle
         [HttpGet]
-        public ActionResult Add()
+        public ActionResult AddVehicle()
         {
             string role = Session["Role"]?.ToString();
             if (role == "Employee")
@@ -26,10 +26,10 @@ namespace autobase.Controllers
             return View("AddVehicle", new AddVehicleDto());
         }
 
-        // POST: /Vehicle/Add
+        // POST: /Vehicle/AddVehicle
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Add(AddVehicleDto model)
+        public ActionResult AddVehicle(AddVehicleDto model)
         {
             string role = Session["Role"]?.ToString();
             if (role == "Employee")
@@ -72,14 +72,14 @@ namespace autobase.Controllers
             _db.SaveChanges();
 
             TempData["Success"] = $"Vehicle \"{vehicle.VehicleName}\" ({vehicle.RegistrationNo}) registered successfully.";
-            return RedirectToAction("Add");
+            return RedirectToAction("AddVehicle");
         }
 
         // ── EDIT LIST ────────────────────────────────────────────────────────
 
-        // GET: /Vehicle/EditIndex
+        // GET: /Vehicle/EditVehicle (list)
         [HttpGet]
-        public ActionResult EditIndex()
+        public ActionResult EditVehicle()
         {
             string role = Session["Role"]?.ToString();
             if (role == "Employee")
@@ -95,12 +95,12 @@ namespace autobase.Controllers
 
         // ── EDIT FORM ────────────────────────────────────────────────────────
 
-        // GET: /Vehicle/Edit/5
+        // GET: /Vehicle/EditVehicle/5
         [HttpGet]
-        public ActionResult Edit(int? id)
+        public ActionResult EditVehicleForm(int? id)
         {
             if (id == null)
-                return RedirectToAction("EditIndex");
+                return RedirectToAction("EditVehicle");
 
             string role = Session["Role"]?.ToString();
             if (role == "Employee")
@@ -110,7 +110,7 @@ namespace autobase.Controllers
             if (vehicle == null || !vehicle.IsActive)
             {
                 TempData["Error"] = "Vehicle not found.";
-                return RedirectToAction("EditIndex");
+                return RedirectToAction("EditVehicle");
             }
 
             LoadDropdowns(vehicle.VehicleTypeId);
@@ -131,16 +131,15 @@ namespace autobase.Controllers
             return View("EditVehicle", dto);
         }
 
-        // POST: /Vehicle/Edit
+        // POST: /Vehicle/EditVehicleForm
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public ActionResult Edit(EditVehicleDto model)
+        public ActionResult EditVehicleForm(EditVehicleDto model)
         {
             string role = Session["Role"]?.ToString();
             if (role == "Employee")
                 return RedirectToAction("Employee", "Dashboard");
 
-            // Duplicate registration check — exclude current vehicle
             if (!string.IsNullOrEmpty(model.RegistrationNo))
             {
                 bool regExists = _db.Vehicles.Any(v =>
@@ -168,7 +167,7 @@ namespace autobase.Controllers
             if (vehicle == null || !vehicle.IsActive)
             {
                 TempData["Error"] = "Vehicle not found.";
-                return RedirectToAction("EditIndex");
+                return RedirectToAction("EditVehicle");
             }
 
             var vehicleType = _db.VehicleTypes.Find(model.VehicleTypeId);
@@ -184,12 +183,14 @@ namespace autobase.Controllers
             _db.SaveChanges();
 
             TempData["Success"] = $"Vehicle \"{vehicle.VehicleName}\" ({vehicle.RegistrationNo}) updated successfully.";
-            return RedirectToAction("EditIndex");
+            return RedirectToAction("EditVehicle");
         }
 
-        // GET: /Vehicle/Delete
+        // ── DELETE ───────────────────────────────────────────────────────────
+
+        // GET: /Vehicle/DeleteVehicle
         [HttpGet]
-        public ActionResult Delete()
+        public ActionResult DeleteVehicle()
         {
             string role = Session["Role"]?.ToString();
             if (role == "Employee")
@@ -200,8 +201,8 @@ namespace autobase.Controllers
                               .OrderBy(v => v.VehicleName)
                               .ToList();
 
-            return View("DeleteVehicle", vehicles);   
-        } 
+            return View("DeleteVehicle", vehicles);
+        }
 
         // POST: /Vehicle/Disable
         [HttpPost]
@@ -217,14 +218,14 @@ namespace autobase.Controllers
             if (vehicle == null || !vehicle.IsActive)
             {
                 TempData["Error"] = "Vehicle not found or already disabled.";
-                return RedirectToAction("Delete");
+                return RedirectToAction("DeleteVehicle");
             }
 
-            vehicle.IsActive = false; // soft-delete — data stays in DB
+            vehicle.IsActive = false;
             _db.SaveChanges();
 
             TempData["Success"] = $"Vehicle \"{vehicle.VehicleName}\" ({vehicle.RegistrationNo}) has been disabled successfully.";
-            return RedirectToAction("Delete");
+            return RedirectToAction("DeleteVehicle");
         }
 
         // ── Helpers ──────────────────────────────────────────────────────────
