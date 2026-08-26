@@ -14,6 +14,7 @@ namespace autobase.Models.DTOs
         public string ActiveFilter { get; set; } = "All";
         public string SearchTerm { get; set; } = "";
 
+        public DateTime SelectedDate { get; set; } = DateTime.Today;
         public List<SeeRequestItem> Requests { get; set; } = new List<SeeRequestItem>();
     }
 

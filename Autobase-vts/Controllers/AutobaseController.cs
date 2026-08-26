@@ -205,13 +205,22 @@ namespace autobase.Controllers
 
         // ── GET: /Autobase/SeeRequests ────────────────────────────────────────
         [HttpGet]
-        public ActionResult SeeRequests(string filter = "All", string search = "")
+        public ActionResult SeeRequests(string filter = "All", string search = "", DateTime? date = null)
         {
             string role = Session["Role"]?.ToString();
             if (role != "SuperAdmin" && role != "Admin")
                 return RedirectToAction("Login", "Account");
 
-            var requestsQuery = _db.VehicleRequests.AsQueryable();
+            // ── Resolve the selected date (defaults to today) ──
+            DateTime selectedDate = (date ?? DateTime.Today).Date;
+            DateTime nextDay = selectedDate.AddDays(1);
+
+            // ── Pull only requests made ON the selected date ──
+            var dateRequests = _db.VehicleRequests
+                .Where(r => r.RequestedOn >= selectedDate && r.RequestedOn < nextDay)
+                .ToList();
+
+            var requestsQuery = dateRequests.AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(search))
             {
@@ -232,7 +241,6 @@ namespace autobase.Controllers
             else if (filter == "Completed")
                 requestsQuery = requestsQuery.Where(r => r.Status == "Returned");
 
-            var allRequests = _db.VehicleRequests.ToList();
             var filtered = requestsQuery.OrderByDescending(r => r.RequestedOn).ToList();
             var employees = _db.Employees.ToList();
 
@@ -258,15 +266,17 @@ namespace autobase.Controllers
                 };
             }).ToList();
 
+            // ── Stat cards now reflect the selected date, not all-time totals ──
             var dto = new SeeRequestDto
             {
-                TotalCount = allRequests.Count,
-                PendingCount = allRequests.Count(r => r.Status == "Pending"),
-                ApprovedCount = allRequests.Count(r => r.Status == "Approved"),
-                RejectedCount = allRequests.Count(r => r.Status == "Rejected"),
-                CompletedCount = allRequests.Count(r => r.Status == "Returned"),
+                TotalCount = dateRequests.Count,
+                PendingCount = dateRequests.Count(r => r.Status == "Pending"),
+                ApprovedCount = dateRequests.Count(r => r.Status == "Approved"),
+                RejectedCount = dateRequests.Count(r => r.Status == "Rejected"),
+                CompletedCount = dateRequests.Count(r => r.Status == "Returned"),
                 ActiveFilter = filter,
                 SearchTerm = search,
+                SelectedDate = selectedDate,
                 Requests = items
             };
 

@@ -410,7 +410,7 @@
             <div class="hero-sub">Click Edit on any vehicle to update its details.</div>
         </div>
     </div>
-    <a href="@Url.Action("Add","Vehicle")" class="btn-add-vehicle">
+    <a href="@Url.Action("AddVehicle","Vehicle")" class="btn-add-vehicle">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <line x1="12" y1="5" x2="12" y2="19" />
             <line x1="5" y1="12" x2="19" y2="12" />
@@ -499,7 +499,7 @@
                             </span>
                         </td>
                         <td>
-                            <a href="@Url.Action("Edit","Vehicle", new { id = v.Id })" class="btn-edit">
+                            <a href="@Url.Action("EditVehicleForm","Vehicle", new { id = v.Id })" class="btn-edit">
                                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" />
                                     <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" />
