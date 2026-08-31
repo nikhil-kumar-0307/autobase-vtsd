@@ -161,26 +161,49 @@ namespace autobase.Controllers
 
         // ── GET: /EmployeeDashboard/NewRequest ───────────────────────────────
         [HttpGet]
-        public ActionResult NewRequest()
+        public ActionResult NewRequest(int page = 1, string filter = "All")
         {
             string role = Session["Role"]?.ToString();
             if (role != "Employee")
                 return RedirectToAction("Login", "Account");
 
-            var vehicles = _db.Vehicles
-                .Where(v => v.IsActive && (v.Status == "Available" || v.Status == "Allocated"))
+            const int pageSize = 10;
+            if (page < 1) page = 1;
+
+            // ── Full fleet, unfiltered — used only for the summary chip counts ──
+            var fullFleet = _db.Vehicles.Where(v => v.IsActive).ToList();
+            int totalAvailable = fullFleet.Count(v => v.Status == "Available");
+            int totalInUse = fullFleet.Count(v => v.Status == "Allocated");
+            int totalMaintenance = fullFleet.Count(v => v.Status == "Maintenance");
+
+            // ── Apply the status filter BEFORE paginating ──
+            var query = _db.Vehicles.Where(v => v.IsActive);
+
+            if (filter == "Available")
+                query = query.Where(v => v.Status == "Available");
+            else if (filter == "InUse")
+                query = query.Where(v => v.Status == "Allocated");
+            else if (filter == "Maintenance")
+                query = query.Where(v => v.Status == "Maintenance");
+            // "All" → no extra filter
+
+            var filteredVehicles = query
                 .OrderBy(v => v.VehicleType)
                 .ThenBy(v => v.VehicleName)
                 .ToList()
                 .Select(v =>
                 {
-            // Find the active approved request for this vehicle
-            var activeRequest = _db.VehicleRequests
-                        .Where(r => r.VehicleId == v.Id && r.Status == "Approved")
-                        .OrderByDescending(r => r.RequiredUntil)
-                        .FirstOrDefault();
+                    DateTime? freeAt = null;
 
-                    DateTime? freeAt = activeRequest?.RequiredUntil;
+                    if (v.Status == "Allocated")
+                    {
+                        var activeRequest = _db.VehicleRequests
+                            .Where(r => r.VehicleId == v.Id && r.Status == "Approved")
+                            .OrderByDescending(r => r.RequiredUntil)
+                            .FirstOrDefault();
+
+                        freeAt = activeRequest?.RequiredUntil;
+                    }
 
                     return new AvailableVehicleItem
                     {
@@ -192,13 +215,37 @@ namespace autobase.Controllers
                         FuelType = "—",
                         SeatingCapacity = 0,
                         Notes = v.Notes,
+                        Status = v.Status,
                         IsAvailable = v.Status == "Available",
                         FreeAt = freeAt
                     };
                 })
                 .ToList();
 
-            var model = new NewRequestDto { AvailableVehicles = vehicles };
+            // ── Paginate the FILTERED list, not the full fleet ──
+            int totalCount = filteredVehicles.Count;
+            int totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+            if (totalPages < 1) totalPages = 1;
+            if (page > totalPages) page = totalPages;
+
+            var pageItems = filteredVehicles
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            var model = new NewRequestDto
+            {
+                AvailableVehicles = pageItems,
+                CurrentPage = page,
+                TotalPages = totalPages,
+                PageSize = pageSize,
+                TotalVehicleCount = totalCount,
+                TotalAvailable = totalAvailable,
+                TotalInUse = totalInUse,
+                TotalMaintenance = totalMaintenance,
+                ActiveFilter = filter
+            };
+
             return View(model);
         }
 

@@ -610,8 +610,8 @@
 <!-- Two-column layout -->
 <div class="add-layout">
 
-    <!-- ── Left: form ── -->
-    @using (Html.BeginForm("Edit", "Vehicle", FormMethod.Post, new { id = "editVehicleForm" }))
+    <!-- ── Left: form ── -->   
+    @using (Html.BeginForm("EditVehicleForm", "Vehicle", FormMethod.Post, new { id = "editVehicleForm" }))
     {
         @Html.AntiForgeryToken()
         @Html.HiddenFor(m => m.Id)

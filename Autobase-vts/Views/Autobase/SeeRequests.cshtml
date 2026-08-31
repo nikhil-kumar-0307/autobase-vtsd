@@ -19,6 +19,103 @@
             margin-bottom: 22px;
         }
 
+        /* ── NEW: Date navigator ── */
+        .date-nav {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 18px;
+            background: #fff;
+            border: 1px solid #efefef;
+            border-radius: 11px;
+            padding: 10px 14px;
+        }
+
+        .date-nav-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            height: 38px;
+            padding: 0 16px;
+            border: 1.5px solid #e8e8e8;
+            border-radius: 8px;
+            font-family: 'Barlow', sans-serif;
+            font-size: 12.5px;
+            font-weight: 700;
+            color: #555;
+            background: #fff;
+            cursor: pointer;
+            text-decoration: none;
+            white-space: nowrap;
+            transition: border-color .15s, color .15s, background .15s;
+        }
+
+            .date-nav-btn:hover {
+                border-color: #F5C518;
+                color: #0d0d0d;
+            }
+
+            .date-nav-btn.disabled {
+                opacity: .35;
+                pointer-events: none;
+                cursor: default;
+            }
+
+            .date-nav-btn.today-btn {
+                margin-left: auto;
+                background: #0d0d0d;
+                border-color: #0d0d0d;
+                color: #fff;
+            }
+
+                .date-nav-btn.today-btn:hover {
+                    background: #222;
+                    color: #fff;
+                }
+
+        .date-picker-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex: 1;
+            justify-content: center;
+        }
+
+            .date-picker-wrap input[type="date"] {
+                height: 38px;
+                padding: 0 10px;
+                border: 1.5px solid #e8e8e8;
+                border-radius: 8px;
+                font-family: 'Barlow', sans-serif;
+                font-size: 12.5px;
+                font-weight: 600;
+                color: #0d0d0d;
+                background: #fafafa;
+                outline: none;
+            }
+
+                .date-picker-wrap input[type="date"]:focus {
+                    border-color: #F5C518;
+                }
+
+        .date-label {
+            font-size: 13.5px;
+            font-weight: 700;
+            color: #0d0d0d;
+        }
+
+        .today-badge {
+            font-size: 9.5px;
+            font-weight: 800;
+            letter-spacing: .5px;
+            text-transform: uppercase;
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+            padding: 2px 8px;
+            border-radius: 20px;
+        }
+
         /* Alert */
         .alert {
             padding: 13px 16px;
@@ -337,7 +434,7 @@
             margin-top: 4px;
         }
 
-        /* ── NEW: In-use / scheduled tag (purple) ── */
+        /* ── In-use / scheduled tag (purple) ── */
         .inuse-tag {
             display: inline-flex;
             align-items: center;
@@ -455,7 +552,7 @@
             background: #2563eb;
         }
 
-        /* ── NEW: Vehicle-in-use context badge shown in Status column ── */
+        /* ── Vehicle-in-use context badge shown in Status column ── */
         .vehicle-inuse-badge {
             display: inline-flex;
             align-items: center;
@@ -475,7 +572,7 @@
                 flex-shrink: 0;
             }
 
-        /* ── NEW: Inline info box shown in the approve modal for scheduled requests ── */
+        /* ── Inline info box shown in the approve modal for scheduled requests ── */
         .modal-schedule-notice {
             display: none;
             background: #f5f3ff;
@@ -831,6 +928,46 @@
 <div class="page-title">Vehicle Requests</div>
 <div class="page-sub">Review, approve or reject incoming vehicle requests from employees.</div>
 
+<!-- ── Date navigator ── -->
+<div class="date-nav">
+    @{
+        var prevDate = Model.SelectedDate.AddDays(-1).ToString("yyyy-MM-dd");
+        var nextDate = Model.SelectedDate.AddDays(1).ToString("yyyy-MM-dd");
+        bool isToday = Model.SelectedDate.Date == DateTime.Today;
+    }
+
+    <a href="@Url.Action("SeeRequests","Autobase", new { filter = Model.ActiveFilter, search = Model.SearchTerm, date = prevDate })"
+       class="date-nav-btn">‹ Previous Day</a>
+
+    <div class="date-picker-wrap">
+        <input type="date" id="datePicker"
+               value="@Model.SelectedDate.ToString("yyyy-MM-dd")"
+               max="@DateTime.Today.ToString("yyyy-MM-dd")"
+               onchange="goToDate(this.value)" />
+        <span class="date-label">@Model.SelectedDate.ToString("dddd, dd MMM yyyy")</span>
+        @if (isToday)
+        {
+            <span class="today-badge">Today</span>
+        }
+    </div>
+
+    @if (!isToday)
+    {
+        <a href="@Url.Action("SeeRequests","Autobase", new { filter = Model.ActiveFilter, search = Model.SearchTerm, date = nextDate })"
+           class="date-nav-btn">Next Day ›</a>
+    }
+    else
+    {
+        <span class="date-nav-btn disabled">Next Day ›</span>
+    }
+
+    @if (!isToday)
+    {
+        <a href="@Url.Action("SeeRequests","Autobase", new { filter = Model.ActiveFilter, search = Model.SearchTerm })"
+           class="date-nav-btn today-btn">Jump to Today</a>
+    }
+</div>
+
 @if (TempData["SuccessMessage"] != null)
 {
     <div class="alert alert-success">
@@ -880,15 +1017,15 @@
                oninput="liveSearch(this.value)" />
     </div>
     <div class="filter-tabs">
-        <a href="@Url.Action("SeeRequests","Autobase", new { filter="All",       search=Model.SearchTerm })"
+        <a href="@Url.Action("SeeRequests","Autobase", new { filter="All",       search=Model.SearchTerm, date=Model.SelectedDate.ToString("yyyy-MM-dd") })"
            class="ftab @(Model.ActiveFilter=="All"       ? "f-all"       : "")">All</a>
-        <a href="@Url.Action("SeeRequests","Autobase", new { filter="Pending",   search=Model.SearchTerm })"
+        <a href="@Url.Action("SeeRequests","Autobase", new { filter="Pending",   search=Model.SearchTerm, date=Model.SelectedDate.ToString("yyyy-MM-dd") })"
            class="ftab @(Model.ActiveFilter=="Pending"   ? "f-pending"   : "")">Pending</a>
-        <a href="@Url.Action("SeeRequests","Autobase", new { filter="Approved",  search=Model.SearchTerm })"
+        <a href="@Url.Action("SeeRequests","Autobase", new { filter="Approved",  search=Model.SearchTerm, date=Model.SelectedDate.ToString("yyyy-MM-dd") })"
            class="ftab @(Model.ActiveFilter=="Approved"  ? "f-approved"  : "")">Approved</a>
-        <a href="@Url.Action("SeeRequests","Autobase", new { filter="Rejected",  search=Model.SearchTerm })"
+        <a href="@Url.Action("SeeRequests","Autobase", new { filter="Rejected",  search=Model.SearchTerm, date=Model.SelectedDate.ToString("yyyy-MM-dd") })"
            class="ftab @(Model.ActiveFilter=="Rejected"  ? "f-rejected"  : "")">Rejected</a>
-        <a href="@Url.Action("SeeRequests","Autobase", new { filter="Completed", search=Model.SearchTerm })"
+        <a href="@Url.Action("SeeRequests","Autobase", new { filter="Completed", search=Model.SearchTerm, date=Model.SelectedDate.ToString("yyyy-MM-dd") })"
            class="ftab @(Model.ActiveFilter=="Completed" ? "f-completed" : "")">Completed</a>
     </div>
 </div>
@@ -904,7 +1041,7 @@
     {
         <div class="empty-state">
             <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
-            <p>No requests found.</p>
+            <p>No requests found for this date.</p>
         </div>
     }
     else
@@ -946,8 +1083,6 @@
                             .Select(w => w[0].ToString().ToUpper()));
 
                     // ── Detect if this is a scheduled/future request for an in-use vehicle ──
-                    // A request is "scheduled" when its start time is in the future
-                    // (meaning the vehicle is currently in use and they booked ahead).
                     bool isScheduled = r.Status == "Pending" && r.RequiredFrom > nowTime;
 
                     // Safe strings for JS
@@ -985,7 +1120,7 @@
                         <td>
                             <div class="v-name-cell">@r.VehicleName</div>
 
-                            @* Overdue tag (existing) *@
+                            @* Overdue tag *@
                             @if (r.IsOverdue)
                             {
                                 <div class="overdue-tag">
@@ -994,7 +1129,7 @@
                                 </div>
                             }
 
-                            @* ── NEW: In-Use / Scheduled tag ── *@
+                            @* In-Use / Scheduled tag *@
                             @if (isScheduled)
                             {
                                 <div class="inuse-tag">
@@ -1036,7 +1171,7 @@
                                 @r.Status
                             </span>
 
-                            @* ── NEW: purple "Scheduled from…" badge under the status pill ── *@
+                            @* purple "Scheduled from…" badge under the status pill *@
                             @if (isScheduled)
                             {
                                 <div class="vehicle-inuse-badge">
@@ -1117,7 +1252,7 @@
         </div>
         <div class="modal-body">
 
-            <!-- ── NEW: purple warning shown only for scheduled requests ── -->
+            <!-- purple warning shown only for scheduled requests -->
             <div class="modal-schedule-notice" id="scheduleNotice">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
                 <div class="msn-text">
@@ -1163,7 +1298,6 @@
     <script>
         var _mode = '', _reqId = 0;
 
-        // ── Updated openModal: now accepts isScheduled, fromStr, untilStr ──
         function openModal(mode, id, vehicle, emp, isScheduled, fromStr, untilStr) {
             _mode = mode; _reqId = id;
 
@@ -1175,7 +1309,6 @@
             document.getElementById('modalEmp').textContent = 'Requested by: ' + emp;
             document.getElementById('modalNotes').value = '';
 
-            // ── Show/hide the scheduled notice banner ──
             if (isScheduled) {
                 notice.classList.add('visible');
                 document.getElementById('noticeFrom').textContent = fromStr;
@@ -1232,6 +1365,15 @@
                 row.style.display = (!val || n.includes(val) || en.includes(val)
                     || v.includes(val) || r.includes(val)) ? '' : 'none';
             });
+        }
+
+        // ── NEW: date picker navigation ──
+        function goToDate(val) {
+            var url = '@Url.Action("SeeRequests", "Autobase")'
+                + '?date=' + encodeURIComponent(val)
+                + '&filter=' + encodeURIComponent('@Model.ActiveFilter')
+                + '&search=' + encodeURIComponent('@Model.SearchTerm');
+            window.location.href = url;
         }
     </script>
 }

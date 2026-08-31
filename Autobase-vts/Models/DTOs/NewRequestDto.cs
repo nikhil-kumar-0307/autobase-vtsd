@@ -1,12 +1,25 @@
 ﻿using System;
 using System.Collections.Generic;
-
 namespace autobase.Models.DTOs
 {
     public class NewRequestDto
     {
         public IEnumerable<AvailableVehicleItem> AvailableVehicles { get; set; }
             = new List<AvailableVehicleItem>();
+
+        // ── pagination ──
+        public int CurrentPage { get; set; } = 1;
+        public int TotalPages { get; set; } = 1;
+        public int PageSize { get; set; } = 10;
+        public int TotalVehicleCount { get; set; }
+
+        // ── full-fleet counts (not just current page/filter) ──
+        public int TotalAvailable { get; set; }
+        public int TotalInUse { get; set; }
+        public int TotalMaintenance { get; set; }
+
+        // ── NEW: which status tab is currently active ──
+        public string ActiveFilter { get; set; } = "All";
     }
 
     public class AvailableVehicleItem
@@ -19,12 +32,11 @@ namespace autobase.Models.DTOs
         public string FuelType { get; set; }
         public int SeatingCapacity { get; set; }
         public string Notes { get; set; }
-
-        // ── NEW ──
         public bool IsAvailable { get; set; } = true;
         public DateTime? FreeAt { get; set; }
+        public string Status { get; set; } = "Available";
+        public bool IsMaintenance => Status == "Maintenance";
 
-        // How long until it's free — calculated property
         public string FreeInLabel
         {
             get
