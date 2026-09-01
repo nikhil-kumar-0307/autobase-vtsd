@@ -1,19 +1,22 @@
-﻿using System.Web;
+﻿using System.Linq;
 using System.Web.Mvc;
 using autobase.Data;
-using System.Linq;
 
 namespace autobase.Filters
 {
-    public class SessionRestoreAttribute : ActionFilterAttribute
+    /// <summary>
+    /// Runs as a global authorization filter (before RoleAuthorize on any action)
+    /// to repopulate Session[...] from the DB when the forms-auth cookie is valid
+    /// but session has expired (e.g. RememberMe case).
+    /// </summary>
+    public class SessionRestoreAttribute : FilterAttribute, IAuthorizationFilter
     {
-        public override void OnActionExecuting(ActionExecutingContext filterContext)
+        public void OnAuthorization(AuthorizationContext filterContext)
         {
             var session = filterContext.HttpContext.Session;
             var user = filterContext.HttpContext.User;
 
-            // Only restore if authenticated but session is empty
-            if (user.Identity.IsAuthenticated && session["Role"] == null)
+            if (user.Identity.IsAuthenticated && session?["Role"] == null)
             {
                 var db = new AutobaseDbContext();
                 var emp = db.Employees
@@ -28,15 +31,12 @@ namespace autobase.Filters
                 }
                 else
                 {
-                    // Cookie exists but employee not found — force logout
+                    // Cookie exists but employee not found / deactivated — force logout
                     System.Web.Security.FormsAuthentication.SignOut();
                     session.Clear();
-                    filterContext.Result = new RedirectResult("/Account/Login");
-                    return;
+                    filterContext.Result = new RedirectResult("~/Account/Login");
                 }
             }
-
-            base.OnActionExecuting(filterContext);
         }
     }
 }

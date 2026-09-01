@@ -78,7 +78,7 @@ namespace autobase.Controllers
         public ActionResult AllocatedVehicle(string filter = "All", string search = "")
         {
             string role = Session["Role"]?.ToString();
-            if (role != "SuperAdmin" && role != "Admin")
+            if (role != "SuperAdmin" && role != "Admin" && role != "HOD")
                 return RedirectToAction("Login", "Account");
 
             var now = DateTime.Now;
@@ -184,7 +184,7 @@ namespace autobase.Controllers
         public ActionResult MarkReturnedFromAllocated(int requestId)
         {
             string role = Session["Role"]?.ToString();
-            if (role != "SuperAdmin" && role != "Admin")
+            if (role != "SuperAdmin" && role != "Admin" && role != "HOD")
                 return RedirectToAction("Login", "Account");
 
             var request = _db.VehicleRequests.Find(requestId);
@@ -208,14 +208,12 @@ namespace autobase.Controllers
         public ActionResult SeeRequests(string filter = "All", string search = "", DateTime? date = null)
         {
             string role = Session["Role"]?.ToString();
-            if (role != "SuperAdmin" && role != "Admin")
+            if (role != "SuperAdmin" && role != "Admin" && role != "HOD")
                 return RedirectToAction("Login", "Account");
 
-            // ── Resolve the selected date (defaults to today) ──
             DateTime selectedDate = (date ?? DateTime.Today).Date;
             DateTime nextDay = selectedDate.AddDays(1);
 
-            // ── Pull only requests made ON the selected date ──
             var dateRequests = _db.VehicleRequests
                 .Where(r => r.RequestedOn >= selectedDate && r.RequestedOn < nextDay)
                 .ToList();
@@ -234,6 +232,8 @@ namespace autobase.Controllers
 
             if (filter == "Pending")
                 requestsQuery = requestsQuery.Where(r => r.Status == "Pending");
+            else if (filter == "HODApproved")
+                requestsQuery = requestsQuery.Where(r => r.Status == "HODApproved");
             else if (filter == "Approved")
                 requestsQuery = requestsQuery.Where(r => r.Status == "Approved");
             else if (filter == "Rejected")
@@ -262,15 +262,20 @@ namespace autobase.Controllers
                     RequiredUntil = r.RequiredUntil,
                     Status = r.Status,
                     AdminNotes = r.AdminNotes,
-                    RequestedOn = r.RequestedOn
+                    RequestedOn = r.RequestedOn,
+                    HodNotes = r.HodNotes,
+                    HodApprovedBy = r.HodApprovedBy,
+                    HodApprovedOn = r.HodApprovedOn,
+                    FinalApprovedBy = r.FinalApprovedBy,
+                    FinalApprovedOn = r.FinalApprovedOn
                 };
             }).ToList();
 
-            // ── Stat cards now reflect the selected date, not all-time totals ──
             var dto = new SeeRequestDto
             {
                 TotalCount = dateRequests.Count,
                 PendingCount = dateRequests.Count(r => r.Status == "Pending"),
+                HodApprovedCount = dateRequests.Count(r => r.Status == "HODApproved"),
                 ApprovedCount = dateRequests.Count(r => r.Status == "Approved"),
                 RejectedCount = dateRequests.Count(r => r.Status == "Rejected"),
                 CompletedCount = dateRequests.Count(r => r.Status == "Returned"),
@@ -284,19 +289,60 @@ namespace autobase.Controllers
         }
 
         // ── POST: /Autobase/ApproveRequest ────────────────────────────────────
+        // Handles BOTH stages. HOD can only move Pending -> HODApproved.
+        // Admin/SuperAdmin give the final approval (HODApproved -> Approved),
+        // and — since they "can do anything" — may also approve directly from
+        // Pending, skipping the HOD stage if needed.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult ApproveRequest(int requestId, string adminNotes)
         {
             string role = Session["Role"]?.ToString();
-            if (role != "SuperAdmin" && role != "Admin")
+            if (role != "SuperAdmin" && role != "Admin" && role != "HOD")
                 return RedirectToAction("Login", "Account");
 
             var request = _db.VehicleRequests.Find(requestId);
-            if (request != null)
+            if (request == null)
+                return RedirectToAction("SeeRequests");
+
+            string approverName = Session["FullName"]?.ToString() ?? role;
+
+            if (role == "HOD")
             {
+                if (request.Status != "Pending")
+                {
+                    TempData["ErrorMessage"] = "This request is not awaiting HOD approval.";
+                    return RedirectToAction("SeeRequests");
+                }
+
+                request.Status = "HODApproved";
+                request.HodNotes = adminNotes;
+                request.HodApprovedBy = approverName;
+                request.HodApprovedOn = DateTime.Now;
+
+                _db.SaveChanges();
+                TempData["SuccessMessage"] = "Request approved. Awaiting final approval from Admin.";
+            }
+            else // Admin / SuperAdmin
+            {
+                if (request.Status != "Pending" && request.Status != "HODApproved")
+                {
+                    TempData["ErrorMessage"] = "This request cannot be approved from its current status.";
+                    return RedirectToAction("SeeRequests");
+                }
+
+                // If Admin/SuperAdmin is approving straight from Pending, record that
+                // they covered the HOD step too, so the trail stays honest.
+                if (request.Status == "Pending")
+                {
+                    request.HodApprovedBy = $"{approverName} ({role} — HOD step skipped)";
+                    request.HodApprovedOn = DateTime.Now;
+                }
+
                 request.Status = "Approved";
                 request.AdminNotes = adminNotes;
+                request.FinalApprovedBy = approverName;
+                request.FinalApprovedOn = DateTime.Now;
 
                 var vehicle = _db.Vehicles.Find(request.VehicleId);
                 if (vehicle != null)
@@ -315,11 +361,11 @@ namespace autobase.Controllers
         public ActionResult RejectRequest(int requestId, string adminNotes)
         {
             string role = Session["Role"]?.ToString();
-            if (role != "SuperAdmin" && role != "Admin")
+            if (role != "SuperAdmin" && role != "Admin" && role != "HOD")
                 return RedirectToAction("Login", "Account");
 
             var request = _db.VehicleRequests.Find(requestId);
-            if (request != null)
+            if (request != null && (request.Status == "Pending" || request.Status == "HODApproved"))
             {
                 request.Status = "Rejected";
                 request.AdminNotes = adminNotes;
@@ -336,7 +382,7 @@ namespace autobase.Controllers
         public ActionResult MarkReturned(int requestId)
         {
             string role = Session["Role"]?.ToString();
-            if (role != "SuperAdmin" && role != "Admin")
+            if (role != "SuperAdmin" && role != "Admin" && role != "HOD")
                 return RedirectToAction("Login", "Account");
 
             var request = _db.VehicleRequests.Find(requestId);
@@ -360,7 +406,7 @@ namespace autobase.Controllers
         public ActionResult PrintRequest(int id)
         {
             string role = Session["Role"]?.ToString();
-            if (role != "SuperAdmin" && role != "Admin")
+            if (role != "SuperAdmin" && role != "Admin" && role != "HOD")
                 return RedirectToAction("Login", "Account");
 
             // Fetch the vehicle request

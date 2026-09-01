@@ -6,14 +6,13 @@ namespace autobase.Models.DTOs
     public class SeeRequestDto
     {
         public int TotalCount { get; set; }
-        public int PendingCount { get; set; }
+        public int PendingCount { get; set; }        // awaiting HOD
+        public int HodApprovedCount { get; set; }     // awaiting final approval
         public int ApprovedCount { get; set; }
         public int RejectedCount { get; set; }
         public int CompletedCount { get; set; }
-
         public string ActiveFilter { get; set; } = "All";
         public string SearchTerm { get; set; } = "";
-
         public DateTime SelectedDate { get; set; } = DateTime.Today;
         public List<SeeRequestItem> Requests { get; set; } = new List<SeeRequestItem>();
     }
@@ -35,9 +34,14 @@ namespace autobase.Models.DTOs
         public string AdminNotes { get; set; }
         public DateTime RequestedOn { get; set; }
 
+        public string HodNotes { get; set; }
+        public string HodApprovedBy { get; set; }
+        public DateTime? HodApprovedOn { get; set; }
+        public string FinalApprovedBy { get; set; }
+        public DateTime? FinalApprovedOn { get; set; }
+
         public double DurationHours =>
             (RequiredUntil - RequiredFrom).TotalHours;
-
         public bool IsOverdue =>
             Status == "Approved" && RequiredUntil < DateTime.Now;
     }

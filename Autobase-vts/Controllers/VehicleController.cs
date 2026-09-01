@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Web.Mvc;
 using autobase.Data;
+using autobase.Helpers;
 using autobase.Models;
 using autobase.Models.DTOs;
 
@@ -78,13 +79,10 @@ namespace autobase.Controllers
         // ── EDIT LIST ────────────────────────────────────────────────────────
 
         // GET: /Vehicle/EditVehicle (list)
+        [RoleAuthorize("SuperAdmin")]
         [HttpGet]
         public ActionResult EditVehicle()
         {
-            string role = Session["Role"]?.ToString();
-            if (role == "Employee")
-                return RedirectToAction("Employee", "Dashboard");
-
             var vehicles = _db.Vehicles
                               .Where(v => v.IsActive)
                               .OrderBy(v => v.VehicleName)
@@ -96,15 +94,12 @@ namespace autobase.Controllers
         // ── EDIT FORM ────────────────────────────────────────────────────────
 
         // GET: /Vehicle/EditVehicle/5
+        [RoleAuthorize("SuperAdmin")]
         [HttpGet]
         public ActionResult EditVehicleForm(int? id)
         {
             if (id == null)
                 return RedirectToAction("EditVehicle");
-
-            string role = Session["Role"]?.ToString();
-            if (role == "Employee")
-                return RedirectToAction("Employee", "Dashboard");
 
             var vehicle = _db.Vehicles.Find(id.Value);
             if (vehicle == null || !vehicle.IsActive)
@@ -132,14 +127,11 @@ namespace autobase.Controllers
         }
 
         // POST: /Vehicle/EditVehicleForm
+        [RoleAuthorize("SuperAdmin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult EditVehicleForm(EditVehicleDto model)
         {
-            string role = Session["Role"]?.ToString();
-            if (role == "Employee")
-                return RedirectToAction("Employee", "Dashboard");
-
             if (!string.IsNullOrEmpty(model.RegistrationNo))
             {
                 bool regExists = _db.Vehicles.Any(v =>
@@ -189,13 +181,10 @@ namespace autobase.Controllers
         // ── DELETE ───────────────────────────────────────────────────────────
 
         // GET: /Vehicle/DeleteVehicle
+        [RoleAuthorize("SuperAdmin")]
         [HttpGet]
         public ActionResult DeleteVehicle()
         {
-            string role = Session["Role"]?.ToString();
-            if (role == "Employee")
-                return RedirectToAction("Employee", "Dashboard");
-
             var vehicles = _db.Vehicles
                               .Where(v => v.IsActive)
                               .OrderBy(v => v.VehicleName)
@@ -205,14 +194,11 @@ namespace autobase.Controllers
         }
 
         // POST: /Vehicle/Disable
+        [RoleAuthorize("SuperAdmin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Disable(int id)
         {
-            string role = Session["Role"]?.ToString();
-            if (role == "Employee")
-                return RedirectToAction("Employee", "Dashboard");
-
             var vehicle = _db.Vehicles.Find(id);
 
             if (vehicle == null || !vehicle.IsActive)

@@ -2,6 +2,7 @@
 @{
     ViewBag.Title = "See Requests";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    string currentRole = Session["Role"]?.ToString();
 }
 
 @section Styles {
@@ -143,7 +144,7 @@
         /* Stat cards */
         .stats-row {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
+            grid-template-columns: repeat(6, 1fr);
             gap: 14px;
             margin-bottom: 22px;
         }
@@ -172,6 +173,10 @@
 
             .stat-card.c-amber::after {
                 background: #d97706;
+            }
+
+            .stat-card.c-indigo::after {
+                background: #4f46e5;
             }
 
             .stat-card.c-green::after {
@@ -247,6 +252,7 @@
         .filter-tabs {
             display: flex;
             gap: 6px;
+            flex-wrap: wrap;
         }
 
         .ftab {
@@ -281,6 +287,12 @@
             .ftab.f-pending {
                 background: #d97706;
                 border-color: #d97706;
+                color: #fff;
+            }
+
+            .ftab.f-hodapproved {
+                background: #4f46e5;
+                border-color: #4f46e5;
                 color: #fff;
             }
 
@@ -520,6 +532,16 @@
 
         .s-dot.pending {
             background: #ca8a04;
+        }
+
+        .s-pill.hodapproved {
+            background: #e0e7ff;
+            color: #3730a3;
+            border: 1px solid #c7d2fe;
+        }
+
+        .s-dot.hodapproved {
+            background: #4f46e5;
         }
 
         .s-pill.approved {
@@ -990,8 +1012,12 @@
         <div class="stat-num">@Model.TotalCount</div>
     </div>
     <div class="stat-card c-amber">
-        <div class="stat-lbl">Pending</div>
+        <div class="stat-lbl">Pending (HOD)</div>
         <div class="stat-num">@Model.PendingCount</div>
+    </div>
+    <div class="stat-card c-indigo">
+        <div class="stat-lbl">Awaiting Final</div>
+        <div class="stat-num">@Model.HodApprovedCount</div>
     </div>
     <div class="stat-card c-green">
         <div class="stat-lbl">Approved</div>
@@ -1021,6 +1047,8 @@
            class="ftab @(Model.ActiveFilter=="All"       ? "f-all"       : "")">All</a>
         <a href="@Url.Action("SeeRequests","Autobase", new { filter="Pending",   search=Model.SearchTerm, date=Model.SelectedDate.ToString("yyyy-MM-dd") })"
            class="ftab @(Model.ActiveFilter=="Pending"   ? "f-pending"   : "")">Pending</a>
+        <a href="@Url.Action("SeeRequests","Autobase", new { filter="HODApproved", search=Model.SearchTerm, date=Model.SelectedDate.ToString("yyyy-MM-dd") })"
+           class="ftab @(Model.ActiveFilter=="HODApproved" ? "f-hodapproved" : "")">Awaiting Final</a>
         <a href="@Url.Action("SeeRequests","Autobase", new { filter="Approved",  search=Model.SearchTerm, date=Model.SelectedDate.ToString("yyyy-MM-dd") })"
            class="ftab @(Model.ActiveFilter=="Approved"  ? "f-approved"  : "")">Approved</a>
         <a href="@Url.Action("SeeRequests","Autobase", new { filter="Rejected",  search=Model.SearchTerm, date=Model.SelectedDate.ToString("yyyy-MM-dd") })"
@@ -1070,6 +1098,7 @@
                     string sc = r.Status == "Approved" ? "approved"
                               : r.Status == "Rejected" ? "rejected"
                               : r.Status == "Returned" ? "returned"
+                              : r.Status == "HODApproved" ? "hodapproved"
                               : "pending";
 
                     double hrs = r.DurationHours;
@@ -1083,7 +1112,7 @@
                             .Select(w => w[0].ToString().ToUpper()));
 
                     // ── Detect if this is a scheduled/future request for an in-use vehicle ──
-                    bool isScheduled = r.Status == "Pending" && r.RequiredFrom > nowTime;
+                    bool isScheduled = (r.Status == "Pending" || r.Status == "HODApproved") && r.RequiredFrom > nowTime;
 
                     // Safe strings for JS
                     string safeVehicle = r.VehicleName.Replace("'", "\\'");
@@ -1179,14 +1208,23 @@
                                     Starts @r.RequiredFrom.ToString("dd MMM, hh:mm tt")
                                 </div>
                             }
+
+                            @* small note under status when HOD already signed off, waiting on Admin *@
+                            @if (r.Status == "HODApproved" && !string.IsNullOrEmpty(r.HodApprovedBy))
+                            {
+                                <div class="date-sub" style="margin-top:4px;">HOD: @r.HodApprovedBy</div>
+                            }
                         </td>
 
                         <td>
-                            @if (!string.IsNullOrEmpty(r.AdminNotes))
+                            @{
+                                string notesToShow = !string.IsNullOrEmpty(r.AdminNotes) ? r.AdminNotes : r.HodNotes;
+                            }
+                            @if (!string.IsNullOrEmpty(notesToShow))
                             {
-                                <span class="note-tag" title="@r.AdminNotes">
+                                <span class="note-tag" title="@notesToShow">
                                     <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" /></svg>
-                                    @r.AdminNotes
+                                    @notesToShow
                                 </span>
                             }
                             else
@@ -1199,14 +1237,50 @@
                             <div class="action-col">
                                 @if (r.Status == "Pending")
                                 {
-                                    <button class="btn-approve"
-                                            onclick="openModal('approve', @r.RequestId, '@safeVehicle', '@safeEmp', @(isScheduled ? "true" : "false"), '@safeFrom', '@safeUntil')">
-                                        ✓ Approve
-                                    </button>
-                                    <button class="btn-reject"
-                                            onclick="openModal('reject', @r.RequestId, '@safeVehicle', '@safeEmp', @(isScheduled ? "true" : "false"), '@safeFrom', '@safeUntil')">
-                                        ✕ Reject
-                                    </button>
+                                    if (currentRole == "HOD")
+                                    {
+                                        <button class="btn-approve"
+                                                onclick="openModal('approve', @r.RequestId, '@safeVehicle', '@safeEmp', @(isScheduled ? "true" : "false"), '@safeFrom', '@safeUntil')">
+                                            ✓ Approve (HOD)
+                                        </button>
+                                        <button class="btn-reject"
+                                                onclick="openModal('reject', @r.RequestId, '@safeVehicle', '@safeEmp', @(isScheduled ? "true" : "false"), '@safeFrom', '@safeUntil')">
+                                            ✕ Reject
+                                        </button>
+                                    }
+                                    else if (currentRole == "Admin" || currentRole == "SuperAdmin")
+                                    {
+                                        <button class="btn-approve"
+                                                onclick="openModal('approve', @r.RequestId, '@safeVehicle', '@safeEmp', @(isScheduled ? "true" : "false"), '@safeFrom', '@safeUntil')">
+                                            ✓ Approve (Skip HOD)
+                                        </button>
+                                        <button class="btn-reject"
+                                                onclick="openModal('reject', @r.RequestId, '@safeVehicle', '@safeEmp', @(isScheduled ? "true" : "false"), '@safeFrom', '@safeUntil')">
+                                            ✕ Reject
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <span style="font-size:12px;color:#ccc;">—</span>
+                                    }
+                                }
+                                else if (r.Status == "HODApproved")
+                                {
+                                    if (currentRole == "Admin" || currentRole == "SuperAdmin")
+                                    {
+                                        <button class="btn-approve"
+                                                onclick="openModal('approve', @r.RequestId, '@safeVehicle', '@safeEmp', @(isScheduled ? "true" : "false"), '@safeFrom', '@safeUntil')">
+                                            ✓ Final Approve
+                                        </button>
+                                        <button class="btn-reject"
+                                                onclick="openModal('reject', @r.RequestId, '@safeVehicle', '@safeEmp', @(isScheduled ? "true" : "false"), '@safeFrom', '@safeUntil')">
+                                            ✕ Reject
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <span style="font-size:12px;color:#a16207;">Awaiting Admin approval</span>
+                                    }
                                 }
                                 else if (r.Status == "Approved")
                                 {

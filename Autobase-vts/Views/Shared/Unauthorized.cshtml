@@ -1,0 +1,15 @@
+﻿@{
+    ViewBag.Title = "Access Denied";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div style="text-align:center; padding:60px 20px;">
+    <h2 style="font-family:'Barlow',sans-serif; font-size:22px; margin-bottom:10px;">403 — Access Denied</h2>
+    <p style="font-family:'Barlow',sans-serif; color:#777; margin-bottom:20px;">
+        You don't have permission to view this page.
+    </p>
+    <a href="@Url.Action("Index", "Dashboard")"
+       style="font-family:'Barlow',sans-serif; font-weight:600; color:#0d0d0d; text-decoration:none; border:1.5px solid #eee; padding:8px 16px; border-radius:8px;">
+        Back to Dashboard
+    </a>
+</div>

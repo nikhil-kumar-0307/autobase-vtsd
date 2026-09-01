@@ -89,7 +89,7 @@ namespace autobase.Controllers
         private ActionResult RedirectToRole(string role = null)
         {
             role = role ?? Session["Role"]?.ToString() ?? "Employee";
-            if (role == "SuperAdmin" || role == "Admin")
+            if (role == "SuperAdmin" || role == "Admin" || role == "HOD")
                 return RedirectToAction("Index", "Dashboard");
 
             return RedirectToAction("EmployeeDashboard", "Dashboard");

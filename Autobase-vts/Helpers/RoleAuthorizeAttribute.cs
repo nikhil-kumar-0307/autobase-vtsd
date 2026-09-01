@@ -1,5 +1,5 @@
-﻿using System.Web.Mvc;
-using System.Web;
+﻿using System.Web;
+using System.Web.Mvc;
 
 namespace autobase.Helpers
 {
@@ -42,6 +42,7 @@ namespace autobase.Helpers
             else
             {
                 // Logged in but wrong role → 403 Forbidden view
+                filterContext.HttpContext.Response.StatusCode = 403;
                 filterContext.Result = new ViewResult { ViewName = "Unauthorized" };
             }
         }

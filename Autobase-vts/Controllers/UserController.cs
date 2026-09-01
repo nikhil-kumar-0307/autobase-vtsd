@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Web.Mvc;
 using autobase.Data;
+using autobase.Helpers;
 using autobase.Models;
 using autobase.Models.DTOs;
 
@@ -72,48 +73,31 @@ namespace autobase.Controllers
 
         // ── EDIT LIST ─────────────────────────────────────────────────────────
 
+        [RoleAuthorize("SuperAdmin")]
         [HttpGet]
         public ActionResult EditIndex()
         {
-            string role = Session["Role"]?.ToString();
-            if (role != "SuperAdmin" && role != "Admin")
-                return RedirectToAction("Index", "Dashboard");
-
             var users = _db.Employees
                            .Where(e => e.IsActive && e.Role != "SuperAdmin")
                            .OrderBy(e => e.FullName)
                            .ToList();
-
-            // SuperAdmin sees everyone except self; Admin sees only Employees
-            if (role == "Admin")
-                users = users.Where(e => e.Role == "Employee").ToList();
 
             return View("EditUserList", users);
         }
 
         // ── EDIT FORM ─────────────────────────────────────────────────────────
 
+        [RoleAuthorize("SuperAdmin")]
         [HttpGet]
         public ActionResult Edit(int? id)
         {
             if (id == null)
                 return RedirectToAction("EditIndex");
 
-            string role = Session["Role"]?.ToString();
-            if (role != "SuperAdmin" && role != "Admin")
-                return RedirectToAction("Index", "Dashboard");
-
             var emp = _db.Employees.Find(id.Value);
             if (emp == null || !emp.IsActive)
             {
                 TempData["Error"] = "User not found.";
-                return RedirectToAction("EditIndex");
-            }
-
-            // Admin cannot edit Admin or SuperAdmin
-            if (role == "Admin" && emp.Role != "Employee")
-            {
-                TempData["Error"] = "You do not have permission to edit this user.";
                 return RedirectToAction("EditIndex");
             }
 
@@ -129,19 +113,15 @@ namespace autobase.Controllers
                 Email = emp.Email
             };
 
-            ViewBag.SessionRole = role;
+            ViewBag.SessionRole = "SuperAdmin";
             return View("EditUser", dto);
         }
 
+        [RoleAuthorize("SuperAdmin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Edit(EditUserDto model)
         {
-            string role = Session["Role"]?.ToString();
-            if (role != "SuperAdmin" && role != "Admin")
-                return RedirectToAction("Index", "Dashboard");
-
-            // Duplicate employee number check (exclude self)
             if (!string.IsNullOrEmpty(model.EmployeeNumber))
             {
                 bool exists = _db.Employees.Any(e =>
@@ -152,13 +132,12 @@ namespace autobase.Controllers
                         "An employee with this employee number already exists.");
             }
 
-            // NewPassword is optional — clear its errors if blank
             if (string.IsNullOrEmpty(model.NewPassword))
                 ModelState.Remove("NewPassword");
 
             if (!ModelState.IsValid)
             {
-                ViewBag.SessionRole = role;
+                ViewBag.SessionRole = "SuperAdmin";
                 return View("EditUser", model);
             }
 
