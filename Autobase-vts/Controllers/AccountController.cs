@@ -13,7 +13,7 @@ namespace autobase.Controllers
     {
         private readonly AutobaseDbContext _db = new AutobaseDbContext();
 
-        // GET: /Account/Login  
+        // GET: /Account/Login
         [HttpGet]
         public ActionResult Login()
         {
@@ -32,6 +32,31 @@ namespace autobase.Controllers
                         Session["EmployeeNumber"] = emp.EmployeeNumber;
                         Session["EmployeeId"] = emp.Id;
                     }
+                    else
+                    {
+                        // The remembered cookie might belong to a QMS-sourced login instead
+                        using (var qmsDb = new QmsLookupDbContext())
+                        {
+                            var qmsEmp = qmsDb.EmployeeMasters
+                                .FirstOrDefault(e => e.EmployeeNo == User.Identity.Name);
+
+                            if (qmsEmp != null)
+                            {
+                                Session["Role"] = "Employee";
+                                Session["FullName"] = qmsEmp.EmployeeName;
+                                Session["EmployeeNumber"] = qmsEmp.EmployeeNo;
+                                Session["EmployeeId"] = 0; // see note below
+                                Session["FromQMS"] = true;
+                            }
+                            else
+                            {
+                                // Cookie no longer matches either source — force a fresh login
+                                FormsAuthentication.SignOut();
+                                Session.Clear();
+                                return View(new LoginDto());
+                            }
+                        }
+                    }
                 }
                 return RedirectToRole();
             }
@@ -46,32 +71,53 @@ namespace autobase.Controllers
             if (!ModelState.IsValid)
                 return View(model);
 
+            // 1) Try Autobase's own Employees table first — this is the only
+            //    source that can produce SuperAdmin/Admin/HOD roles.
             var employee = _db.Employees
                 .FirstOrDefault(e => e.EmployeeNumber == model.EmployeeNumber && e.IsActive);
 
-            if (employee == null || !PasswordHelper.VerifyPassword(model.Password, employee.PasswordHash))
+            if (employee != null && PasswordHelper.VerifyPassword(model.Password, employee.PasswordHash))
             {
-                ModelState.AddModelError("", "Invalid employee number or password.");
-                return View(model);
+                employee.LastLoginAt = DateTime.Now;
+                _db.SaveChanges();
+
+                FormsAuthentication.SetAuthCookie(employee.EmployeeNumber, model.RememberMe);
+                Session["Role"] = employee.Role;
+                Session["FullName"] = employee.FullName;
+                Session["EmployeeNumber"] = employee.EmployeeNumber;
+                Session["EmployeeId"] = employee.Id;
+
+                if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                    return Redirect(returnUrl);
+                return RedirectToRole(employee.Role);
             }
 
-            // Update last login
-            employee.LastLoginAt = DateTime.Now;
-            _db.SaveChanges();
+            // 2) Fall back to QMS's EmployeeMaster table. There's no Role column
+            //    there, so anyone who logs in this way is always a plain "Employee".
+            using (var qmsDb = new QmsLookupDbContext())
+            {
+                var qmsEmployee = qmsDb.EmployeeMasters
+                    .FirstOrDefault(e => e.EmployeeNo == model.EmployeeNumber);
 
-            // Issue forms auth ticket
-            FormsAuthentication.SetAuthCookie(employee.EmployeeNumber, model.RememberMe);
+                // QMS stores the password as plain text (see EmployeeMasterController),
+                // so this is a direct string comparison — NOT run through PasswordHelper.
+                if (qmsEmployee != null && qmsEmployee.Password == model.Password)
+                {
+                    FormsAuthentication.SetAuthCookie(qmsEmployee.EmployeeNo, model.RememberMe);
+                    Session["Role"] = "Employee";
+                    Session["FullName"] = qmsEmployee.EmployeeName;
+                    Session["EmployeeNumber"] = qmsEmployee.EmployeeNo;
+                    Session["EmployeeId"] = 0; // see note below — not an Autobase Employees.Id
+                    Session["FromQMS"] = true;
 
-            // Store role info in session for sidebar / topbar
-            Session["Role"] = employee.Role;
-            Session["FullName"] = employee.FullName;
-            Session["EmployeeNumber"] = employee.EmployeeNumber;
-            Session["EmployeeId"] = employee.Id;
+                    if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+                        return Redirect(returnUrl);
+                    return RedirectToAction("EmployeeDashboard", "Dashboard");
+                }
+            }
 
-            if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
-                return Redirect(returnUrl);
-
-            return RedirectToRole(employee.Role);
+            ModelState.AddModelError("", "Invalid employee number or password.");
+            return View(model);
         }
 
         // GET: /Account/Logout
@@ -84,16 +130,15 @@ namespace autobase.Controllers
             return RedirectToAction("Login");
         }
 
-        // ── Helpers ──────────────────────────────────────────────────────────        
-
+        // ── Helpers ──────────────────────────────────────────────────────────
         private ActionResult RedirectToRole(string role = null)
         {
             role = role ?? Session["Role"]?.ToString() ?? "Employee";
             if (role == "SuperAdmin" || role == "Admin" || role == "HOD")
                 return RedirectToAction("Index", "Dashboard");
-
             return RedirectToAction("EmployeeDashboard", "Dashboard");
         }
+
         protected override void Dispose(bool disposing)
         {
             if (disposing) _db.Dispose();

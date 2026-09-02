@@ -2,7 +2,6 @@
 @{
     ViewBag.Title = "Add User";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
-    string sessionRole = Session["Role"]?.ToString() ?? "";
 }
 
 <style>
@@ -233,7 +232,7 @@
     /* ── Role cards ── */
     .role-grid {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1fr 1fr 1fr;
         gap: 14px;
     }
 
@@ -603,22 +602,36 @@
         <div class="section-body">
             <div class="role-grid" id="roleGrid">
 
-                @if (sessionRole == "SuperAdmin")
-                {
-                    <!-- Admin card — only SuperAdmin can assign Admin -->
-                    <label class="role-card @(Model.Role == "Admin" ? "selected" : "")" id="card-Admin">
-                        <input type="radio" name="Role" value="Admin"
-                               @(Model.Role == "Admin" ? "checked" : "")
-                               onchange="selectRole('Admin')" />
-                        <div class="role-card-icon">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                            </svg>
-                        </div>
-                        <div class="role-card-name">Admin</div>
-                        <div class="role-card-desc">Full system access</div>
-                    </label>
-                }
+                <!-- Admin card -->
+                <label class="role-card @(Model.Role == "Admin" ? "selected" : "")" id="card-Admin">
+                    <input type="radio" name="Role" value="Admin"
+                           @(Model.Role == "Admin" ? "checked" : "")
+                           onchange="selectRole('Admin')" />
+                    <div class="role-card-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                        </svg>
+                    </div>
+                    <div class="role-card-name">Admin</div>
+                    <div class="role-card-desc">Full system access</div>
+                </label>
+
+                <!-- HOD card -->
+                <label class="role-card @(Model.Role == "HOD" ? "selected" : "")" id="card-HOD">
+                    <input type="radio" name="Role" value="HOD"
+                           @(Model.Role == "HOD" ? "checked" : "")
+                           onchange="selectRole('HOD')" />
+                    <div class="role-card-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+                            <circle cx="9" cy="7" r="4" />
+                            <path d="M23 21v-2a4 4 0 00-3-3.87" />
+                            <path d="M16 3.13a4 4 0 010 7.75" />
+                        </svg>
+                    </div>
+                    <div class="role-card-name">HOD</div>
+                    <div class="role-card-desc">Departmental approvals</div>
+                </label>
 
                 <!-- Employee card -->
                 <label class="role-card @(Model.Role == "Employee" ? "selected" : "")" id="card-Employee">
@@ -716,7 +729,7 @@
     <script>
         // Role card selection
         function selectRole(role) {
-            document.querySelectorAll('.role-card').forEach(function(c) {
+            document.querySelectorAll('.role-card').forEach(function (c) {
                 c.classList.remove('selected');
             });
             var card = document.getElementById('card-' + role);

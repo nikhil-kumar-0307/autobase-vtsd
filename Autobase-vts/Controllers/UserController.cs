@@ -15,28 +15,27 @@ namespace autobase.Controllers
     {
         private readonly AutobaseDbContext _db = new AutobaseDbContext();
 
+        // Roles that can be assigned to a user via the Add/Edit forms.
+        // Only SuperAdmin reaches these actions (see RoleAuthorize below),
+        // so SuperAdmin itself is intentionally excluded from self-service creation.
+        private static readonly string[] AssignableRoles = { "Admin", "HOD", "Employee" };
+
         // ── ADD ──────────────────────────────────────────────────────────────
 
+        [RoleAuthorize("SuperAdmin")]
         [HttpGet]
         public ActionResult Add()
         {
-            string role = Session["Role"]?.ToString();
-            if (role != "SuperAdmin" && role != "Admin")
-                return RedirectToAction("Index", "Dashboard");
-
             return View("AddUser", new AddUserDto());
         }
 
+        [RoleAuthorize("SuperAdmin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Add(AddUserDto model)
         {
-            string role = Session["Role"]?.ToString();
-            if (role != "SuperAdmin" && role != "Admin")
-                return RedirectToAction("Index", "Dashboard");
-
-            if (role == "Admin" && model.Role == "SuperAdmin")
-                ModelState.AddModelError("Role", "Admins cannot create SuperAdmin accounts.");
+            if (string.IsNullOrEmpty(model.Role) || !AssignableRoles.Contains(model.Role))
+                ModelState.AddModelError("Role", "Please select a valid role.");
 
             if (!string.IsNullOrEmpty(model.EmployeeNumber))
             {
@@ -122,6 +121,9 @@ namespace autobase.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Edit(EditUserDto model)
         {
+            if (string.IsNullOrEmpty(model.Role) || !AssignableRoles.Contains(model.Role))
+                ModelState.AddModelError("Role", "Please select a valid role.");
+
             if (!string.IsNullOrEmpty(model.EmployeeNumber))
             {
                 bool exists = _db.Employees.Any(e =>
