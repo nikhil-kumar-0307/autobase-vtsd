@@ -174,3 +174,5 @@ D:\ntpc\autobase-vtsd\Autobase-vts\obj\Debug\Autobase-vts.csproj.CoreCompileInpu
 D:\ntpc\autobase-vtsd\Autobase-vts\obj\Debug\Autobase-vts.csproj.CopyComplete
 D:\ntpc\autobase-vtsd\Autobase-vts\obj\Debug\Autobase-vts.dll
 D:\ntpc\autobase-vtsd\Autobase-vts\obj\Debug\Autobase-vts.pdb
+D:\ntpc\autobase-vtsd\Autobase-vts\obj\Debug\Autobase-vts.csproj.AssemblyReference.cache
+D:\ntpc\autobase-vtsd\Autobase-vts\obj\Debug\autobase.Migrations.UpdateVehicleRequestTable.resources

@@ -2,6 +2,11 @@
 @{
     ViewBag.Title = "Edit Vehicle";
     Layout = "~/Views/Shared/_AdminLayout.cshtml";
+
+    int currentPage = (int)(ViewBag.CurrentPage ?? 1);
+    int totalPages = (int)(ViewBag.TotalPages ?? 1);
+    int totalCount = (int)(ViewBag.TotalCount ?? Model.Count);
+    int pageSize = (int)(ViewBag.PageSize ?? 15);
 }
 
 <style>
@@ -373,6 +378,61 @@
             color: #ccc;
         }
 
+    /* ── Pagination ── */
+    .pagination-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 22px;
+        border-top: 1px solid #f5f5f5;
+        background: #fafafa;
+    }
+
+    .pagination-info {
+        font-size: 12px;
+        color: #999;
+        font-weight: 500;
+    }
+
+    .pagination-controls {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .page-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 32px;
+        height: 32px;
+        padding: 0 8px;
+        border: 1.5px solid #e8e8e8;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 700;
+        color: #555;
+        text-decoration: none;
+        background: #fff;
+        transition: border-color .2s, background .2s, color .2s;
+    }
+
+        .page-btn:hover {
+            border-color: #aaa;
+            color: #0d0d0d;
+        }
+
+        .page-btn.active {
+            background: #1a2340;
+            border-color: #1a2340;
+            color: #fff;
+        }
+
+        .page-btn.disabled {
+            pointer-events: none;
+            opacity: .35;
+        }
+
     @@keyframes fadeUp {
         from {
             opacity: 0;
@@ -440,7 +500,7 @@
     <div class="table-card-header">
         <div style="display:flex;align-items:center;">
             <span class="table-title">All Vehicles</span>
-            <span class="table-count">@Model.Count</span>
+            <span class="table-count">@totalCount</span>
         </div>
         <div class="search-wrap">
             <span class="search-icon">
@@ -449,7 +509,7 @@
                     <line x1="21" y1="21" x2="16.65" y2="16.65" />
                 </svg>
             </span>
-            <input type="text" id="searchInput" placeholder="Search..." oninput="filterTable(this.value)" />
+            <input type="text" id="searchInput" placeholder="Search this page..." oninput="filterTable(this.value)" />
         </div>
     </div>
 
@@ -480,7 +540,7 @@
                 </tr>
             </thead>
             <tbody>
-                @{ int i = 1; }
+                @{ int i = ((currentPage - 1) * pageSize) + 1; }
                 @foreach (var v in Model)
                 {
                     string statusClass = v.Status?.ToLower() == "available" ? "available"
@@ -511,6 +571,36 @@
                 }
             </tbody>
         </table>
+
+        <!-- Pagination -->
+        if (totalPages > 1)
+        {
+            <div class="pagination-bar">
+                <span class="pagination-info">
+                    Showing @(((currentPage - 1) * pageSize) + 1)–@(Math.Min(currentPage * pageSize, totalCount)) of @totalCount vehicles
+                </span>
+
+                <div class="pagination-controls">
+                    <a href="@Url.Action("EditVehicle", "Vehicle", new { page = 1 })"
+                       class="page-btn @(currentPage == 1 ? "disabled" : "")">«</a>
+
+                    <a href="@Url.Action("EditVehicle", "Vehicle", new { page = currentPage - 1 })"
+                       class="page-btn @(currentPage == 1 ? "disabled" : "")">‹</a>
+
+                    @for (int p = Math.Max(1, currentPage - 2); p <= Math.Min(totalPages, currentPage + 2); p++)
+                    {
+                        <a href="@Url.Action("EditVehicle", "Vehicle", new { page = p })"
+                           class="page-btn @(p == currentPage ? "active" : "")">@p</a>
+                    }
+
+                    <a href="@Url.Action("EditVehicle", "Vehicle", new { page = currentPage + 1 })"
+                       class="page-btn @(currentPage == totalPages ? "disabled" : "")">›</a>
+
+                    <a href="@Url.Action("EditVehicle", "Vehicle", new { page = totalPages })"
+                       class="page-btn @(currentPage == totalPages ? "disabled" : "")">»</a>
+                </div>
+            </div>
+        }
     }
 </div>
 
@@ -519,7 +609,7 @@
         function filterTable(q) {
             q = q.toLowerCase();
             var rows = document.querySelectorAll('#vehicleTable tbody tr');
-            rows.forEach(function(row) {
+            rows.forEach(function (row) {
                 row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
             });
         }

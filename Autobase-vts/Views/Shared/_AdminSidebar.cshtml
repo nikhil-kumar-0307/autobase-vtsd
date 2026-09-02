@@ -34,28 +34,38 @@
         </a>
 
         <div class="nav-section-label">Vehicle</div>
-        <a href="@Url.Action("Create", "VehicleType")"
-           class="nav-item @(currentController == "VehicleType" && currentAction == "Create" ? "active" : "")">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10" />
-                <line x1="12" y1="8" x2="12" y2="16" />
-                <line x1="8" y1="12" x2="16" y2="12" />
-            </svg>
-            Create Vehicle
-        </a>
 
-        <a href="@Url.Action("AddVehicle", "Vehicle")"
-           class="nav-item @(currentController == "Vehicle" && currentAction == "AddVehicle" ? "active" : "")">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="1" y="3" width="15" height="13" rx="1" />
-                <path d="M16 8h4l3 4v3h-7V8z" />
-                <circle cx="5.5" cy="18.5" r="2.5" />
-                <circle cx="18.5" cy="18.5" r="2.5" />
-            </svg>
-            Add Vehicle
-        </a>
-
+        @* Create Vehicle (vehicle type catalogue) — SuperAdmin only. Admin and HOD no longer see this. *@
         @if (role == "SuperAdmin")
+        {
+            <a href="@Url.Action("Create", "VehicleType")"
+               class="nav-item @(currentController == "VehicleType" && currentAction == "Create" ? "active" : "")">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="12" y1="8" x2="12" y2="16" />
+                    <line x1="8" y1="12" x2="16" y2="12" />
+                </svg>
+                Create Vehicle
+            </a>
+        }
+
+        @* Add Vehicle — SuperAdmin only. Admin and HOD no longer see this. *@
+        @if (role == "SuperAdmin")
+        {
+            <a href="@Url.Action("AddVehicle", "Vehicle")"
+               class="nav-item @(currentController == "Vehicle" && currentAction == "AddVehicle" ? "active" : "")">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="1" y="3" width="15" height="13" rx="1" />
+                    <path d="M16 8h4l3 4v3h-7V8z" />
+                    <circle cx="5.5" cy="18.5" r="2.5" />
+                    <circle cx="18.5" cy="18.5" r="2.5" />
+                </svg>
+                Add Vehicle
+            </a>
+        }
+
+        @* Edit Vehicle — SuperAdmin (full edit) + Admin (Status only). HOD still has no access. *@
+        @if (role == "SuperAdmin" || role == "Admin")
         {
             <a href="@Url.Action("EditVehicle", "Vehicle")"
                class="nav-item @(currentController == "Vehicle" && (currentAction == "EditVehicle" || currentAction == "EditVehicleForm") ? "active" : "")">
@@ -65,7 +75,11 @@
                 </svg>
                 Edit Vehicle
             </a>
+        }
 
+        @* Delete Vehicle — SuperAdmin only (unchanged). *@
+        @if (role == "SuperAdmin")
+        {
             <a href="@Url.Action("DeleteVehicle", "Vehicle")"
                class="nav-item @(currentController == "Vehicle" && currentAction == "DeleteVehicle" ? "active" : "")">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

@@ -2,8 +2,11 @@
   "ExpandedNodes": [
     "",
     "\\Autobase-vts",
-    "\\Autobase-vts\\Controllers"
+    "\\Autobase-vts\\App_Start",
+    "\\Autobase-vts\\Controllers",
+    "\\Autobase-vts\\Views",
+    "\\Autobase-vts\\Views\\Shared"
   ],
-  "SelectedNode": "\\Autobase-vts\\Controllers\\VehicleController.cs",
+  "SelectedNode": "\\Autobase-vts\\Web.config",
   "PreviewInSolutionExplorer": false
 }

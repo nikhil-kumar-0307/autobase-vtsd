@@ -1,0 +1,37 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "D:\\ntpc\\autobase-vtsd\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{E74715E6-0C66-41B6-834C-AF56DAC6D5A7}|Autobase-vts\\Autobase-vts.csproj|d:\\ntpc\\autobase-vtsd\\autobase-vts\\web.config||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
+      "RelativeMoniker": "D:0:0:{E74715E6-0C66-41B6-834C-AF56DAC6D5A7}|Autobase-vts\\Autobase-vts.csproj|solutionrelative:autobase-vts\\web.config||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Web.config",
+              "DocumentMoniker": "D:\\ntpc\\autobase-vtsd\\Autobase-vts\\Web.config",
+              "RelativeDocumentMoniker": "Autobase-vts\\Web.config",
+              "ToolTip": "D:\\ntpc\\autobase-vtsd\\Autobase-vts\\Web.config",
+              "RelativeToolTip": "Autobase-vts\\Web.config",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000601|",
+              "WhenOpened": "2026-07-03T10:12:45.096Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

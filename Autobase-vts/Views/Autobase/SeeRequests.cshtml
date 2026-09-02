@@ -1237,6 +1237,8 @@
                             <div class="action-col">
                                 @if (r.Status == "Pending")
                                 {
+                                    @* Admin CANNOT act on a Pending request — HOD must review it first.
+                                        Only HOD (first-stage) or SuperAdmin (can bypass HOD) act here. *@
                                     if (currentRole == "HOD")
                                     {
                                         <button class="btn-approve"
@@ -1248,7 +1250,7 @@
                                             ✕ Reject
                                         </button>
                                     }
-                                    else if (currentRole == "Admin" || currentRole == "SuperAdmin")
+                                    else if (currentRole == "SuperAdmin")
                                     {
                                         <button class="btn-approve"
                                                 onclick="openModal('approve', @r.RequestId, '@safeVehicle', '@safeEmp', @(isScheduled ? "true" : "false"), '@safeFrom', '@safeUntil')">
@@ -1258,6 +1260,10 @@
                                                 onclick="openModal('reject', @r.RequestId, '@safeVehicle', '@safeEmp', @(isScheduled ? "true" : "false"), '@safeFrom', '@safeUntil')">
                                             ✕ Reject
                                         </button>
+                                    }
+                                    else if (currentRole == "Admin")
+                                    {
+                                        <span style="font-size:12px;color:#a16207;">Awaiting HOD approval</span>
                                     }
                                     else
                                     {

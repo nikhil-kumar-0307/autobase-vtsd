@@ -137,6 +137,8 @@
     <Compile Include="Controllers\VehicleController.cs" />
     <Compile Include="Controllers\VehicleTypeController.cs" />
     <Compile Include="Data\AutobaseDbContext.cs" />
+    <Compile Include="Data\QmsEmployeeMasterLite.cs" />
+    <Compile Include="Data\QmsLookupDbContext.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>

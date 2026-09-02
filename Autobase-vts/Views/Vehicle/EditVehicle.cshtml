@@ -8,6 +8,10 @@
     int selectedTypeId = (int)(ViewBag.SelectedTypeId ?? 0);
     string currentName = ViewBag.VehicleName as string ?? "";
     string currentType = ViewBag.VehicleType as string ?? "";
+
+    // SuperAdmin = every field editable. Admin = Status only, everything
+    // else below renders locked/read-only.
+    bool isFullEdit = (bool)(ViewBag.IsFullEdit ?? false);
 }
 
 <style>
@@ -135,6 +139,12 @@
         animation: fadeUp .38s ease .05s both;
     }
 
+        .info-bar.locked {
+            background: #fffaf0;
+            border-left-color: #d69e2e;
+            color: #975a16;
+        }
+
     /* ── Layout ── */
     .add-layout {
         display: grid;
@@ -200,6 +210,11 @@
         text-transform: uppercase;
     }
 
+        .form-badge.locked {
+            background: #fffaf0;
+            color: #d69e2e;
+        }
+
     .section-label {
         font-size: 10px;
         font-weight: 700;
@@ -255,6 +270,18 @@
         color: #e53e3e;
     }
 
+    .lock-tag {
+        margin-left: auto;
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: .5px;
+        color: #d69e2e;
+        text-transform: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 3px;
+    }
+
     .input-wrap {
         position: relative;
         display: flex;
@@ -308,6 +335,15 @@
 
     .field input.input-error, .field select.input-error {
         border-color: #e53e3e;
+    }
+
+    .field input:disabled,
+    .field select:disabled,
+    .field textarea:disabled {
+        background: #f2f2f2;
+        color: #999;
+        cursor: not-allowed;
+        border-color: #eee;
     }
 
     .select-wrap {
@@ -573,14 +609,27 @@
 </div>
 
 <!-- Info bar -->
-<div class="info-bar">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="10" />
-        <line x1="12" y1="8" x2="12" y2="12" />
-        <line x1="12" y1="16" x2="12.01" y2="16" />
-    </svg>
-    Fields marked <strong>&nbsp;*&nbsp;</strong> are required. Only the fields below can be updated — Vehicle Name &amp; Type come from the catalogue.
-</div>
+@if (isFullEdit)
+{
+    <div class="info-bar">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="8" x2="12" y2="12" />
+            <line x1="12" y1="16" x2="12.01" y2="16" />
+        </svg>
+        Fields marked <strong>&nbsp;*&nbsp;</strong> are required. Only the fields below can be updated — Vehicle Name &amp; Type come from the catalogue.
+    </div>
+}
+else
+{
+    <div class="info-bar locked">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="10" rx="2" />
+            <path d="M7 11V7a5 5 0 0110 0v4" />
+        </svg>
+        As an Admin, you can update <strong>&nbsp;Status&nbsp;</strong> only. All other fields are locked and shown for reference.
+    </div>
+}
 
 <!-- Alerts -->
 @if (TempData["Success"] != null)
@@ -610,7 +659,7 @@
 <!-- Two-column layout -->
 <div class="add-layout">
 
-    <!-- ── Left: form ── -->   
+    <!-- ── Left: form ── -->
     @using (Html.BeginForm("EditVehicleForm", "Vehicle", FormMethod.Post, new { id = "editVehicleForm" }))
     {
         @Html.AntiForgeryToken()
@@ -628,45 +677,68 @@
                     </div>
                     <div>
                         <div class="fct-title">Vehicle Details</div>
-                        <div class="fct-sub">Update the fields below and save</div>
+                        <div class="fct-sub">@(isFullEdit ? "Update the fields below and save" : "Only Status can be changed")</div>
                     </div>
                 </div>
-                <span class="form-badge">Edit Form</span>
+                <span class="form-badge @(isFullEdit ? "" : "locked")">@(isFullEdit ? "Edit Form" : "Status Only")</span>
             </div>
 
             <!-- Basic Information -->
             <div class="section-label">Basic Information</div>
             <div class="form-body">
                 <div class="field-row">
-                    <!-- Vehicle Name dropdown -->
+                    <!-- Vehicle Name -->
                     <div class="field">
-                        <label class="field-label">Vehicle Name <span class="req">*</span></label>
-                        <div class="input-wrap select-wrap">
-                            <div class="input-icon">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <rect x="1" y="3" width="15" height="13" rx="1" />
-                                    <path d="M16 8h4l3 4v3h-7V8z" />
-                                    <circle cx="5.5" cy="18.5" r="2.5" />
-                                    <circle cx="18.5" cy="18.5" r="2.5" />
-                                </svg>
+                        <label class="field-label">
+                            Vehicle Name <span class="req">*</span>
+                            @if (!isFullEdit)
+                            {
+                                <span class="lock-tag">🔒 Locked</span>
+                            }
+                        </label>
+                        @if (isFullEdit)
+                        {
+                            <div class="input-wrap select-wrap">
+                                <div class="input-icon">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="1" y="3" width="15" height="13" rx="1" />
+                                        <path d="M16 8h4l3 4v3h-7V8z" />
+                                        <circle cx="5.5" cy="18.5" r="2.5" />
+                                        <circle cx="18.5" cy="18.5" r="2.5" />
+                                    </svg>
+                                </div>
+                                <select id="vehicleTypeId" name="VehicleTypeId"
+                                        class="@(ViewData.ModelState["VehicleTypeId"]?.Errors.Count > 0 ? "input-error" : "")"
+                                        onchange="syncType(this)">
+                                    <option value="">— Choose vehicle —</option>
+                                    @foreach (var vt in vehicleTypes)
+                                    {
+                                        <option value="@vt.Id"
+                                                data-type="@vt.VehicleType"
+                                                @(Model.VehicleTypeId == vt.Id ? "selected" : "")>
+                                            @vt.VehicleName
+                                        </option>
+                                    }
+                                </select>
                             </div>
-                            <select id="vehicleTypeId" name="VehicleTypeId"
-                                    class="@(ViewData.ModelState["VehicleTypeId"]?.Errors.Count > 0 ? "input-error" : "")"
-                                    onchange="syncType(this)">
-                                <option value="">— Choose vehicle —</option>
-                                @foreach (var vt in vehicleTypes)
-                                {
-                                    <option value="@vt.Id"
-                                            data-type="@vt.VehicleType"
-                                            @(Model.VehicleTypeId == vt.Id ? "selected" : "")>
-                                        @vt.VehicleName
-                                    </option>
-                                }
-                            </select>
-                        </div>
+                        }
+                        else
+                        {
+                            <div class="input-wrap">
+                                <div class="input-icon">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="1" y="3" width="15" height="13" rx="1" />
+                                        <path d="M16 8h4l3 4v3h-7V8z" />
+                                        <circle cx="5.5" cy="18.5" r="2.5" />
+                                        <circle cx="18.5" cy="18.5" r="2.5" />
+                                    </svg>
+                                </div>
+                                <input type="text" value="@currentName" disabled />
+                            </div>
+                        }
                     </div>
 
-                    <!-- Vehicle Type (auto-filled) -->
+                    <!-- Vehicle Type (always read-only, auto-filled) -->
                     <div class="field">
                         <label class="field-label">Vehicle Type <span class="req">*</span></label>
                         <div class="input-wrap">
@@ -688,7 +760,13 @@
                 <div class="field-row">
                     <!-- Registration No -->
                     <div class="field">
-                        <label class="field-label">Registration No. <span class="req">*</span></label>
+                        <label class="field-label">
+                            Registration No. <span class="req">*</span>
+                            @if (!isFullEdit)
+                            {
+                                <span class="lock-tag">🔒 Locked</span>
+                            }
+                        </label>
                         <div class="input-wrap">
                             <div class="input-icon">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -697,12 +775,19 @@
                                     <line x1="7" y1="13" x2="13" y2="13" />
                                 </svg>
                             </div>
-                            @Html.TextBoxFor(m => m.RegistrationNo, new
+                            @if (isFullEdit)
                             {
-                                placeholder = "e.g. MH12AB1234",
-                                @class = ViewData.ModelState["RegistrationNo"]?.Errors.Count > 0 ? "input-error" : "",
-                                style = "text-transform:uppercase;"
-                            })
+                                @Html.TextBoxFor(m => m.RegistrationNo, new
+                                {
+                                    placeholder = "e.g. MH12AB1234",
+                                    @class = ViewData.ModelState["RegistrationNo"]?.Errors.Count > 0 ? "input-error" : "",
+                                    style = "text-transform:uppercase;"
+                                })
+                            }
+                            else
+                            {
+                                <input type="text" value="@Model.RegistrationNo" disabled style="text-transform:uppercase;" />
+                            }
                         </div>
                     </div>
 
@@ -710,7 +795,14 @@
                     <div class="field">
                         <label class="field-label">
                             Year of Manufacture <span class="req">*</span>
-                            <span style="margin-left:auto; font-size:9px; color:#ccc; font-weight:400; letter-spacing:0;">1990–2030</span>
+                            @if (isFullEdit)
+                            {
+                                <span style="margin-left:auto; font-size:9px; color:#ccc; font-weight:400; letter-spacing:0;">1990–2030</span>
+                            }
+                            else
+                            {
+                                <span class="lock-tag">🔒 Locked</span>
+                            }
                         </label>
                         <div class="input-wrap">
                             <div class="input-icon">
@@ -721,14 +813,21 @@
                                     <line x1="3" y1="10" x2="21" y2="10" />
                                 </svg>
                             </div>
-                            @Html.TextBoxFor(m => m.YearOfManufacture, new
+                            @if (isFullEdit)
                             {
-                                placeholder = "e.g. 2022",
-                                type = "number",
-                                min = "1990",
-                                max = "2030",
-                                @class = ViewData.ModelState["YearOfManufacture"]?.Errors.Count > 0 ? "input-error" : ""
-                            })
+                                @Html.TextBoxFor(m => m.YearOfManufacture, new
+                                {
+                                    placeholder = "e.g. 2022",
+                                    type = "number",
+                                    min = "1990",
+                                    max = "2030",
+                                    @class = ViewData.ModelState["YearOfManufacture"]?.Errors.Count > 0 ? "input-error" : ""
+                                })
+                            }
+                            else
+                            {
+                                <input type="number" value="@Model.YearOfManufacture" disabled />
+                            }
                         </div>
                     </div>
                 </div>
@@ -762,7 +861,14 @@
                     <div class="field">
                         <label class="field-label" style="justify-content:space-between;">
                             <span>Notes / Remarks</span>
-                            <span style="font-size:9px; font-weight:400; color:#ccc; letter-spacing:0; text-transform:none;">Optional</span>
+                            @if (isFullEdit)
+                            {
+                                <span style="font-size:9px; font-weight:400; color:#ccc; letter-spacing:0; text-transform:none;">Optional</span>
+                            }
+                            else
+                            {
+                                <span class="lock-tag">🔒 Locked</span>
+                            }
                         </label>
                         <div class="input-wrap">
                             <div class="input-icon" style="top:14px; align-self:flex-start;">
@@ -773,10 +879,17 @@
                                     <line x1="16" y1="17" x2="8" y2="17" />
                                 </svg>
                             </div>
-                            @Html.TextAreaFor(m => m.Notes, new
+                            @if (isFullEdit)
                             {
-                                placeholder = "Insurance details, driver notes, service reminders..."
-                            })
+                                @Html.TextAreaFor(m => m.Notes, new
+                                {
+                                    placeholder = "Insurance details, driver notes, service reminders..."
+                                })
+                            }
+                            else
+                            {
+                                <textarea disabled>@Model.Notes</textarea>
+                            }
                         </div>
                     </div>
                 </div>
@@ -789,7 +902,7 @@
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="20 6 9 17 4 12" />
                         </svg>
-                        Update Vehicle
+                        @(isFullEdit ? "Update Vehicle" : "Update Status")
                     </button>
                     <a href="@Url.Action("EditVehicle","Vehicle")" class="btn-cancel">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -799,7 +912,7 @@
                         Cancel
                     </a>
                 </div>
-                <span class="save-note">Changes saved instantly to the fleet database.</span>
+                <span class="save-note">@(isFullEdit ? "Changes saved instantly to the fleet database." : "Only the Status change is saved.")</span>
             </div>
         </div>
     }
@@ -874,18 +987,23 @@
         function syncType(sel) {
             var opt = sel.options[sel.selectedIndex];
             var type = opt ? opt.getAttribute('data-type') : '';
-            document.getElementById('vehicleTypeDisplay').value = type || '';
+            var display = document.getElementById('vehicleTypeDisplay');
+            if (display) display.value = type || '';
         }
 
         var dotColors = { Available: '#38a169', Allocated: '#d69e2e', Maintenance: '#e53e3e' };
         function updateStatusDot(sel) {
             var color = dotColors[sel.value] || '#aaa';
-            document.getElementById('statusDotSvg').setAttribute('fill', color);
+            var dot = document.getElementById('statusDotSvg');
+            if (dot) dot.setAttribute('fill', color);
         }
 
         (function () {
-            syncType(document.getElementById('vehicleTypeId'));
-            updateStatusDot(document.getElementById('statusSelect'));
+            var typeSel = document.getElementById('vehicleTypeId');
+            if (typeSel) syncType(typeSel);
+
+            var statusSel = document.getElementById('statusSelect');
+            if (statusSel) updateStatusDot(statusSel);
         })();
     </script>
 }

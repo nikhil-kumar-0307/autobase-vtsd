@@ -289,10 +289,13 @@ namespace autobase.Controllers
         }
 
         // ── POST: /Autobase/ApproveRequest ────────────────────────────────────
-        // Handles BOTH stages. HOD can only move Pending -> HODApproved.
-        // Admin/SuperAdmin give the final approval (HODApproved -> Approved),
-        // and — since they "can do anything" — may also approve directly from
-        // Pending, skipping the HOD stage if needed.
+        // Handles BOTH stages:
+        //   • HOD can only move Pending -> HODApproved.
+        //   • Admin can ONLY give the final approval (HODApproved -> Approved).
+        //     Admin can NOT skip the HOD stage — a Pending request is invisible
+        //     to Admin's approve action until HOD has signed off.
+        //   • SuperAdmin gives the final approval too, AND is the only role
+        //     allowed to bypass HOD entirely by approving straight from Pending.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult ApproveRequest(int requestId, string adminNotes)
@@ -323,20 +326,41 @@ namespace autobase.Controllers
                 _db.SaveChanges();
                 TempData["SuccessMessage"] = "Request approved. Awaiting final approval from Admin.";
             }
-            else // Admin / SuperAdmin
+            else if (role == "SuperAdmin")
             {
+                // SuperAdmin may finally-approve from HODApproved, OR bypass HOD
+                // entirely by approving straight from Pending.
                 if (request.Status != "Pending" && request.Status != "HODApproved")
                 {
                     TempData["ErrorMessage"] = "This request cannot be approved from its current status.";
                     return RedirectToAction("SeeRequests");
                 }
 
-                // If Admin/SuperAdmin is approving straight from Pending, record that
-                // they covered the HOD step too, so the trail stays honest.
                 if (request.Status == "Pending")
                 {
-                    request.HodApprovedBy = $"{approverName} ({role} — HOD step skipped)";
+                    // Record that SuperAdmin covered the HOD step too, so the trail stays honest.
+                    request.HodApprovedBy = $"{approverName} (SuperAdmin — HOD step skipped)";
                     request.HodApprovedOn = DateTime.Now;
+                }
+
+                request.Status = "Approved";
+                request.AdminNotes = adminNotes;
+                request.FinalApprovedBy = approverName;
+                request.FinalApprovedOn = DateTime.Now;
+
+                var vehicle = _db.Vehicles.Find(request.VehicleId);
+                if (vehicle != null)
+                    vehicle.Status = "Allocated";
+
+                _db.SaveChanges();
+                TempData["SuccessMessage"] = "Request approved successfully.";
+            }
+            else // Admin — final approval ONLY, cannot skip HOD
+            {
+                if (request.Status != "HODApproved")
+                {
+                    TempData["ErrorMessage"] = "This request must be approved by HOD before Admin can give final approval.";
+                    return RedirectToAction("SeeRequests");
                 }
 
                 request.Status = "Approved";

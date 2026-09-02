@@ -13,29 +13,23 @@ namespace autobase.Controllers
     {
         private readonly AutobaseDbContext _db = new AutobaseDbContext();
 
-        // ── ADD ──────────────────────────────────────────────────────────────
+        // ── ADD VEHICLE (SuperAdmin only — Admin and HOD have no access) ───────
 
         // GET: /Vehicle/AddVehicle
+        [RoleAuthorize("SuperAdmin")]
         [HttpGet]
         public ActionResult AddVehicle()
         {
-            string role = Session["Role"]?.ToString();
-            if (role == "Employee")
-                return RedirectToAction("Employee", "Dashboard");
-
             LoadDropdowns();
             return View("AddVehicle", new AddVehicleDto());
         }
 
         // POST: /Vehicle/AddVehicle
+        [RoleAuthorize("SuperAdmin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult AddVehicle(AddVehicleDto model)
         {
-            string role = Session["Role"]?.ToString();
-            if (role == "Employee")
-                return RedirectToAction("Employee", "Dashboard");
-
             if (!string.IsNullOrEmpty(model.RegistrationNo))
             {
                 bool regExists = _db.Vehicles.Any(v =>
@@ -76,25 +70,40 @@ namespace autobase.Controllers
             return RedirectToAction("AddVehicle");
         }
 
-        // ── EDIT LIST ────────────────────────────────────────────────────────
+        // ── EDIT LIST (SuperAdmin + Admin — HOD has no access) ──────────────────
 
-        // GET: /Vehicle/EditVehicle (list)
-        [RoleAuthorize("SuperAdmin")]
+        // GET: /Vehicle/EditVehicle (list) — paginated, 15 per page
+        [RoleAuthorize("SuperAdmin", "Admin")]
         [HttpGet]
-        public ActionResult EditVehicle()
+        public ActionResult EditVehicle(int page = 1)
         {
-            var vehicles = _db.Vehicles
-                              .Where(v => v.IsActive)
-                              .OrderBy(v => v.VehicleName)
-                              .ToList();
+            const int pageSize = 15;
+            if (page < 1) page = 1;
+
+            var query = _db.Vehicles
+                            .Where(v => v.IsActive)
+                            .OrderBy(v => v.VehicleName);
+
+            int totalCount = query.Count();
+            int totalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+            if (totalPages > 0 && page > totalPages) page = totalPages;
+
+            var vehicles = query.Skip((page - 1) * pageSize)
+                                 .Take(pageSize)
+                                 .ToList();
+
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.TotalCount = totalCount;
+            ViewBag.PageSize = pageSize;
 
             return View("EditVehicleList", vehicles);
         }
 
-        // ── EDIT FORM ────────────────────────────────────────────────────────
+        // ── EDIT FORM (SuperAdmin = full edit, Admin = Status field only) ───────
 
         // GET: /Vehicle/EditVehicle/5
-        [RoleAuthorize("SuperAdmin")]
+        [RoleAuthorize("SuperAdmin", "Admin")]
         [HttpGet]
         public ActionResult EditVehicleForm(int? id)
         {
@@ -107,6 +116,10 @@ namespace autobase.Controllers
                 TempData["Error"] = "Vehicle not found.";
                 return RedirectToAction("EditVehicle");
             }
+
+            // SuperAdmin can edit every field. Admin can only ever change Status.
+            bool isFullEdit = Session["Role"]?.ToString() == "SuperAdmin";
+            ViewBag.IsFullEdit = isFullEdit;
 
             LoadDropdowns(vehicle.VehicleTypeId);
 
@@ -127,11 +140,53 @@ namespace autobase.Controllers
         }
 
         // POST: /Vehicle/EditVehicleForm
-        [RoleAuthorize("SuperAdmin")]
+        [RoleAuthorize("SuperAdmin", "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult EditVehicleForm(EditVehicleDto model)
         {
+            bool isFullEdit = Session["Role"]?.ToString() == "SuperAdmin";
+
+            var vehicle = _db.Vehicles.Find(model.Id);
+            if (vehicle == null || !vehicle.IsActive)
+            {
+                TempData["Error"] = "Vehicle not found.";
+                return RedirectToAction("EditVehicle");
+            }
+
+            // ── Admin path: ONLY Status is ever written. Whatever else was
+            // posted (even if someone tampered with the form/devtools) is
+            // discarded server-side, not just hidden in the UI. ──────────────
+            if (!isFullEdit)
+            {
+                ModelState.Remove("VehicleTypeId");
+                ModelState.Remove("RegistrationNo");
+                ModelState.Remove("YearOfManufacture");
+                ModelState.Remove("Notes");
+
+                if (!ModelState.IsValid)
+                {
+                    ViewBag.IsFullEdit = false;
+                    ViewBag.VehicleName = vehicle.VehicleName;
+                    ViewBag.VehicleType = vehicle.VehicleType;
+                    LoadDropdowns(vehicle.VehicleTypeId);
+
+                    model.VehicleTypeId = vehicle.VehicleTypeId;
+                    model.RegistrationNo = vehicle.RegistrationNo;
+                    model.YearOfManufacture = vehicle.YearOfManufacture;
+                    model.Notes = vehicle.Notes;
+
+                    return View("EditVehicle", model);
+                }
+
+                vehicle.Status = model.Status;
+                _db.SaveChanges();
+
+                TempData["Success"] = $"Status for \"{vehicle.VehicleName}\" ({vehicle.RegistrationNo}) updated to {vehicle.Status}.";
+                return RedirectToAction("EditVehicle");
+            }
+
+            // ── SuperAdmin path: full edit (unchanged behaviour) ────────────
             if (!string.IsNullOrEmpty(model.RegistrationNo))
             {
                 bool regExists = _db.Vehicles.Any(v =>
@@ -146,20 +201,11 @@ namespace autobase.Controllers
 
             if (!ModelState.IsValid)
             {
+                ViewBag.IsFullEdit = true;
                 LoadDropdowns(model.VehicleTypeId);
-
-                var existing = _db.Vehicles.Find(model.Id);
-                ViewBag.VehicleName = existing?.VehicleName;
-                ViewBag.VehicleType = existing?.VehicleType;
-
+                ViewBag.VehicleName = vehicle.VehicleName;
+                ViewBag.VehicleType = vehicle.VehicleType;
                 return View("EditVehicle", model);
-            }
-
-            var vehicle = _db.Vehicles.Find(model.Id);
-            if (vehicle == null || !vehicle.IsActive)
-            {
-                TempData["Error"] = "Vehicle not found.";
-                return RedirectToAction("EditVehicle");
             }
 
             var vehicleType = _db.VehicleTypes.Find(model.VehicleTypeId);
@@ -178,7 +224,7 @@ namespace autobase.Controllers
             return RedirectToAction("EditVehicle");
         }
 
-        // ── DELETE ───────────────────────────────────────────────────────────
+        // ── DELETE (unchanged — SuperAdmin only) ─────────────────────────────
 
         // GET: /Vehicle/DeleteVehicle
         [RoleAuthorize("SuperAdmin")]
