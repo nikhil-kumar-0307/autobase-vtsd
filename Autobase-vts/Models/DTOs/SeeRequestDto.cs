@@ -28,6 +28,7 @@ namespace autobase.Models.DTOs
         public string VehicleName { get; set; }
         public string RegistrationNo { get; set; }
         public string Purpose { get; set; }
+        public string ReportingPlace { get; set; }
         public DateTime RequiredFrom { get; set; }
         public DateTime RequiredUntil { get; set; }
         public string Status { get; set; }

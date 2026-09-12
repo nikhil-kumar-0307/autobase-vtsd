@@ -100,9 +100,7 @@ namespace autobase.Controllers
             {
                 var qmsEmployee = qmsDb.EmployeeMasters
                     .FirstOrDefault(e => e.EmployeeNo == model.EmployeeNumber);
-
-                // QMS stores the password as plain text (see EmployeeMasterController),
-                // so this is a direct string comparison — NOT run through PasswordHelper.
+                
                 if (qmsEmployee != null && qmsEmployee.Password == model.Password)
                 {
                     FormsAuthentication.SetAuthCookie(qmsEmployee.EmployeeNo, model.RememberMe);

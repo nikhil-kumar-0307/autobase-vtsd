@@ -12,12 +12,8 @@ namespace autobase.Controllers
     public class AutobaseController : Controller
     {
         private readonly AutobaseDbContext _db = new AutobaseDbContext();
-        private readonly QmsLookupDbContext _qmsDb = new QmsLookupDbContext();   // ADDED
-
-        // ── NEW: resolves an employee number's department, checking Autobase's
-        //         own Employees table first, then falling back to QMS's
-        //         EmployeeMaster — since a requester might only exist in QMS
-        //         (e.g. test/QMS-sourced logins never get an Employees row). ──
+        private readonly QmsLookupDbContext _qmsDb = new QmsLookupDbContext();
+       
         private string GetEmployeeDepartment(string employeeNumber)
         {
             if (string.IsNullOrWhiteSpace(employeeNumber)) return null;
@@ -153,6 +149,7 @@ namespace autobase.Controllers
                     StartTime = r.RequiredFrom,
                     DueReturn = r.RequiredUntil,
                     Purpose = r.Purpose,
+
                     IsOverdue = isOverdue,
                     OverdueBy = overdueBy,
                     DurationHours = durH,
@@ -236,9 +233,7 @@ namespace autobase.Controllers
             var dateRequests = _db.VehicleRequests
                 .Where(r => r.RequestedOn >= selectedDate && r.RequestedOn < nextDay)
                 .ToList();
-
-            // Pull both employee sources once, up front, so the per-row lookups
-            // below are all in-memory instead of hitting the DB per row.
+            
             var autobaseEmployees = _db.Employees.ToList();
             var qmsEmployees = _qmsDb.EmployeeMasters.ToList();
 
@@ -246,11 +241,7 @@ namespace autobase.Controllers
                 autobaseEmployees.FirstOrDefault(e => e.EmployeeNumber == empNo);
             Func<string, QmsEmployeeMasterLite> findQms = empNo =>
                 qmsEmployees.FirstOrDefault(e => e.EmployeeNo == empNo);
-
-            // ── FIXED: department lookup now checks Autobase's Employees table
-            //           AND falls back to QMS's EmployeeMaster, so QMS-sourced
-            //           requesters (test employee) are no longer invisible to
-            //           their HOD. Also case/whitespace tolerant. ──
+            
             if (role == "HOD")
             {
                 var hodEmp = findAutobase(Session["EmployeeNumber"]?.ToString());
@@ -290,10 +281,7 @@ namespace autobase.Controllers
                 requestsQuery = requestsQuery.Where(r => r.Status == "Returned");
 
             var filtered = requestsQuery.OrderByDescending(r => r.RequestedOn).ToList();
-
-            // ── FIXED: name/department/designation now fall back to QMS too,
-            //           so a QMS-sourced requester's row doesn't show "—" for
-            //           everything. ──
+            
             var items = filtered.Select(r =>
             {
                 var emp = findAutobase(r.EmployeeNumber);
@@ -310,6 +298,7 @@ namespace autobase.Controllers
                     VehicleName = r.VehicleName,
                     RegistrationNo = r.RegistrationNo,
                     Purpose = r.Purpose,
+                    ReportingPlace = r.ReportingPlace,
                     RequiredFrom = r.RequiredFrom,
                     RequiredUntil = r.RequiredUntil,
                     Status = r.Status,
@@ -454,8 +443,7 @@ namespace autobase.Controllers
                     TempData["ErrorMessage"] = "This request is not awaiting HOD approval.";
                     return RedirectToAction("SeeRequests");
                 }
-
-                // ── FIXED: extract session value first, then query ──
+                
                 string currentEmpNumber = Session["EmployeeNumber"]?.ToString();
                 string hodDept = _db.Employees
                     .FirstOrDefault(e => e.EmployeeNumber == currentEmpNumber)
@@ -551,7 +539,7 @@ namespace autobase.Controllers
             if (disposing)
             {
                 _db.Dispose();
-                _qmsDb.Dispose();   // ADDED
+                _qmsDb.Dispose(); 
             }
             base.Dispose(disposing);
         }

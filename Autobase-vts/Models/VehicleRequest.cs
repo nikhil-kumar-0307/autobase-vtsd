@@ -19,6 +19,8 @@ namespace autobase.Models
         [Required]
         public string Purpose { get; set; }
         [Required]
+        public string ReportingPlace { get; set; }
+        [Required]
         public DateTime RequiredFrom { get; set; }
         [Required]
         public DateTime RequiredUntil { get; set; }

@@ -50,7 +50,7 @@ namespace autobase.Controllers
                     mobileNumber = (string)null,
                     email = (string)null,
                     role = "Employee",
-                    canChangePassword = true   // ── CHANGED: QMS-sourced accounts can now change password too ──
+                    canChangePassword = true  
                 }, JsonRequestBehavior.AllowGet);
             }
 
@@ -90,9 +90,7 @@ namespace autobase.Controllers
 
                 return Json(new { success = true, message = "Password changed successfully." });
             }
-
-            // 2) Fall back to QMS's EmployeeMaster — stored as plain text there,
-            //    matching how AccountController already authenticates against it.
+          
             var qmsEmp = _qmsDb.EmployeeMasters.FirstOrDefault(e => e.EmployeeNo == empNo);
             if (qmsEmp != null)
             {
@@ -106,9 +104,7 @@ namespace autobase.Controllers
                     return Json(new { success = true, message = "Password changed successfully." });
                 }
                 catch (Exception)
-                {
-                    // Most likely cause: the QmsLookupConnection connection string
-                    // is configured with read-only access to the QMS database.
+                {                    
                     return Json(new { success = false, message = "Unable to update password right now. Please contact IT support." });
                 }
             }

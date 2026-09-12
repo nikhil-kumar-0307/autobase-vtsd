@@ -879,6 +879,7 @@
                                     <th>End</th>
                                     <th>Duration</th>
                                     <th>Purpose</th>
+                                    <th>Reporting Place</th>
                                     <th>Status</th>
                                     <th>Admin Notes</th>
                                     <th>Action</th>
@@ -898,63 +899,66 @@
                                         ? hrs.ToString("0.#") + " hrs"
                                         : ((int)(hrs * 60)) + " min";
 
-                                    <tr>
-                                        <td><span class="row-num">@i</span></td>
-                                        <td><span class="v-name">@r.VehicleName</span></td>
-                                        <td><span class="reg-tag">@r.RegistrationNo</span></td>
-                                        <td>
-                                            <div class="date-main">@r.RequiredFrom.ToString("dd MMM, hh:mm tt")</div>
-                                        </td>
-                                        <td>
-                                            <div class="date-main">@r.RequiredUntil.ToString("dd MMM, hh:mm tt")</div>
-                                        </td>
-                                        <td>
-                                            <span class="dur-pill">
-                                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                    <circle cx="12" cy="12" r="10" />
-                                                    <polyline points="12 6 12 12 16 14" />
-                                                </svg>
-                                                @durLabel
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <span class="purpose-cell" title="@r.Purpose">@r.Purpose</span>
-                                        </td>
-                                        <td>
-                                            <span class="status-pill @sc">
-                                                <span class="status-dot @sc"></span>
-                                                @r.Status
-                                            </span>
-                                        </td>
-                                        <td>
-                                            @if (!string.IsNullOrEmpty(r.AdminNotes))
+                                <tr>
+                                    <td><span class="row-num">@i</span></td>
+                                    <td><span class="v-name">@r.VehicleName</span></td>
+                                    <td><span class="reg-tag">@r.RegistrationNo</span></td>
+                                    <td>
+                                        <div class="date-main">@r.RequiredFrom.ToString("dd MMM, hh:mm tt")</div>
+                                    </td>
+                                    <td>
+                                        <div class="date-main">@r.RequiredUntil.ToString("dd MMM, hh:mm tt")</div>
+                                    </td>
+                                    <td>
+                                        <span class="dur-pill">
+                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                <circle cx="12" cy="12" r="10" />
+                                                <polyline points="12 6 12 12 16 14" />
+                                            </svg>
+                                            @durLabel
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="purpose-cell" title="@r.Purpose">@r.Purpose</span>
+                                    </td>
+                                    <td>
+                                        <span class="purpose-cell" title="@r.ReportingPlace">@r.ReportingPlace</span>
+                                    </td>
+                                    <td>
+                                        <span class="status-pill @sc">
+                                            <span class="status-dot @sc"></span>
+                                            @r.Status
+                                        </span>
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(r.AdminNotes))
+                                        {
+                                            <span class="admin-note" title="@r.AdminNotes">@r.AdminNotes</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="admin-note empty">—</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (r.Status == "Approved")
+                                        {
+                                            using (Html.BeginForm("ReturnVehicle", "EmployeeDashboard", FormMethod.Post, new { style = "display:inline;" }))
                                             {
-                                                <span class="admin-note" title="@r.AdminNotes">@r.AdminNotes</span>
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="requestId" value="@r.RequestId" />
+                                                <button type="submit" class="btn-return"
+                                                        onclick="return confirm('Confirm vehicle return?')">
+                                                    ✓ Return Vehicle
+                                                </button>
                                             }
-                                            else
-                                            {
-                                                <span class="admin-note empty">—</span>
-                                            }
-                                        </td>
-                                        <td>
-                                            @if (r.Status == "Approved")
-                                            {
-                                                using (Html.BeginForm("ReturnVehicle", "EmployeeDashboard", FormMethod.Post, new { style = "display:inline;" }))
-                                                {
-                                                    @Html.AntiForgeryToken()
-                                                    <input type="hidden" name="requestId" value="@r.RequestId" />
-                                                    <button type="submit" class="btn-return"
-                                                            onclick="return confirm('Confirm vehicle return?')">
-                                                        ✓ Return Vehicle
-                                                    </button>
-                                                }
-                                            }
-                                            else
-                                            {
-                                                <span style="font-size:12px;color:#ccc;">—</span>
-                                            }
-                                        </td>
-                                    </tr>
+                                        }
+                                        else
+                                        {
+                                            <span style="font-size:12px;color:#ccc;">—</span>
+                                        }
+                                    </td>
+                                </tr>
                                     i++;
                                 }
                             </tbody>

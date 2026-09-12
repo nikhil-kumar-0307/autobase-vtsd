@@ -20,9 +20,7 @@ namespace autobase.Controllers
         // Only SuperAdmin reaches these actions (see RoleAuthorize below),
         // so SuperAdmin itself is intentionally excluded from self-service creation.
         private static readonly string[] AssignableRoles = { "Admin", "HOD", "Employee" };
-
-
-        // ── NEW: shared helper ──
+       
         private SelectList GetDepartmentList(string selected = null)
         {
             var names = _qmsDb.Departments
@@ -201,11 +199,7 @@ namespace autobase.Controllers
             {
                 TempData["Error"] = "SuperAdmin accounts cannot be deleted.";
                 return RedirectToAction("EditIndex");
-            }
-
-            // Soft delete — keeps history/foreign-key references (e.g. past
-            // vehicle requests) intact while removing the user from all lists
-            // and login access.
+            }            
             _db.Employees.Remove(emp);
             _db.SaveChanges();
 

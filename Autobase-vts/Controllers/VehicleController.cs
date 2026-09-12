@@ -153,10 +153,7 @@ namespace autobase.Controllers
                 TempData["Error"] = "Vehicle not found.";
                 return RedirectToAction("EditVehicle");
             }
-
-            // ── Admin path: ONLY Status is ever written. Whatever else was
-            // posted (even if someone tampered with the form/devtools) is
-            // discarded server-side, not just hidden in the UI. ──────────────
+            
             if (!isFullEdit)
             {
                 ModelState.Remove("VehicleTypeId");

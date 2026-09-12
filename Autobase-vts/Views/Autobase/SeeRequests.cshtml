@@ -8,19 +8,19 @@
 @section Styles {
     <style>
         .page-title {
-            font-size: 22px;
+            font-size: 24px;
             font-weight: 800;
             color: #0d0d0d;
         }
 
         .page-sub {
-            font-size: 12.5px;
+            font-size: 13.5px;
             color: #aaa;
             margin-top: 3px;
             margin-bottom: 22px;
         }
 
-        /* ── NEW: Date navigator ── */
+        /* ── Date navigator ── */
         .date-nav {
             display: flex;
             align-items: center;
@@ -36,12 +36,12 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            height: 38px;
+            height: 40px;
             padding: 0 16px;
             border: 1.5px solid #e8e8e8;
             border-radius: 8px;
             font-family: 'Barlow', sans-serif;
-            font-size: 12.5px;
+            font-size: 13.5px;
             font-weight: 700;
             color: #555;
             background: #fff;
@@ -83,12 +83,12 @@
         }
 
             .date-picker-wrap input[type="date"] {
-                height: 38px;
+                height: 40px;
                 padding: 0 10px;
                 border: 1.5px solid #e8e8e8;
                 border-radius: 8px;
                 font-family: 'Barlow', sans-serif;
-                font-size: 12.5px;
+                font-size: 13.5px;
                 font-weight: 600;
                 color: #0d0d0d;
                 background: #fafafa;
@@ -100,28 +100,28 @@
                 }
 
         .date-label {
-            font-size: 13.5px;
+            font-size: 15px;
             font-weight: 700;
             color: #0d0d0d;
         }
 
         .today-badge {
-            font-size: 9.5px;
+            font-size: 10.5px;
             font-weight: 800;
             letter-spacing: .5px;
             text-transform: uppercase;
             background: #dcfce7;
             color: #166534;
             border: 1px solid #bbf7d0;
-            padding: 2px 8px;
+            padding: 3px 9px;
             border-radius: 20px;
         }
 
         /* Alert */
         .alert {
-            padding: 13px 16px;
+            padding: 14px 18px;
             border-radius: 9px;
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 600;
             margin-bottom: 18px;
             display: flex;
@@ -192,7 +192,7 @@
             }
 
         .stat-lbl {
-            font-size: 9px;
+            font-size: 10px;
             font-weight: 700;
             letter-spacing: 1.3px;
             text-transform: uppercase;
@@ -201,7 +201,7 @@
         }
 
         .stat-num {
-            font-size: 32px;
+            font-size: 34px;
             font-weight: 800;
             color: #0d0d0d;
             line-height: 1;
@@ -231,12 +231,12 @@
 
             .search-wrap input {
                 width: 100%;
-                height: 42px;
+                height: 44px;
                 padding: 0 14px 0 40px;
                 border: 1.5px solid #e8e8e8;
                 border-radius: 9px;
                 font-family: 'Barlow', sans-serif;
-                font-size: 13px;
+                font-size: 14px;
                 font-weight: 500;
                 color: #0d0d0d;
                 background: #fff;
@@ -256,12 +256,12 @@
         }
 
         .ftab {
-            height: 42px;
+            height: 44px;
             padding: 0 18px;
             border: 1.5px solid #e8e8e8;
             border-radius: 9px;
             font-family: 'Barlow', sans-serif;
-            font-size: 12.5px;
+            font-size: 13.5px;
             font-weight: 600;
             color: #666;
             background: #fff;
@@ -323,7 +323,7 @@
         }
 
         .tc-header {
-            padding: 15px 20px;
+            padding: 16px 22px;
             border-bottom: 1px solid #f5f5f5;
             display: flex;
             align-items: center;
@@ -331,23 +331,28 @@
         }
 
         .tc-title {
-            font-size: 13px;
+            font-size: 14.5px;
             font-weight: 700;
             color: #0d0d0d;
+        }
+
+        .table-scroll {
+            overflow-x: auto;
         }
 
         .req-table {
             width: 100%;
             border-collapse: collapse;
+            min-width: 1180px;
         }
 
             .req-table th {
-                font-size: 8.5px;
+                font-size: 10.5px;
                 font-weight: 700;
-                letter-spacing: 1.2px;
+                letter-spacing: 1px;
                 text-transform: uppercase;
-                color: #bbb;
-                padding: 10px 16px;
+                color: #999;
+                padding: 12px 16px;
                 text-align: left;
                 background: #fafafa;
                 border-bottom: 1px solid #f0f0f0;
@@ -355,11 +360,11 @@
             }
 
             .req-table td {
-                padding: 13px 16px;
-                font-size: 12.5px;
-                color: #555;
+                padding: 16px;
+                font-size: 14px;
+                color: #444;
                 border-bottom: 1px solid #f9f9f9;
-                vertical-align: middle;
+                vertical-align: top;
             }
 
             .req-table tr:last-child td {
@@ -381,7 +386,7 @@
             }
 
         .row-num {
-            font-size: 11.5px;
+            font-size: 12.5px;
             color: #ccc;
             font-weight: 600;
         }
@@ -389,84 +394,83 @@
         /* Employee cell */
         .emp-cell {
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             gap: 10px;
         }
 
         .emp-av {
-            width: 34px;
-            height: 34px;
+            width: 38px;
+            height: 38px;
             border-radius: 50%;
             background: #F5C518;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 700;
             color: #0d0d0d;
             flex-shrink: 0;
         }
 
         .emp-name {
-            font-size: 13px;
+            font-size: 14.5px;
             font-weight: 700;
             color: #0d0d0d;
         }
 
         .emp-meta {
-            font-size: 11px;
-            color: #aaa;
-            margin-top: 1px;
+            font-size: 12px;
+            color: #999;
+            margin-top: 2px;
         }
 
         .emp-dept {
-            font-size: 11px;
+            font-size: 12px;
             color: #bbb;
+            margin-top: 1px;
         }
 
-        /* Vehicle cell */
+        /* ── Combined Vehicle cell (name + reg tag) ── */
         .v-name-cell {
-            font-size: 13px;
+            font-size: 14.5px;
             font-weight: 700;
             color: #0d0d0d;
+            margin-bottom: 5px;
         }
 
-        /* ── Overdue tag (red) ── */
         .overdue-tag {
             display: inline-flex;
             align-items: center;
             gap: 4px;
-            font-size: 10px;
+            font-size: 11px;
             font-weight: 700;
             background: #fff1f1;
             color: #dc2626;
             border: 1px solid #fecaca;
-            padding: 2px 8px;
+            padding: 3px 9px;
             border-radius: 5px;
-            margin-top: 4px;
+            margin-top: 6px;
         }
 
-        /* ── In-use / scheduled tag (purple) ── */
         .inuse-tag {
             display: inline-flex;
             align-items: center;
             gap: 4px;
-            font-size: 10px;
+            font-size: 11px;
             font-weight: 700;
             background: #f5f3ff;
             color: #7c3aed;
             border: 1px solid #ddd6fe;
-            padding: 2px 8px;
+            padding: 3px 9px;
             border-radius: 5px;
-            margin-top: 4px;
+            margin-top: 6px;
         }
 
-        /* Reg tag */
         .reg-tag {
             display: inline-block;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 700;
-            padding: 3px 9px;
+            padding: 3px 10px;
             border-radius: 6px;
             background: #f5f5f5;
             color: #555;
@@ -474,46 +478,62 @@
             letter-spacing: .4px;
         }
 
-        /* Date */
-        .date-main {
-            font-size: 12.5px;
-            font-weight: 600;
-            color: #0d0d0d;
+        /* ── Combined Schedule cell (start → end + duration) ── */
+        .sched-cell {
+            min-width: 165px;
         }
 
-        .date-sub {
-            font-size: 11px;
-            color: #bbb;
-            margin-top: 1px;
+        .sched-row {
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+            font-size: 13px;
+            color: #333;
         }
 
-        /* Duration */
+            .sched-row .sched-lbl {
+                font-size: 10.5px;
+                font-weight: 700;
+                color: #bbb;
+                text-transform: uppercase;
+                letter-spacing: .5px;
+                width: 34px;
+                flex-shrink: 0;
+            }
+
+            .sched-row .sched-val {
+                font-weight: 600;
+                color: #0d0d0d;
+            }
+
         .dur-pill {
             display: inline-flex;
             align-items: center;
-            gap: 4px;
-            font-size: 12.5px;
+            gap: 5px;
+            font-size: 13px;
             font-weight: 700;
             color: #2563eb;
+            margin-top: 6px;
         }
 
-        /* Purpose */
-        .purpose-cell {
-            max-width: 130px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            font-size: 12.5px;
+        /* Purpose / Reporting Place / notes — allow wrapping instead of clipping */
+        .wrap-cell {
+            max-width: 190px;
+            white-space: normal;
+            overflow-wrap: break-word;
+            font-size: 14px;
+            color: #444;
+            line-height: 1.4;
         }
 
         /* Status pills */
         .s-pill {
             display: inline-flex;
             align-items: center;
-            gap: 5px;
-            padding: 4px 11px;
+            gap: 6px;
+            padding: 5px 13px;
             border-radius: 50px;
-            font-size: 11px;
+            font-size: 12.5px;
             font-weight: 700;
             white-space: nowrap;
         }
@@ -574,15 +594,14 @@
             background: #2563eb;
         }
 
-        /* ── Vehicle-in-use context badge shown in Status column ── */
         .vehicle-inuse-badge {
             display: inline-flex;
             align-items: center;
             gap: 5px;
-            margin-top: 6px;
-            padding: 3px 9px;
+            margin-top: 7px;
+            padding: 4px 10px;
             border-radius: 50px;
-            font-size: 10px;
+            font-size: 11px;
             font-weight: 700;
             background: #f5f3ff;
             color: #7c3aed;
@@ -594,13 +613,12 @@
                 flex-shrink: 0;
             }
 
-        /* ── Inline info box shown in the approve modal for scheduled requests ── */
         .modal-schedule-notice {
             display: none;
             background: #f5f3ff;
             border: 1px solid #ddd6fe;
             border-radius: 9px;
-            padding: 11px 13px;
+            padding: 12px 14px;
             margin-bottom: 14px;
             gap: 9px;
             align-items: flex-start;
@@ -617,7 +635,7 @@
             }
 
         .msn-text {
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 600;
             color: #5b21b6;
             line-height: 1.55;
@@ -625,35 +643,55 @@
 
             .msn-text strong {
                 display: block;
-                font-size: 12.5px;
+                font-size: 13.5px;
                 margin-bottom: 2px;
                 color: #4c1d95;
             }
 
-        /* Admin notes */
-        .note-tag {
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            background: #f5f5f5;
-            border: 1px solid #eee;
-            border-radius: 6px;
-            padding: 4px 10px;
-            font-size: 11.5px;
-            color: #555;
-            max-width: 120px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+        /* ── Notes column: Admin + HOD stacked, wrapping, not truncated ── */
+        .notes-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            min-width: 160px;
+            max-width: 210px;
         }
 
-            .note-tag svg {
-                flex-shrink: 0;
-                color: #aaa;
+        .note-block {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .note-block-lbl {
+            font-size: 9.5px;
+            font-weight: 800;
+            letter-spacing: .6px;
+            text-transform: uppercase;
+        }
+
+            .note-block-lbl.admin {
+                color: #a16207;
             }
 
+            .note-block-lbl.hod {
+                color: #4f46e5;
+            }
+
+        .note-block-text {
+            font-size: 13px;
+            color: #444;
+            line-height: 1.4;
+            white-space: normal;
+            overflow-wrap: break-word;
+            background: #fafafa;
+            border: 1px solid #eee;
+            border-radius: 7px;
+            padding: 6px 9px;
+        }
+
         .note-empty {
-            font-size: 12px;
+            font-size: 13px;
             color: #ddd;
         }
 
@@ -662,13 +700,13 @@
             display: inline-flex;
             align-items: center;
             gap: 5px;
-            padding: 6px 12px;
+            padding: 7px 13px;
             background: #dcfce7;
             color: #166534;
             border: 1px solid #bbf7d0;
             border-radius: 7px;
             font-family: 'Barlow', sans-serif;
-            font-size: 11.5px;
+            font-size: 12.5px;
             font-weight: 700;
             cursor: pointer;
             transition: background .15s;
@@ -683,13 +721,13 @@
             display: inline-flex;
             align-items: center;
             gap: 5px;
-            padding: 6px 12px;
+            padding: 7px 13px;
             background: #fee2e2;
             color: #991b1b;
             border: 1px solid #fecaca;
             border-radius: 7px;
             font-family: 'Barlow', sans-serif;
-            font-size: 11.5px;
+            font-size: 12.5px;
             font-weight: 700;
             cursor: pointer;
             transition: background .15s;
@@ -704,13 +742,13 @@
             display: inline-flex;
             align-items: center;
             gap: 5px;
-            padding: 6px 12px;
+            padding: 7px 13px;
             background: #eff6ff;
             color: #1d4ed8;
             border: 1px solid #bfdbfe;
             border-radius: 7px;
             font-family: 'Barlow', sans-serif;
-            font-size: 11.5px;
+            font-size: 12.5px;
             font-weight: 700;
             cursor: pointer;
             transition: background .15s;
@@ -725,13 +763,13 @@
             display: inline-flex;
             align-items: center;
             gap: 5px;
-            padding: 6px 12px;
+            padding: 7px 13px;
             background: #f5f5f5;
             color: #555;
             border: 1px solid #e8e8e8;
             border-radius: 7px;
             font-family: 'Barlow', sans-serif;
-            font-size: 11.5px;
+            font-size: 12.5px;
             font-weight: 700;
             cursor: pointer;
             transition: background .15s;
@@ -746,7 +784,8 @@
         .action-col {
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 7px;
+            min-width: 140px;
         }
 
         /* Empty state */
@@ -761,7 +800,7 @@
             }
 
             .empty-state p {
-                font-size: 13px;
+                font-size: 14px;
                 color: #bbb;
             }
 
@@ -824,7 +863,7 @@
             }
 
         .modal-title {
-            font-size: 16px;
+            font-size: 17px;
             font-weight: 800;
             color: #0d0d0d;
         }
@@ -855,25 +894,25 @@
         .modal-info {
             background: #f8f8f8;
             border-radius: 10px;
-            padding: 12px 14px;
+            padding: 13px 15px;
             margin-bottom: 16px;
         }
 
         .modal-info-name {
-            font-size: 14px;
+            font-size: 15px;
             font-weight: 700;
             color: #0d0d0d;
         }
 
         .modal-info-sub {
-            font-size: 12px;
+            font-size: 13px;
             color: #aaa;
             margin-top: 3px;
         }
 
         .modal-label {
             display: block;
-            font-size: 10px;
+            font-size: 10.5px;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -888,7 +927,7 @@
             border: 1.5px solid #e8e8e8;
             border-radius: 9px;
             font-family: 'Barlow', sans-serif;
-            font-size: 13px;
+            font-size: 14px;
             color: #0d0d0d;
             outline: none;
             resize: vertical;
@@ -907,11 +946,11 @@
 
         .modal-btn {
             flex: 1;
-            height: 44px;
+            height: 46px;
             border: none;
             border-radius: 10px;
             font-family: 'Barlow', sans-serif;
-            font-size: 14px;
+            font-size: 14.5px;
             font-weight: 700;
             cursor: pointer;
             transition: background .2s;
@@ -993,14 +1032,14 @@
 @if (TempData["SuccessMessage"] != null)
 {
     <div class="alert alert-success">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
         @TempData["SuccessMessage"]
     </div>
 }
 @if (TempData["ErrorMessage"] != null)
 {
     <div class="alert alert-error">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" /></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" /></svg>
         @TempData["ErrorMessage"]
     </div>
 }
@@ -1061,7 +1100,7 @@
 <!-- Table -->
 <div class="table-card">
     <div class="tc-header">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#F5C518" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#F5C518" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
         <span class="tc-title">Vehicle Requests (@Model.Requests.Count)</span>
     </div>
 
@@ -1074,250 +1113,251 @@
     }
     else
     {
-        <table class="req-table" id="reqTable">
-            <thead>
-                <tr>
-                    <th style="width:40px;">#</th>
-                    <th>Employee</th>
-                    <th>Vehicle</th>
-                    <th>Reg No</th>
-                    <th>Start</th>
-                    <th>End</th>
-                    <th>Duration</th>
-                    <th>Purpose</th>
-                    <th>Requested On</th>
-                    <th>Status</th>
-                    <th>Admin Notes</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @{ int i = 1; var nowTime = DateTime.Now; }
-                @foreach (var r in Model.Requests)
-                {
-                    string sc = r.Status == "Approved" ? "approved"
-                              : r.Status == "Rejected" ? "rejected"
-                              : r.Status == "Returned" ? "returned"
-                              : r.Status == "HODApproved" ? "hodapproved"
-                              : "pending";
+        <div class="table-scroll">
+            <table class="req-table" id="reqTable">
+                <thead>
+                    <tr>
+                        <th style="width:36px;">#</th>
+                        <th>Employee</th>
+                        <th>Vehicle</th>
+                        <th>Schedule</th>
+                        <th>Purpose</th>
+                        <th>Reporting Place</th>
+                        <th>Requested On</th>
+                        <th>Status</th>
+                        <th>Notes</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{ int i = 1; var nowTime = DateTime.Now; }
+                    @foreach (var r in Model.Requests)
+                    {
+                        string sc = r.Status == "Approved" ? "approved"
+                                  : r.Status == "Rejected" ? "rejected"
+                                  : r.Status == "Returned" ? "returned"
+                                  : r.Status == "HODApproved" ? "hodapproved"
+                                  : "pending";
 
-                    double hrs = r.DurationHours;
-                    string durLabel = hrs >= 1
-                        ? hrs.ToString("0.#") + " hrs"
-                        : ((int)(hrs * 60)) + " min";
+                        double hrs = r.DurationHours;
+                        string durLabel = hrs >= 1
+                            ? hrs.ToString("0.#") + " hrs"
+                            : ((int)(hrs * 60)) + " min";
 
-                    string empInitials = string.IsNullOrEmpty(r.EmployeeName) ? "E"
-                        : string.Join("", r.EmployeeName.Split(' ')
-                            .Where(w => w.Length > 0).Take(2)
-                            .Select(w => w[0].ToString().ToUpper()));
+                        string empInitials = string.IsNullOrEmpty(r.EmployeeName) ? "E"
+                            : string.Join("", r.EmployeeName.Split(' ')
+                                .Where(w => w.Length > 0).Take(2)
+                                .Select(w => w[0].ToString().ToUpper()));
 
-                    // ── Detect if this is a scheduled/future request for an in-use vehicle ──
-                    bool isScheduled = (r.Status == "Pending" || r.Status == "HODApproved") && r.RequiredFrom > nowTime;
+                        bool isScheduled = (r.Status == "Pending" || r.Status == "HODApproved") && r.RequiredFrom > nowTime;
 
-                    // Safe strings for JS
-                    string safeVehicle = r.VehicleName.Replace("'", "\\'");
-                    string safeEmp = r.EmployeeName.Replace("'", "\\'");
-                    string safeFrom = r.RequiredFrom.ToString("dd MMM yyyy, hh:mm tt");
-                    string safeUntil = r.RequiredUntil.ToString("dd MMM yyyy, hh:mm tt");
+                        string safeVehicle = r.VehicleName.Replace("'", "\\'");
+                        string safeEmp = r.EmployeeName.Replace("'", "\\'");
+                        string safeFrom = r.RequiredFrom.ToString("dd MMM yyyy, hh:mm tt");
+                        string safeUntil = r.RequiredUntil.ToString("dd MMM yyyy, hh:mm tt");
 
-                    string rowCls = r.IsOverdue ? "overdue-row"
-                                  : isScheduled ? "scheduled-row"
-                                  : "";
+                        string rowCls = r.IsOverdue ? "overdue-row"
+                                      : isScheduled ? "scheduled-row"
+                                      : "";
 
-                    <tr class="req-row @rowCls"
-                        data-name="@r.EmployeeName.ToLower()"
-                        data-empno="@r.EmployeeNumber.ToLower()"
-                        data-vehicle="@r.VehicleName.ToLower()"
-                        data-reg="@r.RegistrationNo.ToLower()"
-                        data-scheduled="@(isScheduled ? "1" : "0")"
-                        data-from="@safeFrom"
-                        data-until="@safeUntil">
+                        <tr class="req-row @rowCls"
+                            data-name="@r.EmployeeName.ToLower()"
+                            data-empno="@r.EmployeeNumber.ToLower()"
+                            data-vehicle="@r.VehicleName.ToLower()"
+                            data-reg="@r.RegistrationNo.ToLower()"
+                            data-scheduled="@(isScheduled ? "1" : "0")"
+                            data-from="@safeFrom"
+                            data-until="@safeUntil">
 
-                        <td><span class="row-num">@i</span></td>
+                            <td><span class="row-num">@i</span></td>
 
-                        <td>
-                            <div class="emp-cell">
-                                <div class="emp-av">@empInitials</div>
-                                <div>
-                                    <div class="emp-name">@r.EmployeeName</div>
-                                    <div class="emp-meta">@r.EmployeeNumber &middot; @r.EmployeePhone</div>
-                                    <div class="emp-dept">@r.Designation &middot; @r.Department</div>
+                            <td>
+                                <div class="emp-cell">
+                                    <div class="emp-av">@empInitials</div>
+                                    <div>
+                                        <div class="emp-name">@r.EmployeeName</div>
+                                        <div class="emp-meta">@r.EmployeeNumber &middot; @r.EmployeePhone</div>
+                                        <div class="emp-dept">@r.Designation &middot; @r.Department</div>
+                                    </div>
                                 </div>
-                            </div>
-                        </td>
+                            </td>
 
-                        <td>
-                            <div class="v-name-cell">@r.VehicleName</div>
+                            <!-- ── Combined Vehicle + Reg No ── -->
+                            <td>
+                                <div class="v-name-cell">@r.VehicleName</div>
+                                <span class="reg-tag">@r.RegistrationNo</span>
 
-                            @* Overdue tag *@
-                            @if (r.IsOverdue)
-                            {
-                                <div class="overdue-tag">
-                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
-                                    Overdue
+                                @if (r.IsOverdue)
+                                {
+                                    <div class="overdue-tag">
+                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+                                        Overdue
+                                    </div>
+                                }
+                                @if (isScheduled)
+                                {
+                                    <div class="inuse-tag">
+                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+                                        In Use · Scheduled
+                                    </div>
+                                }
+                            </td>
+
+                            <!-- ── Combined Start / End / Duration ── -->
+                            <td class="sched-cell">
+                                <div class="sched-row">
+                                    <span class="sched-lbl">From</span>
+                                    <span class="sched-val">@r.RequiredFrom.ToString("dd MMM, hh:mm tt")</span>
                                 </div>
-                            }
-
-                            @* In-Use / Scheduled tag *@
-                            @if (isScheduled)
-                            {
-                                <div class="inuse-tag">
-                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
-                                    Vehicle In Use · Scheduled
+                                <div class="sched-row" style="margin-top:4px;">
+                                    <span class="sched-lbl">To</span>
+                                    <span class="sched-val">@r.RequiredUntil.ToString("dd MMM, hh:mm tt")</span>
                                 </div>
-                            }
-                        </td>
-
-                        <td><span class="reg-tag">@r.RegistrationNo</span></td>
-
-                        <td>
-                            <div class="date-main">@r.RequiredFrom.ToString("dd MMM yyyy")</div>
-                            <div class="date-sub">@r.RequiredFrom.ToString("hh:mm tt")</div>
-                        </td>
-                        <td>
-                            <div class="date-main">@r.RequiredUntil.ToString("dd MMM yyyy")</div>
-                            <div class="date-sub">@r.RequiredUntil.ToString("hh:mm tt")</div>
-                        </td>
-
-                        <td>
-                            <span class="dur-pill">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
-                                @durLabel
-                            </span>
-                        </td>
-
-                        <td><span class="purpose-cell" title="@r.Purpose">@r.Purpose</span></td>
-
-                        <td>
-                            <div class="date-main">@r.RequestedOn.ToString("dd MMM yy")</div>
-                            <div class="date-sub">@r.RequestedOn.ToString("hh:mm tt")</div>
-                        </td>
-
-                        <td>
-                            @* Status pill *@
-                            <span class="s-pill @sc">
-                                <span class="s-dot @sc"></span>
-                                @r.Status
-                            </span>
-
-                            @* purple "Scheduled from…" badge under the status pill *@
-                            @if (isScheduled)
-                            {
-                                <div class="vehicle-inuse-badge">
-                                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
-                                    Starts @r.RequiredFrom.ToString("dd MMM, hh:mm tt")
-                                </div>
-                            }
-
-                            @* small note under status when HOD already signed off, waiting on Admin *@
-                            @if (r.Status == "HODApproved" && !string.IsNullOrEmpty(r.HodApprovedBy))
-                            {
-                                <div class="date-sub" style="margin-top:4px;">HOD: @r.HodApprovedBy</div>
-                            }
-                        </td>
-
-                        <td>
-                            @{
-                                string notesToShow = !string.IsNullOrEmpty(r.AdminNotes) ? r.AdminNotes : r.HodNotes;
-                            }
-                            @if (!string.IsNullOrEmpty(notesToShow))
-                            {
-                                <span class="note-tag" title="@notesToShow">
-                                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" /></svg>
-                                    @notesToShow
+                                <span class="dur-pill">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+                                    @durLabel
                                 </span>
-                            }
-                            else
-                            {
-                                <span class="note-empty">—</span>
-                            }
-                        </td>
+                            </td>
 
-                        <td>
-                            <div class="action-col">
-                                @if (r.Status == "Pending")
+                            <td><div class="wrap-cell">@r.Purpose</div></td>
+                            <td><div class="wrap-cell">@(string.IsNullOrEmpty(r.ReportingPlace) ? "—" : r.ReportingPlace)</div></td>
+
+                            <td>
+                                <div class="sched-val">@r.RequestedOn.ToString("dd MMM yy")</div>
+                                <div class="emp-meta">@r.RequestedOn.ToString("hh:mm tt")</div>
+                            </td>
+
+                            <td>
+                                <span class="s-pill @sc">
+                                    <span class="s-dot @sc"></span>
+                                    @r.Status
+                                </span>
+
+                                @if (isScheduled)
                                 {
-                                    @* Admin CANNOT act on a Pending request — HOD must review it first.
-                                        Only HOD (first-stage) or SuperAdmin (can bypass HOD) act here. *@
-                                    if (currentRole == "HOD")
-                                    {
-                                        <button class="btn-approve"
-                                                onclick="openModal('approve', @r.RequestId, '@safeVehicle', '@safeEmp', @(isScheduled ? "true" : "false"), '@safeFrom', '@safeUntil')">
-                                            ✓ Approve (HOD)
-                                        </button>
-                                        <button class="btn-reject"
-                                                onclick="openModal('reject', @r.RequestId, '@safeVehicle', '@safeEmp', @(isScheduled ? "true" : "false"), '@safeFrom', '@safeUntil')">
-                                            ✕ Reject
-                                        </button>
-                                    }
-                                    else if (currentRole == "SuperAdmin")
-                                    {
-                                        <button class="btn-approve"
-                                                onclick="openModal('approve', @r.RequestId, '@safeVehicle', '@safeEmp', @(isScheduled ? "true" : "false"), '@safeFrom', '@safeUntil')">
-                                            ✓ Approve (Skip HOD)
-                                        </button>
-                                        <button class="btn-reject"
-                                                onclick="openModal('reject', @r.RequestId, '@safeVehicle', '@safeEmp', @(isScheduled ? "true" : "false"), '@safeFrom', '@safeUntil')">
-                                            ✕ Reject
-                                        </button>
-                                    }
-                                    else if (currentRole == "Admin")
-                                    {
-                                        <span style="font-size:12px;color:#a16207;">Awaiting HOD approval</span>
-                                    }
-                                    else
-                                    {
-                                        <span style="font-size:12px;color:#ccc;">—</span>
-                                    }
+                                    <div class="vehicle-inuse-badge">
+                                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+                                        Starts @r.RequiredFrom.ToString("dd MMM, hh:mm tt")
+                                    </div>
                                 }
-                                else if (r.Status == "HODApproved")
+
+                                @if (r.Status == "HODApproved" && !string.IsNullOrEmpty(r.HodApprovedBy))
                                 {
-                                    if (currentRole == "Admin" || currentRole == "SuperAdmin")
-                                    {
-                                        <button class="btn-approve"
-                                                onclick="openModal('approve', @r.RequestId, '@safeVehicle', '@safeEmp', @(isScheduled ? "true" : "false"), '@safeFrom', '@safeUntil')">
-                                            ✓ Final Approve
-                                        </button>
-                                        <button class="btn-reject"
-                                                onclick="openModal('reject', @r.RequestId, '@safeVehicle', '@safeEmp', @(isScheduled ? "true" : "false"), '@safeFrom', '@safeUntil')">
-                                            ✕ Reject
-                                        </button>
-                                    }
-                                    else
-                                    {
-                                        <span style="font-size:12px;color:#a16207;">Awaiting Admin approval</span>
-                                    }
+                                    <div class="emp-meta" style="margin-top:5px;">HOD: @r.HodApprovedBy</div>
                                 }
-                                else if (r.Status == "Approved")
+                            </td>
+
+                            <!-- ── Notes: Admin + HOD, both stacked and fully visible ── -->
+                            <td>
+                                @if (string.IsNullOrEmpty(r.AdminNotes) && string.IsNullOrEmpty(r.HodNotes))
                                 {
-                                    using (Html.BeginForm("MarkReturned", "Autobase", FormMethod.Post, new { style = "display:inline;" }))
-                                    {
-                                        @Html.AntiForgeryToken()
-                                        <input type="hidden" name="requestId" value="@r.RequestId" />
-                                        <button type="submit" class="btn-returned"
-                                                onclick="return confirm('Mark this vehicle as returned?')">
-                                            ✓ Mark Returned
-                                        </button>
-                                    }
-                                    <a href="@Url.Action("PrintRequest","Autobase", new { id = r.RequestId })"
-                                       class="btn-print" target="_blank">🖨 Print</a>
-                                }
-                                else if (r.Status == "Returned")
-                                {
-                                    <a href="@Url.Action("PrintRequest","Autobase", new { id = r.RequestId })"
-                                       class="btn-print" target="_blank">🖨 Print</a>
+                                    <span class="note-empty">—</span>
                                 }
                                 else
                                 {
-                                    <span style="font-size:12px;color:#ccc;">—</span>
+                                    <div class="notes-stack">
+                                        @if (!string.IsNullOrEmpty(r.HodNotes))
+                                        {
+                                            <div class="note-block">
+                                                <span class="note-block-lbl hod">HOD Note</span>
+                                                <span class="note-block-text">@r.HodNotes</span>
+                                            </div>
+                                        }
+                                        @if (!string.IsNullOrEmpty(r.AdminNotes))
+                                        {
+                                            <div class="note-block">
+                                                <span class="note-block-lbl admin">Admin Note</span>
+                                                <span class="note-block-text">@r.AdminNotes</span>
+                                            </div>
+                                        }
+                                    </div>
                                 }
-                            </div>
-                        </td>
-                    </tr>
-                    i++;
-                }
-            </tbody>
-        </table>
+                            </td>
+
+                            <td>
+                                <div class="action-col">
+                                    @if (r.Status == "Pending")
+                                    {
+                                        if (currentRole == "HOD")
+                                        {
+                                            <button class="btn-approve"
+                                                    onclick="openModal('approve', @r.RequestId, '@safeVehicle', '@safeEmp', @(isScheduled ? "true" : "false"), '@safeFrom', '@safeUntil')">
+                                                ✓ Approve (HOD)
+                                            </button>
+                                            <button class="btn-reject"
+                                                    onclick="openModal('reject', @r.RequestId, '@safeVehicle', '@safeEmp', @(isScheduled ? "true" : "false"), '@safeFrom', '@safeUntil')">
+                                                ✕ Reject
+                                            </button>
+                                        }
+                                        else if (currentRole == "SuperAdmin")
+                                        {
+                                            <button class="btn-approve"
+                                                    onclick="openModal('approve', @r.RequestId, '@safeVehicle', '@safeEmp', @(isScheduled ? "true" : "false"), '@safeFrom', '@safeUntil')">
+                                                ✓ Approve (Skip HOD)
+                                            </button>
+                                            <button class="btn-reject"
+                                                    onclick="openModal('reject', @r.RequestId, '@safeVehicle', '@safeEmp', @(isScheduled ? "true" : "false"), '@safeFrom', '@safeUntil')">
+                                                ✕ Reject
+                                            </button>
+                                        }
+                                        else if (currentRole == "Admin")
+                                        {
+                                            <span style="font-size:13px;color:#a16207;">Awaiting HOD approval</span>
+                                        }
+                                        else
+                                        {
+                                            <span style="font-size:13px;color:#ccc;">—</span>
+                                        }
+                                    }
+                                    else if (r.Status == "HODApproved")
+                                    {
+                                        if (currentRole == "Admin" || currentRole == "SuperAdmin")
+                                        {
+                                            <button class="btn-approve"
+                                                    onclick="openModal('approve', @r.RequestId, '@safeVehicle', '@safeEmp', @(isScheduled ? "true" : "false"), '@safeFrom', '@safeUntil')">
+                                                ✓ Final Approve
+                                            </button>
+                                            <button class="btn-reject"
+                                                    onclick="openModal('reject', @r.RequestId, '@safeVehicle', '@safeEmp', @(isScheduled ? "true" : "false"), '@safeFrom', '@safeUntil')">
+                                                ✕ Reject
+                                            </button>
+                                        }
+                                        else
+                                        {
+                                            <span style="font-size:13px;color:#a16207;">Awaiting Admin approval</span>
+                                        }
+                                    }
+                                    else if (r.Status == "Approved")
+                                    {
+                                        using (Html.BeginForm("MarkReturned", "Autobase", FormMethod.Post, new { style = "display:inline;" }))
+                                        {
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="requestId" value="@r.RequestId" />
+                                            <button type="submit" class="btn-returned"
+                                                    onclick="return confirm('Mark this vehicle as returned?')">
+                                                ✓ Mark Returned
+                                            </button>
+                                        }
+                                        <a href="@Url.Action("PrintRequest","Autobase", new { id = r.RequestId })"
+                                           class="btn-print" target="_blank">🖨 Print</a>
+                                    }
+                                    else if (r.Status == "Returned")
+                                    {
+                                        <a href="@Url.Action("PrintRequest","Autobase", new { id = r.RequestId })"
+                                           class="btn-print" target="_blank">🖨 Print</a>
+                                    }
+                                    else
+                                    {
+                                        <span style="font-size:13px;color:#ccc;">—</span>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                        i++;
+                    }
+                </tbody>
+            </table>
+        </div>
     }
 </div>
 
@@ -1332,7 +1372,6 @@
         </div>
         <div class="modal-body">
 
-            <!-- purple warning shown only for scheduled requests -->
             <div class="modal-schedule-notice" id="scheduleNotice">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
                 <div class="msn-text">
@@ -1447,7 +1486,6 @@
             });
         }
 
-        // ── NEW: date picker navigation ──
         function goToDate(val) {
             var url = '@Url.Action("SeeRequests", "Autobase")'
                 + '?date=' + encodeURIComponent(val)
