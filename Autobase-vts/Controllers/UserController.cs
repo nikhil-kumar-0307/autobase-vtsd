@@ -14,18 +14,32 @@ namespace autobase.Controllers
     public class UserController : Controller
     {
         private readonly AutobaseDbContext _db = new AutobaseDbContext();
+        private readonly QmsLookupDbContext _qmsDb = new QmsLookupDbContext();
 
         // Roles that can be assigned to a user via the Add/Edit forms.
         // Only SuperAdmin reaches these actions (see RoleAuthorize below),
         // so SuperAdmin itself is intentionally excluded from self-service creation.
         private static readonly string[] AssignableRoles = { "Admin", "HOD", "Employee" };
 
+
+        // ── NEW: shared helper ──
+        private SelectList GetDepartmentList(string selected = null)
+        {
+            var names = _qmsDb.Departments
+                .Where(d => d.IsActive)
+                .OrderBy(d => d.Name)
+                .Select(d => d.Name)
+                .ToList();
+
+            return new SelectList(names, selected);
+        }
         // ── ADD ──────────────────────────────────────────────────────────────
 
         [RoleAuthorize("SuperAdmin")]
         [HttpGet]
         public ActionResult Add()
         {
+            ViewBag.Departments = GetDepartmentList();
             return View("AddUser", new AddUserDto());
         }
 
@@ -54,7 +68,7 @@ namespace autobase.Controllers
                 EmployeeNumber = model.EmployeeNumber.Trim().ToUpper(),
                 FullName = model.FullName.Trim(),
                 Email = model.Email?.Trim(),
-                PasswordHash = HashPassword(model.Password),
+                PasswordHash = PasswordHelper.HashPassword(model.Password),
                 Role = model.Role,
                 MobileNumber = model.MobileNumber?.Trim(),
                 Designation = model.Designation?.Trim(),
@@ -113,6 +127,7 @@ namespace autobase.Controllers
             };
 
             ViewBag.SessionRole = "SuperAdmin";
+            ViewBag.Departments = GetDepartmentList(emp.Department);
             return View("EditUser", dto);
         }
 
@@ -140,6 +155,7 @@ namespace autobase.Controllers
             if (!ModelState.IsValid)
             {
                 ViewBag.SessionRole = "SuperAdmin";
+                ViewBag.Departments = GetDepartmentList(model.Department);
                 return View("EditUser", model);
             }
 
@@ -159,7 +175,7 @@ namespace autobase.Controllers
             emp.Email = model.Email?.Trim();
 
             if (!string.IsNullOrEmpty(model.NewPassword))
-                emp.PasswordHash = HashPassword(model.NewPassword);
+                emp.PasswordHash = PasswordHelper.HashPassword(model.NewPassword);
 
             _db.SaveChanges();
 
@@ -167,22 +183,45 @@ namespace autobase.Controllers
             return RedirectToAction("EditIndex");
         }
 
-        // ── Helpers ──────────────────────────────────────────────────────────
+        // ── DELETE ────────────────────────────────────────────────────────────
 
-        private static string HashPassword(string password)
+        [RoleAuthorize("SuperAdmin")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public ActionResult Delete(int id)
         {
-            using (var sha = SHA256.Create())
+            var emp = _db.Employees.Find(id);
+            if (emp == null || !emp.IsActive)
             {
-                byte[] bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(password));
-                var sb = new StringBuilder();
-                foreach (byte b in bytes) sb.Append(b.ToString("x2"));
-                return sb.ToString();
+                TempData["Error"] = "User not found.";
+                return RedirectToAction("EditIndex");
             }
+
+            if (emp.Role == "SuperAdmin")
+            {
+                TempData["Error"] = "SuperAdmin accounts cannot be deleted.";
+                return RedirectToAction("EditIndex");
+            }
+
+            // Soft delete — keeps history/foreign-key references (e.g. past
+            // vehicle requests) intact while removing the user from all lists
+            // and login access.
+            _db.Employees.Remove(emp);
+            _db.SaveChanges();
+
+            TempData["Success"] = $"User \"{emp.FullName}\" ({emp.EmployeeNumber}) deleted successfully.";
+            return RedirectToAction("EditIndex");
         }
+
+       
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing) _db.Dispose();
+            if (disposing)
+            {
+                _db.Dispose();
+                _qmsDb.Dispose();   
+            }
             base.Dispose(disposing);
         }
     }

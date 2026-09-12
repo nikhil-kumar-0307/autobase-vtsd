@@ -11,20 +11,70 @@
 
 <header class="topbar">
     <div class="topbar-left">
-        <div class="topbar-greeting">@greeting, @fullName ??</div>
+        <div class="topbar-greeting">@greeting, @fullName</div>
         <div class="topbar-sub">Here's what's happening today</div>
     </div>
     <div class="topbar-right">
-        <div class="topbar-user-pill">
-            <div class="topbar-avatar">@initials</div>
-            <div class="topbar-user-info">
-                <span class="topbar-user-name">@fullName</span>
-                <span class="topbar-user-role">@role</span>
+        <div class="topbar-user-wrap" id="profileWrap">
+            <div class="topbar-user-pill" id="profilePillBtn">
+                <div class="topbar-avatar">@initials</div>
+                <div class="topbar-user-info">
+                    <span class="topbar-user-name">@fullName</span>
+                    <span class="topbar-user-role">@role</span>
+                </div>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="profileChevron">
+                    <polyline points="6 9 12 15 18 9" />
+                </svg>
             </div>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="6 9 12 15 18 9" />
-            </svg>
+
+            <!-- ── Profile dropdown panel ── -->
+            <div class="profile-panel" id="profilePanel">
+                <div class="profile-panel-loading" id="profileLoading">Loading…</div>
+
+                <div id="profileContent" style="display:none;">
+                    <div class="profile-panel-header">
+                        <div class="profile-panel-avatar" id="ppAvatar">@initials</div>
+                        <div>
+                            <div class="profile-panel-name" id="ppName">@fullName</div>
+                            <div class="profile-panel-role" id="ppRole">@role</div>
+                        </div>
+                    </div>
+
+                    <div class="profile-panel-body">
+                        <div class="profile-row"><span>Employee No.</span><strong id="ppEmpNo">—</strong></div>
+                        <div class="profile-row"><span>Department</span><strong id="ppDept">—</strong></div>
+                        <div class="profile-row"><span>Designation</span><strong id="ppDesig">—</strong></div>
+                        <div class="profile-row"><span>Mobile</span><strong id="ppMobile">—</strong></div>
+                        <div class="profile-row"><span>Email</span><strong id="ppEmail">—</strong></div>
+                    </div>
+
+                    <div class="profile-panel-divider"></div>
+
+                    <!-- ── Change password ── -->
+                    <div id="pwdSection">
+                        <button type="button" class="profile-pwd-toggle" id="pwdToggleBtn">
+                            🔒 Change Password
+                        </button>
+
+                        <div id="pwdForm" style="display:none;">
+                            <input type="password" id="pwdCurrent" class="profile-input" placeholder="Current password" />
+                            <input type="password" id="pwdNew" class="profile-input" placeholder="New password (min. 6 chars)" />
+                            <input type="password" id="pwdConfirm" class="profile-input" placeholder="Confirm new password" />
+                            <div id="pwdMessage" class="profile-pwd-message"></div>
+                            <div class="profile-pwd-actions">
+                                <button type="button" class="profile-pwd-cancel" id="pwdCancelBtn">Cancel</button>
+                                <button type="button" class="profile-pwd-save" id="pwdSaveBtn">Save</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="pwdUnavailableMsg" class="profile-pwd-unavailable" style="display:none;">
+                        Password changes for this account are managed in QMS.
+                    </div>
+                </div>
+            </div>
         </div>
+
         <a href="@Url.Action("Logout", "Account")" class="topbar-logout-btn">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
@@ -35,6 +85,8 @@
         </a>
     </div>
 </header>
+
+@Html.AntiForgeryToken()
 
 <style>
     .topbar {
@@ -70,6 +122,10 @@
         gap: 12px;
     }
 
+    .topbar-user-wrap {
+        position: relative;
+    }
+
     .topbar-user-pill {
         display: flex;
         align-items: center;
@@ -79,7 +135,12 @@
         border-radius: 50px;
         padding: 5px 12px 5px 5px;
         cursor: pointer;
+        transition: background .15s;
     }
+
+        .topbar-user-pill:hover {
+            background: #f0f0f0;
+        }
 
     .topbar-avatar {
         width: 30px;
@@ -112,6 +173,14 @@
         color: #999;
     }
 
+    #profileChevron {
+        transition: transform .2s;
+    }
+
+    .topbar-user-wrap.open #profileChevron {
+        transform: rotate(180deg);
+    }
+
     .topbar-logout-btn {
         display: flex;
         align-items: center;
@@ -133,4 +202,314 @@
             color: #e53e3e;
             background: #fff5f5;
         }
+
+    /* ── Profile dropdown panel ── */
+    .profile-panel {
+        display: none;
+        position: absolute;
+        top: calc(100% + 10px);
+        right: 0;
+        width: 300px;
+        background: #fff;
+        border: 1px solid #ececec;
+        border-radius: 14px;
+        box-shadow: 0 12px 32px rgba(0,0,0,.12);
+        padding: 18px;
+        z-index: 200;
+        font-family: 'Barlow', sans-serif;
+    }
+
+    .topbar-user-wrap.open .profile-panel {
+        display: block;
+    }
+
+    .profile-panel-loading {
+        font-size: 13px;
+        color: #999;
+        text-align: center;
+        padding: 20px 0;
+    }
+
+    .profile-panel-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 14px;
+    }
+
+    .profile-panel-avatar {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background: #F5C518;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 17px;
+        font-weight: 700;
+        color: #0d0d0d;
+        flex-shrink: 0;
+    }
+
+    .profile-panel-name {
+        font-size: 15px;
+        font-weight: 700;
+        color: #0d0d0d;
+    }
+
+    .profile-panel-role {
+        font-size: 11px;
+        font-weight: 600;
+        color: #b45309;
+        background: #fffbeb;
+        border: 1px solid #fde68a;
+        border-radius: 20px;
+        padding: 1px 9px;
+        display: inline-block;
+        margin-top: 3px;
+    }
+
+    .profile-panel-body {
+        display: flex;
+        flex-direction: column;
+        gap: 9px;
+        margin-bottom: 14px;
+    }
+
+    .profile-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 12px;
+    }
+
+        .profile-row span {
+            color: #999;
+        }
+
+        .profile-row strong {
+            color: #0d0d0d;
+            font-weight: 600;
+            text-align: right;
+            max-width: 170px;
+            word-break: break-word;
+        }
+
+    .profile-panel-divider {
+        height: 1px;
+        background: #f0f0f0;
+        margin: 4px 0 14px;
+    }
+
+    .profile-pwd-toggle {
+        width: 100%;
+        background: #fafafa;
+        border: 1.5px solid #ececec;
+        border-radius: 9px;
+        padding: 10px;
+        font-family: 'Barlow', sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        color: #444;
+        cursor: pointer;
+        transition: border-color .2s, background .2s;
+    }
+
+        .profile-pwd-toggle:hover {
+            border-color: #cbd5e0;
+            background: #fff;
+        }
+
+    .profile-input {
+        width: 100%;
+        height: 40px;
+        padding: 0 12px;
+        border: 1.5px solid #e8e8e8;
+        border-radius: 9px;
+        font-family: 'Barlow', sans-serif;
+        font-size: 13px;
+        margin-bottom: 9px;
+        outline: none;
+        box-sizing: border-box;
+        transition: border-color .2s;
+    }
+
+        .profile-input:focus {
+            border-color: #3182ce;
+        }
+
+    .profile-pwd-message {
+        font-size: 11.5px;
+        margin-bottom: 8px;
+        min-height: 14px;
+    }
+
+        .profile-pwd-message.error {
+            color: #e53e3e;
+        }
+
+        .profile-pwd-message.success {
+            color: #166534;
+        }
+
+    .profile-pwd-actions {
+        display: flex;
+        gap: 8px;
+    }
+
+    .profile-pwd-cancel, .profile-pwd-save {
+        flex: 1;
+        height: 38px;
+        border-radius: 8px;
+        font-family: 'Barlow', sans-serif;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        border: none;
+    }
+
+    .profile-pwd-cancel {
+        background: #f5f5f5;
+        color: #555;
+    }
+
+    .profile-pwd-save {
+        background: #F5C518;
+        color: #0d0d0d;
+    }
+
+        .profile-pwd-save:hover {
+            background: #e6b800;
+        }
+
+        .profile-pwd-save:disabled {
+            opacity: .6;
+            cursor: not-allowed;
+        }
+
+    .profile-pwd-unavailable {
+        font-size: 11.5px;
+        color: #999;
+        font-style: italic;
+        text-align: center;
+        padding: 6px 0;
+    }
 </style>
+
+<script>
+    (function () {
+        var wrap = document.getElementById('profileWrap');
+        var pillBtn = document.getElementById('profilePillBtn');
+        var loaded = false;
+
+        pillBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            var isOpen = wrap.classList.toggle('open');
+            if (isOpen && !loaded) {
+                loadProfile();
+            }
+        });
+
+        document.addEventListener('click', function (e) {
+            if (!wrap.contains(e.target)) {
+                wrap.classList.remove('open');
+            }
+        });
+
+        function loadProfile() {
+            fetch('@Url.Action("Details", "Profile")')
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    document.getElementById('profileLoading').style.display = 'none';
+                    var content = document.getElementById('profileContent');
+                    content.style.display = 'block';
+
+                    if (!data.success) {
+                        content.innerHTML = '<div style="font-size:12px;color:#e53e3e;">' + data.message + '</div>';
+                        return;
+                    }
+
+                    loaded = true;
+                    document.getElementById('ppAvatar').textContent = (data.fullName || 'U').substring(0, 1).toUpperCase();
+                    document.getElementById('ppName').textContent = data.fullName || '—';
+                    document.getElementById('ppRole').textContent = data.role || '—';
+                    document.getElementById('ppEmpNo').textContent = data.employeeNumber || '—';
+                    document.getElementById('ppDept').textContent = data.department || '—';
+                    document.getElementById('ppDesig').textContent = data.designation || '—';
+                    document.getElementById('ppMobile').textContent = data.mobileNumber || '—';
+                    document.getElementById('ppEmail').textContent = data.email || '—';
+
+                    if (!data.canChangePassword) {
+                        document.getElementById('pwdSection').style.display = 'none';
+                        document.getElementById('pwdUnavailableMsg').style.display = 'block';
+                    }
+                })
+                .catch(function () {
+                    document.getElementById('profileLoading').textContent = 'Failed to load profile.';
+                });
+        }
+
+        // ── Change password toggle ──
+        document.getElementById('pwdToggleBtn').addEventListener('click', function () {
+            document.getElementById('pwdForm').style.display = 'block';
+            this.style.display = 'none';
+        });
+
+        document.getElementById('pwdCancelBtn').addEventListener('click', function () {
+            document.getElementById('pwdForm').style.display = 'none';
+            document.getElementById('pwdToggleBtn').style.display = 'block';
+            document.getElementById('pwdCurrent').value = '';
+            document.getElementById('pwdNew').value = '';
+            document.getElementById('pwdConfirm').value = '';
+            setPwdMessage('', '');
+        });
+
+        document.getElementById('pwdSaveBtn').addEventListener('click', function () {
+            var current = document.getElementById('pwdCurrent').value;
+            var newPwd = document.getElementById('pwdNew').value;
+            var confirm = document.getElementById('pwdConfirm').value;
+            var btn = this;
+
+            if (!current || !newPwd || !confirm) {
+                setPwdMessage('All fields are required.', 'error');
+                return;
+            }
+
+            var token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+            btn.disabled = true;
+            btn.textContent = 'Saving…';
+
+            fetch('@Url.Action("ChangePassword", "Profile")', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: '__RequestVerificationToken=' + encodeURIComponent(token) +
+                      '&currentPassword=' + encodeURIComponent(current) +
+                      '&newPassword=' + encodeURIComponent(newPwd) +
+                      '&confirmPassword=' + encodeURIComponent(confirm)
+            })
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    btn.disabled = false;
+                    btn.textContent = 'Save';
+                    setPwdMessage(data.message, data.success ? 'success' : 'error');
+                    if (data.success) {
+                        document.getElementById('pwdCurrent').value = '';
+                        document.getElementById('pwdNew').value = '';
+                        document.getElementById('pwdConfirm').value = '';
+                    }
+                })
+                .catch(function () {
+                    btn.disabled = false;
+                    btn.textContent = 'Save';
+                    setPwdMessage('Something went wrong. Try again.', 'error');
+                });
+        });
+
+        function setPwdMessage(msg, type) {
+            var el = document.getElementById('pwdMessage');
+            el.textContent = msg || '';
+            el.className = 'profile-pwd-message' + (type ? ' ' + type : '');
+        }
+    })();
+</script>

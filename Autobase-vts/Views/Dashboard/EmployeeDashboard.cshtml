@@ -1,294 +1,16 @@
 ﻿@model autobase.Models.DTOs.EmployeeDashboardDto
 @{
     ViewBag.Title = "My Dashboard";
-    Layout = null;
+    ViewBag.PageSubtitle = "Here's your vehicle status for today";
+    ViewBag.ActiveNav = "Dashboard";
+    Layout = "~/Views/Shared/_EmployeeLayout.cshtml";
 
     string fullName = Session["FullName"]?.ToString() ?? "Employee";
-    string empNo    = Session["EmployeeNumber"]?.ToString() ?? "";
-    string initials = string.IsNullOrEmpty(fullName) ? "E" : fullName.Substring(0, 1).ToUpper();
-
-    var now  = DateTime.Now;
-    int hour = now.Hour;
-    string greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+    string empNo = Session["EmployeeNumber"]?.ToString() ?? "";
 }
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AutoBase &mdash; Employee Dashboard</title>
-    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&family=Barlow+Condensed:wght@700;800&display=swap" rel="stylesheet" />
+
+@section Styles {
     <style>
-        *, *::before, *::after {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: 'Barlow', sans-serif;
-            background: #f8f8f8;
-            color: #0d0d0d;
-            min-height: 100vh;
-        }
-
-        .emp-layout {
-            display: flex;
-            min-height: 100vh;
-        }
-
-        /* ── Sidebar ── */
-        .emp-sidebar {
-            width: 200px;
-            min-width: 200px;
-            background: #fff;
-            border-right: 1px solid #f0f0f0;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            position: fixed;
-            left: 0;
-            top: 0;
-            z-index: 100;
-        }
-
-        .emp-logo {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 20px 16px 16px;
-            border-bottom: 1px solid #f5f5f5;
-        }
-
-        .emp-logo-icon {
-            width: 32px;
-            height: 32px;
-            background: #F5C518;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-            .emp-logo-icon svg {
-                width: 20px;
-                height: 20px;
-            }
-
-        .emp-logo-text {
-            font-family: 'Barlow Condensed', sans-serif;
-            font-size: 17px;
-            font-weight: 800;
-            letter-spacing: 1px;
-            color: #0d0d0d;
-        }
-
-        .logo-y {
-            color: #F5C518;
-        }
-
-        .emp-nav {
-            flex: 1;
-            padding: 12px 10px;
-            display: flex;
-            flex-direction: column;
-            gap: 1px;
-        }
-
-        .nav-label {
-            font-size: 9px;
-            font-weight: 700;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            color: #bbb;
-            padding: 10px 8px 4px;
-            margin-top: 4px;
-        }
-
-        .nav-link {
-            display: flex;
-            align-items: center;
-            gap: 9px;
-            padding: 8px 10px;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 500;
-            color: #555;
-            text-decoration: none;
-            transition: background .15s, color .15s;
-        }
-
-            .nav-link svg {
-                flex-shrink: 0;
-                opacity: .7;
-            }
-
-            .nav-link:hover {
-                background: #f7f7f7;
-                color: #0d0d0d;
-            }
-
-                .nav-link:hover svg {
-                    opacity: 1;
-                }
-
-            .nav-link.active {
-                background: #fff8dc;
-                color: #0d0d0d;
-                font-weight: 600;
-            }
-
-                .nav-link.active svg {
-                    opacity: 1;
-                    color: #c9a000;
-                }
-
-        .emp-sidebar-footer {
-            padding: 14px;
-            border-top: 1px solid #f0f0f0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .emp-s-avatar {
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            background: #F5C518;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            font-weight: 700;
-            color: #0d0d0d;
-            flex-shrink: 0;
-        }
-
-        .emp-s-info {
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .emp-s-name {
-            font-size: 12px;
-            font-weight: 600;
-            color: #0d0d0d;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .emp-s-meta {
-            font-size: 10px;
-            color: #999;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        /* ── Topbar ── */
-        .emp-topbar {
-            height: 60px;
-            background: #fff;
-            border-bottom: 1px solid #f0f0f0;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 28px;
-            position: fixed;
-            top: 0;
-            left: 200px;
-            right: 0;
-            z-index: 99;
-        }
-
-        .topbar-greet {
-            font-size: 14px;
-            font-weight: 600;
-            color: #0d0d0d;
-        }
-
-        .topbar-sub {
-            font-size: 12px;
-            color: #aaa;
-            margin-top: 1px;
-        }
-
-        .topbar-right {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .user-pill {
-            display: flex;
-            align-items: center;
-            gap: 9px;
-            background: #f7f7f7;
-            border: 1px solid #ebebeb;
-            border-radius: 50px;
-            padding: 5px 12px 5px 5px;
-        }
-
-        .pill-avatar {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background: #F5C518;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 13px;
-            font-weight: 700;
-            color: #0d0d0d;
-        }
-
-        .pill-name {
-            font-size: 12px;
-            font-weight: 600;
-            color: #0d0d0d;
-        }
-
-        .pill-role {
-            font-size: 10px;
-            color: #999;
-        }
-
-        .logout-btn {
-            display: flex;
-            align-items: center;
-            gap: 7px;
-            padding: 8px 16px;
-            border: 1.5px solid #eee;
-            border-radius: 8px;
-            font-family: 'Barlow', sans-serif;
-            font-size: 13px;
-            font-weight: 600;
-            color: #555;
-            text-decoration: none;
-            background: #fff;
-            transition: border-color .2s, color .2s, background .2s;
-        }
-
-            .logout-btn:hover {
-                border-color: #e53e3e;
-                color: #e53e3e;
-                background: #fff5f5;
-            }
-
-        /* ── Main ── */
-        .emp-main {
-            margin-left: 200px;
-            padding-top: 60px;
-            flex: 1;
-        }
-
-        .emp-body {
-            padding: 28px;
-        }
-
         /* ── Welcome banner ── */
         .emp-welcome {
             background: linear-gradient(135deg, #fffbea 0%, #fff8d6 100%);
@@ -433,7 +155,6 @@
             animation: fadeUp .48s ease .1s both;
         }
 
-        /* ── Card shell ── */
         .emp-card {
             background: #fff;
             border: 1px solid #f0f0f0;
@@ -474,7 +195,6 @@
                 color: #0d0d0d;
             }
 
-        /* ── Recent requests table ── */
         .emp-table {
             width: 100%;
             border-collapse: collapse;
@@ -597,7 +317,6 @@
             background: #3182ce;
         }
 
-        /* ── Allocated vehicle cards ── */
         .alloc-list {
             padding: 14px;
             display: flex;
@@ -753,7 +472,6 @@
                     background: #fecaca;
                 }
 
-        /* ── Empty state ── */
         .empty-state {
             padding: 36px 20px;
             text-align: center;
@@ -765,344 +483,227 @@
                 color: #e0e0e0;
                 margin-bottom: 10px;
             }
-
-        @@keyframes fadeUp {
-            from {
-                opacity: 0;
-                transform: translateY(12px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
     </style>
-</head>
-<body>
-    <div class="emp-layout">
+}
 
-        <!-- Sidebar -->
-        <aside class="emp-sidebar">
-            <div class="emp-logo">
-                <div class="emp-logo-icon">
-                    <svg viewBox="0 0 24 24" fill="none">
-                        <rect x="1" y="5" width="15" height="11" rx="1" fill="#1a1a1a" />
-                        <path d="M16 9h4l3 4v3h-7V9z" fill="#1a1a1a" />
-                        <circle cx="5.5" cy="18.5" r="2.5" fill="#1a1a1a" />
-                        <circle cx="18.5" cy="18.5" r="2.5" fill="#1a1a1a" />
-                    </svg>
-                </div>
-                <span class="emp-logo-text">AUTO<span class="logo-y">BASE</span></span>
-            </div>
-            <nav class="emp-nav">
-                <div class="nav-label">Overview</div>
-                <a href="@Url.Action("Index","EmployeeDashboard")" class="nav-link active">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="3" width="7" height="7" />
-                        <rect x="14" y="3" width="7" height="7" />
-                        <rect x="14" y="14" width="7" height="7" />
-                        <rect x="3" y="14" width="7" height="7" />
-                    </svg>
-                    Dashboard
-                </a>
-                <div class="nav-label">Vehicles</div>
-                <a href="@Url.Action("AvailableVehicles","EmployeeDashboard")" class="nav-link">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
-                        <polyline points="22 4 12 14.01 9 11.01" />
-                    </svg>
-                    Available Vehicles
-                </a>
-                <a href="@Url.Action("AllocatedVehicle","EmployeeDashboard")" class="nav-link">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
-                        <circle cx="12" cy="10" r="3" />
-                    </svg>
-                    My Allocated Vehicle
-                </a>
-                <div class="nav-label">Requests</div>
-                <a href="@Url.Action("MyRequests","EmployeeDashboard")" class="nav-link">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
-                        <polyline points="14 2 14 8 20 8" />
-                        <line x1="16" y1="13" x2="8" y2="13" />
-                        <line x1="16" y1="17" x2="8" y2="17" />
-                    </svg>
-                    My Requests
-                </a>
-                <a href="@Url.Action("NewRequest","EmployeeDashboard")" class="nav-link">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10" />
-                        <line x1="12" y1="8" x2="12" y2="16" />
-                        <line x1="8" y1="12" x2="16" y2="12" />
-                    </svg>
-                    New Request
-                </a>
-            </nav>
-            <div class="emp-sidebar-footer">
-                <div class="emp-s-avatar">@initials</div>
-                <div class="emp-s-info">
-                    <span class="emp-s-name">@fullName</span>
-                    <span class="emp-s-meta">Employee &middot; #@empNo</span>
-                </div>
-            </div>
-        </aside>
-
-        <!-- Main -->
-        <div class="emp-main">
-            <header class="emp-topbar">
-                <div>
-                    <div class="topbar-greet">@greeting, @fullName</div>
-                    <div class="topbar-sub">Here's your vehicle status for today</div>
-                </div>
-                <div class="topbar-right">
-                    <div class="user-pill">
-                        <div class="pill-avatar">@initials</div>
-                        <div>
-                            <div class="pill-name">@fullName</div>
-                            <div class="pill-role">Employee</div>
-                        </div>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="6 9 12 15 18 9" />
-                        </svg>
-                    </div>
-                    <a href="@Url.Action("Logout","Account")" class="logout-btn">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
-                            <polyline points="16 17 21 12 16 7" />
-                            <line x1="21" y1="12" x2="9" y2="12" />
-                        </svg>
-                        Logout
-                    </a>
-                </div>
-            </header>
-
-            <div class="emp-body">
-
-                <!-- Welcome banner -->
-                <div class="emp-welcome">
-                    <div>
-                        <div class="emp-welcome-title">Welcome back, @fullName &#128075;</div>
-                        <div class="emp-welcome-sub">
-                            Your vehicle dashboard &nbsp;|&nbsp; Emp No: <span>#@empNo</span>
-                        </div>
-                    </div>
-                    <div class="emp-badge">Employee</div>
-                </div>
-
-                <!-- Stat cards (real data, clickable) -->
-                <div class="emp-stats">
-                    <a href="@Url.Action("MyRequests","EmployeeDashboard")" class="emp-stat s1">
-                        <div class="emp-stat-icon y">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
-                                <polyline points="14 2 14 8 20 8" />
-                            </svg>
-                        </div>
-                        <div class="emp-stat-num">@Model.TotalRequests</div>
-                        <div class="emp-stat-lbl">Total Requests</div>
-                    </a>
-                    <a href="@Url.Action("AllocatedVehicle","EmployeeDashboard")" class="emp-stat s2">
-                        <div class="emp-stat-icon g">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
-                                <circle cx="12" cy="10" r="3" />
-                            </svg>
-                        </div>
-                        <div class="emp-stat-num">@Model.AllocatedCount</div>
-                        <div class="emp-stat-lbl">In Use Now</div>
-                    </a>
-                    <a href="@Url.Action("MyRequests","EmployeeDashboard")" class="emp-stat s3">
-                        <div class="emp-stat-icon b">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="12" cy="12" r="10" />
-                                <polyline points="12 6 12 12 16 14" />
-                            </svg>
-                        </div>
-                        <div class="emp-stat-num">@Model.PendingCount</div>
-                        <div class="emp-stat-lbl">Pending</div>
-                    </a>
-                    <a href="@Url.Action("MyRequests","EmployeeDashboard")" class="emp-stat s4">
-                        <div class="emp-stat-icon r">
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="12" cy="12" r="10" />
-                                <line x1="15" y1="9" x2="9" y2="15" />
-                                <line x1="9" y1="9" x2="15" y2="15" />
-                            </svg>
-                        </div>
-                        <div class="emp-stat-num">@Model.RejectedCount</div>
-                        <div class="emp-stat-lbl">Rejected</div>
-                    </a>
-                </div>
-
-                <!-- Bottom grid: Recent requests + Allocated vehicles -->
-                <div class="emp-bottom-grid">
-
-                    <!-- Recent Requests table -->
-                    <div class="emp-card">
-                        <div class="emp-card-header">
-                            <div class="emp-card-title">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
-                                    <polyline points="14 2 14 8 20 8" />
-                                </svg>
-                                My Recent Requests
-                            </div>
-                            <a href="@Url.Action(" MyRequests","EmployeeDashboard")" class="view-all-link">
-                                View all &rarr;
-                            </a>
-                        </div>
-
-                        @if (!Model.RecentRequests.Any())
-                        {
-                        <div class="empty-state">
-                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
-                                <polyline points="14 2 14 8 20 8" />
-                            </svg>
-                            <p>No requests submitted yet.</p>
-                        </div>
-                        }
-                        else
-                        {
-                        <table class="emp-table">
-                            <thead>
-                                <tr>
-                                    <th>Vehicle</th>
-                                    <th>Requested On</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var r in Model.RecentRequests)
-                                {
-                                string sc = r.Status == "Approved" ? "approved"
-                                : r.Status == "Rejected" ? "rejected"
-                                : r.Status == "Returned" ? "returned"
-                                : "pending";
-                                <tr>
-                                    <td>
-                                        <div class="v-name-sm">@r.VehicleName</div>
-                                        <span class="v-reg-sm">@r.RegistrationNo</span>
-                                    </td>
-                                    <td>
-                                        <div class="date-sm">@r.RequestedOn.ToString("dd MMM yyyy")</div>
-                                        <div class="date-sub-sm">@r.RequestedOn.ToString("hh:mm tt")</div>
-                                    </td>
-                                    <td>
-                                        <span class="status-badge @sc">
-                                            <span class="status-dot @sc"></span>
-                                            @r.Status
-                                        </span>
-                                    </td>
-                                </tr>
-                                }
-                            </tbody>
-                        </table>
-                        }
-                    </div>
-
-                    <!-- Allocated vehicles panel -->
-                    <div class="emp-card">
-                        <div class="emp-card-header">
-                            <div class="emp-card-title">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
-                                    <circle cx="12" cy="10" r="3" />
-                                </svg>
-                                My Allocated Vehicle
-                            </div>
-                            @if (Model.AllocatedVehicles.Any())
-                            {
-                            <a href="@Url.Action(" AllocatedVehicle","EmployeeDashboard")" class="view-all-link">
-                                View all &rarr;
-                            </a>
-                            }
-                        </div>
-
-                        @if (!Model.AllocatedVehicles.Any())
-                        {
-                        <div class="empty-state">
-                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
-                                <circle cx="12" cy="10" r="3" />
-                            </svg>
-                            <p>No vehicle allocated at the moment.</p>
-                        </div>
-                        }
-                        else
-                        {
-                        <div class="alloc-list">
-                            @foreach (var a in Model.AllocatedVehicles)
-                            {
-                            string durText = a.DurationHours > 0
-                            ? a.DurationHours + "h " + a.DurationMins + "m"
-                            : a.DurationMins + " min";
-
-                            string overdueText = a.IsOverdue
-                            ? ((int)a.OverdueBy.TotalHours > 0
-                            ? (int)a.OverdueBy.TotalHours + "h " + a.OverdueBy.Minutes + "m overdue"
-                            : a.OverdueBy.Minutes + " min overdue")
-                            : "";
-
-                            <div class="alloc-mini-card @(a.IsOverdue ? " overdue" : "" )">
-                                <div class="amc-top @(a.IsOverdue ? " overdue-bg" : "normal-bg" )">
-                                    <div>
-                                        <div class="amc-name">@a.VehicleName</div>
-                                        <span class="amc-reg">@a.RegistrationNo</span>
-                                    </div>
-                                    @if (a.IsOverdue)
-                                    {
-                                    <span class="amc-badge-overdue">
-                                        <span class="amc-bdot r"></span>Overdue
-                                    </span>
-                                    }
-                                    else
-                                    {
-                                    <span class="amc-badge-inuse">
-                                        <span class="amc-bdot g"></span>In Use
-                                    </span>
-                                    }
-                                </div>
-                                <div class="amc-bottom">
-                                    <div>
-                                        <div class="amc-time-info">
-                                            Due: <strong>@a.DueReturn.ToString("dd MMM, hh:mm tt")</strong>
-                                        </div>
-                                        @if (a.IsOverdue)
-                                        {
-                                        <div class="amc-time-info red">&#9888; @overdueText</div>
-                                        }
-                                        else
-                                        {
-                                        <div class="amc-time-info">Duration: <strong>@durText</strong></div>
-                                        }
-                                    </div>
-                                    @using (Html.BeginForm("ReturnVehicle", "EmployeeDashboard", FormMethod.Post, new { style = "margin:0;" }))
-                                    {
-                                    @Html.AntiForgeryToken()
-                                    <input type="hidden" name="requestId" value="@a.RequestId" />
-                                    <button type="submit"
-                                            class="btn-return-mini @(a.IsOverdue ? " overdue" : "normal" )"
-                                            onclick="return confirm('Confirm return of @a.VehicleName?')">
-                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
-                                            <polyline points="22 4 12 14.01 9 11.01" />
-                                        </svg>
-                                        Return
-                                    </button>
-                                    }
-                                </div>
-                            </div>
-                            }
-                        </div>
-                        }
-                    </div>
-
-                </div>
-            </div>
+<!-- Welcome banner -->
+<div class="emp-welcome">
+    <div>
+        <div class="emp-welcome-title">Welcome back, @fullName &#128075;</div>
+        <div class="emp-welcome-sub">
+            Your vehicle dashboard &nbsp;|&nbsp; Emp No: <span>#@empNo</span>
         </div>
     </div>
-</body>
-</html>
+    <div class="emp-badge">Employee</div>
+</div>
+
+<!-- Stat cards -->
+<div class="emp-stats">
+    <a href="@Url.Action("MyRequests","EmployeeDashboard")" class="emp-stat s1">
+        <div class="emp-stat-icon y">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+            </svg>
+        </div>
+        <div class="emp-stat-num">@Model.TotalRequests</div>
+        <div class="emp-stat-lbl">Total Requests</div>
+    </a>
+    <a href="@Url.Action("AllocatedVehicle","EmployeeDashboard")" class="emp-stat s2">
+        <div class="emp-stat-icon g">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+                <circle cx="12" cy="10" r="3" />
+            </svg>
+        </div>
+        <div class="emp-stat-num">@Model.AllocatedCount</div>
+        <div class="emp-stat-lbl">In Use Now</div>
+    </a>
+    <a href="@Url.Action("MyRequests","EmployeeDashboard")" class="emp-stat s3">
+        <div class="emp-stat-icon b">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <polyline points="12 6 12 12 16 14" />
+            </svg>
+        </div>
+        <div class="emp-stat-num">@Model.PendingCount</div>
+        <div class="emp-stat-lbl">Pending</div>
+    </a>
+    <a href="@Url.Action("MyRequests","EmployeeDashboard")" class="emp-stat s4">
+        <div class="emp-stat-icon r">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="15" y1="9" x2="9" y2="15" />
+                <line x1="9" y1="9" x2="15" y2="15" />
+            </svg>
+        </div>
+        <div class="emp-stat-num">@Model.RejectedCount</div>
+        <div class="emp-stat-lbl">Rejected</div>
+    </a>
+</div>
+
+<!-- Bottom grid: Recent requests + Allocated vehicles -->
+<div class="emp-bottom-grid">
+
+    <!-- Recent Requests table -->
+    <div class="emp-card">
+        <div class="emp-card-header">
+            <div class="emp-card-title">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                </svg>
+                My Recent Requests
+            </div>
+            <a href="@Url.Action("MyRequests","EmployeeDashboard")" class="view-all-link">
+                View all &rarr;
+            </a>
+        </div>
+
+        @if (!Model.RecentRequests.Any())
+        {
+            <div class="empty-state">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                </svg>
+                <p>No requests submitted yet.</p>
+            </div>
+        }
+        else
+        {
+            <table class="emp-table">
+                <thead>
+                    <tr>
+                        <th>Vehicle</th>
+                        <th>Requested On</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var r in Model.RecentRequests)
+                    {
+                        string sc = r.Status == "Approved" ? "approved"
+                        : r.Status == "Rejected" ? "rejected"
+                        : r.Status == "Returned" ? "returned"
+                        : "pending";
+                        <tr>
+                            <td>
+                                <div class="v-name-sm">@r.VehicleName</div>
+                                <span class="v-reg-sm">@r.RegistrationNo</span>
+                            </td>
+                            <td>
+                                <div class="date-sm">@r.RequestedOn.ToString("dd MMM yyyy")</div>
+                                <div class="date-sub-sm">@r.RequestedOn.ToString("hh:mm tt")</div>
+                            </td>
+                            <td>
+                                <span class="status-badge @sc">
+                                    <span class="status-dot @sc"></span>
+                                    @r.Status
+                                </span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+
+    <!-- Allocated vehicles panel -->
+    <div class="emp-card">
+        <div class="emp-card-header">
+            <div class="emp-card-title">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+                    <circle cx="12" cy="10" r="3" />
+                </svg>
+                My Allocated Vehicle
+            </div>
+            @if (Model.AllocatedVehicles.Any())
+            {
+                <a href="@Url.Action("AllocatedVehicle","EmployeeDashboard")" class="view-all-link">
+                    View all &rarr;
+                </a>
+            }
+        </div>
+
+        @if (!Model.AllocatedVehicles.Any())
+        {
+            <div class="empty-state">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+                    <circle cx="12" cy="10" r="3" />
+                </svg>
+                <p>No vehicle allocated at the moment.</p>
+            </div>
+        }
+        else
+        {
+            <div class="alloc-list">
+                @foreach (var a in Model.AllocatedVehicles)
+                {
+                    string durText = a.DurationHours > 0
+                    ? a.DurationHours + "h " + a.DurationMins + "m"
+                    : a.DurationMins + " min";
+
+                    string overdueText = a.IsOverdue
+                    ? ((int)a.OverdueBy.TotalHours > 0
+                    ? (int)a.OverdueBy.TotalHours + "h " + a.OverdueBy.Minutes + "m overdue"
+                    : a.OverdueBy.Minutes + " min overdue")
+                    : "";
+
+                    <div class="alloc-mini-card @(a.IsOverdue ? " overdue" : "" )">
+                        <div class="amc-top @(a.IsOverdue ? " overdue-bg" : "normal-bg" )">
+                            <div>
+                                <div class="amc-name">@a.VehicleName</div>
+                                <span class="amc-reg">@a.RegistrationNo</span>
+                            </div>
+                            @if (a.IsOverdue)
+                            {
+                                <span class="amc-badge-overdue">
+                                    <span class="amc-bdot r"></span>Overdue
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="amc-badge-inuse">
+                                    <span class="amc-bdot g"></span>In Use
+                                </span>
+                            }
+                        </div>
+                        <div class="amc-bottom">
+                            <div>
+                                <div class="amc-time-info">
+                                    Due: <strong>@a.DueReturn.ToString("dd MMM, hh:mm tt")</strong>
+                                </div>
+                                @if (a.IsOverdue)
+                                {
+                                    <div class="amc-time-info red">&#9888; @overdueText</div>
+                                }
+                                else
+                                {
+                                    <div class="amc-time-info">Duration: <strong>@durText</strong></div>
+                                }
+                            </div>
+                            @using (Html.BeginForm("ReturnVehicle", "EmployeeDashboard", FormMethod.Post, new { style = "margin:0;" }))
+                            {
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="requestId" value="@a.RequestId" />
+                                <button type="submit"
+                                        class="btn-return-mini @(a.IsOverdue ? " overdue" : "normal" )"
+                                        onclick="return confirm('Confirm return of @a.VehicleName?')">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M22 11.08V12a10 10 0 11-5.93-9.14" />
+                                        <polyline points="22 4 12 14.01 9 11.01" />
+                                    </svg>
+                                    Return
+                                </button>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+
+</div>

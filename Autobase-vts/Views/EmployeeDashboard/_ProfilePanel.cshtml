@@ -1,0 +1,183 @@
+﻿@{
+    string ppFullName = Session["FullName"]?.ToString() ?? "Employee";
+    string ppInitials = string.IsNullOrEmpty(ppFullName) ? "E" : ppFullName.Substring(0, 1).ToUpper();
+}
+
+<div class="user-pill-wrap" id="empProfileWrap">
+    <div class="user-pill" id="empProfilePillBtn">
+        <div class="pill-avatar">@ppInitials</div>
+        <div>
+            <div class="pill-name">@ppFullName</div>
+            <div class="pill-role">Employee</div>
+        </div>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="empProfileChevron">
+            <polyline points="6 9 12 15 18 9" />
+        </svg>
+    </div>
+
+    <div class="profile-panel" id="empProfilePanel">
+        <div class="profile-panel-loading" id="empProfileLoading">Loading…</div>
+
+        <div id="empProfileContent" style="display:none;">
+            <div class="profile-panel-header">
+                <div class="profile-panel-avatar" id="empPpAvatar">@ppInitials</div>
+                <div>
+                    <div class="profile-panel-name" id="empPpName">@ppFullName</div>
+                    <div class="profile-panel-role" id="empPpRole">Employee</div>
+                </div>
+            </div>
+
+            <div class="profile-panel-body">
+                <div class="profile-row"><span>Employee No.</span><strong id="empPpEmpNo">—</strong></div>
+                <div class="profile-row"><span>Department</span><strong id="empPpDept">—</strong></div>
+                <div class="profile-row"><span>Designation</span><strong id="empPpDesig">—</strong></div>
+                <div class="profile-row"><span>Mobile</span><strong id="empPpMobile">—</strong></div>
+                <div class="profile-row"><span>Email</span><strong id="empPpEmail">—</strong></div>
+            </div>
+
+            <div class="profile-panel-divider"></div>
+
+            <div id="empPwdSection">
+                <button type="button" class="profile-pwd-toggle" id="empPwdToggleBtn">
+                    🔒 Change Password
+                </button>
+
+                <div id="empPwdForm" style="display:none;">
+                    <input type="password" id="empPwdCurrent" class="profile-input" placeholder="Current password" />
+                    <input type="password" id="empPwdNew" class="profile-input" placeholder="New password (min. 6 chars)" />
+                    <input type="password" id="empPwdConfirm" class="profile-input" placeholder="Confirm new password" />
+                    <div id="empPwdMessage" class="profile-pwd-message"></div>
+                    <div class="profile-pwd-actions">
+                        <button type="button" class="profile-pwd-cancel" id="empPwdCancelBtn">Cancel</button>
+                        <button type="button" class="profile-pwd-save" id="empPwdSaveBtn">Save</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="empPwdUnavailableMsg" class="profile-pwd-unavailable" style="display:none;">
+                Password changes for this account are managed in QMS.
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden token used by this partial's own AJAX call below -->
+@Html.AntiForgeryToken()
+
+<script>
+    (function () {
+        var wrap = document.getElementById('empProfileWrap');
+        var pillBtn = document.getElementById('empProfilePillBtn');
+        var loaded = false;
+
+        pillBtn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            var isOpen = wrap.classList.toggle('open');
+            if (isOpen && !loaded) {
+                loadProfile();
+            }
+        });
+
+        document.addEventListener('click', function (e) {
+            if (!wrap.contains(e.target)) {
+                wrap.classList.remove('open');
+            }
+        });
+
+        function loadProfile() {
+            fetch('@Url.Action("Details", "Profile")')
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    document.getElementById('empProfileLoading').style.display = 'none';
+                    var content = document.getElementById('empProfileContent');
+                    content.style.display = 'block';
+
+                    if (!data.success) {
+                        content.innerHTML = '<div style="font-size:12px;color:#e53e3e;">' + data.message + '</div>';
+                        return;
+                    }
+
+                    loaded = true;
+                    document.getElementById('empPpAvatar').textContent = (data.fullName || 'E').substring(0, 1).toUpperCase();
+                    document.getElementById('empPpName').textContent = data.fullName || '—';
+                    document.getElementById('empPpRole').textContent = data.role || '—';
+                    document.getElementById('empPpEmpNo').textContent = data.employeeNumber || '—';
+                    document.getElementById('empPpDept').textContent = data.department || '—';
+                    document.getElementById('empPpDesig').textContent = data.designation || '—';
+                    document.getElementById('empPpMobile').textContent = data.mobileNumber || '—';
+                    document.getElementById('empPpEmail').textContent = data.email || '—';
+
+                    if (!data.canChangePassword) {
+                        document.getElementById('empPwdSection').style.display = 'none';
+                        document.getElementById('empPwdUnavailableMsg').style.display = 'block';
+                    }
+                })
+                .catch(function () {
+                    document.getElementById('empProfileLoading').textContent = 'Failed to load profile.';
+                });
+        }
+
+        document.getElementById('empPwdToggleBtn').addEventListener('click', function () {
+            document.getElementById('empPwdForm').style.display = 'block';
+            this.style.display = 'none';
+        });
+
+        document.getElementById('empPwdCancelBtn').addEventListener('click', function () {
+            document.getElementById('empPwdForm').style.display = 'none';
+            document.getElementById('empPwdToggleBtn').style.display = 'block';
+            document.getElementById('empPwdCurrent').value = '';
+            document.getElementById('empPwdNew').value = '';
+            document.getElementById('empPwdConfirm').value = '';
+            setEmpPwdMessage('', '');
+        });
+
+        document.getElementById('empPwdSaveBtn').addEventListener('click', function () {
+            var current = document.getElementById('empPwdCurrent').value;
+            var newPwd = document.getElementById('empPwdNew').value;
+            var confirm = document.getElementById('empPwdConfirm').value;
+            var btn = this;
+
+            if (!current || !newPwd || !confirm) {
+                setEmpPwdMessage('All fields are required.', 'error');
+                return;
+            }
+
+            var tokenInput = document.querySelector('#empProfileWrap ~ input[name="__RequestVerificationToken"]');
+            var token = tokenInput ? tokenInput.value : '';
+
+            btn.disabled = true;
+            btn.textContent = 'Saving…';
+
+            fetch('@Url.Action("ChangePassword", "Profile")', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: '__RequestVerificationToken=' + encodeURIComponent(token) +
+                      '&currentPassword=' + encodeURIComponent(current) +
+                      '&newPassword=' + encodeURIComponent(newPwd) +
+                      '&confirmPassword=' + encodeURIComponent(confirm)
+            })
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    btn.disabled = false;
+                    btn.textContent = 'Save';
+                    setEmpPwdMessage(data.message, data.success ? 'success' : 'error');
+                    if (data.success) {
+                        document.getElementById('empPwdCurrent').value = '';
+                        document.getElementById('empPwdNew').value = '';
+                        document.getElementById('empPwdConfirm').value = '';
+                    }
+                })
+                .catch(function () {
+                    btn.disabled = false;
+                    btn.textContent = 'Save';
+                    setEmpPwdMessage('Something went wrong. Try again.', 'error');
+                });
+        });
+
+        function setEmpPwdMessage(msg, type) {
+            var el = document.getElementById('empPwdMessage');
+            el.textContent = msg || '';
+            el.className = 'profile-pwd-message' + (type ? ' ' + type : '');
+        }
+    })();
+</script>

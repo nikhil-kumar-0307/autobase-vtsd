@@ -31,6 +31,7 @@ namespace autobase.Controllers
                         Session["FullName"] = emp.FullName;
                         Session["EmployeeNumber"] = emp.EmployeeNumber;
                         Session["EmployeeId"] = emp.Id;
+                        Session["Department"] = emp.Department;
                     }
                     else
                     {
@@ -86,13 +87,14 @@ namespace autobase.Controllers
                 Session["FullName"] = employee.FullName;
                 Session["EmployeeNumber"] = employee.EmployeeNumber;
                 Session["EmployeeId"] = employee.Id;
+                Session["Department"] = employee.Department;
 
                 if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                     return Redirect(returnUrl);
                 return RedirectToRole(employee.Role);
             }
 
-            // 2) Fall back to QMS's EmployeeMaster table. There's no Role column
+            // 2) Fall back to QMS's EmployeeMaster table. Theres no Role column
             //    there, so anyone who logs in this way is always a plain "Employee".
             using (var qmsDb = new QmsLookupDbContext())
             {

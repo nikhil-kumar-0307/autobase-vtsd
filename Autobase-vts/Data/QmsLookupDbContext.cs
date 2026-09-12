@@ -8,5 +8,6 @@ namespace autobase.Data
         public QmsLookupDbContext() : base("QmsLookupConnection") { }
 
         public DbSet<QmsEmployeeMasterLite> EmployeeMasters { get; set; }
+        public DbSet<QmsDepartmentLite> Departments { get; set; }
     }
 }

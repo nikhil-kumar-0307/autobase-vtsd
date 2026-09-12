@@ -1,10 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
 using autobase.Data;
 using autobase.Models.DTOs;
 using Autobase_vts.Models.DTOs;
-
 
 namespace autobase.Controllers
 {
@@ -12,6 +12,26 @@ namespace autobase.Controllers
     public class AutobaseController : Controller
     {
         private readonly AutobaseDbContext _db = new AutobaseDbContext();
+        private readonly QmsLookupDbContext _qmsDb = new QmsLookupDbContext();   // ADDED
+
+        // ── NEW: resolves an employee number's department, checking Autobase's
+        //         own Employees table first, then falling back to QMS's
+        //         EmployeeMaster — since a requester might only exist in QMS
+        //         (e.g. test/QMS-sourced logins never get an Employees row). ──
+        private string GetEmployeeDepartment(string employeeNumber)
+        {
+            if (string.IsNullOrWhiteSpace(employeeNumber)) return null;
+
+            var emp = _db.Employees.FirstOrDefault(e => e.EmployeeNumber == employeeNumber);
+            if (emp != null) return emp.Department;
+
+            var qmsEmp = _qmsDb.EmployeeMasters.FirstOrDefault(e => e.EmployeeNo == employeeNumber);
+            return qmsEmp?.Department;
+        }
+
+        private static bool SameDepartment(string a, string b) =>
+            !string.IsNullOrWhiteSpace(a) && !string.IsNullOrWhiteSpace(b) &&
+            a.Trim().Equals(b.Trim(), StringComparison.OrdinalIgnoreCase);
 
         // ── GET: /Autobase/AvailableVehicle ──────────────────────────────────
         [HttpGet]
@@ -88,7 +108,6 @@ namespace autobase.Controllers
                 .ToList();
 
             var employees = _db.Employees.ToList();
-
             var vehicles = _db.Vehicles.ToList();
 
             var allItems = approvedRequests.Select(r =>
@@ -218,6 +237,35 @@ namespace autobase.Controllers
                 .Where(r => r.RequestedOn >= selectedDate && r.RequestedOn < nextDay)
                 .ToList();
 
+            // Pull both employee sources once, up front, so the per-row lookups
+            // below are all in-memory instead of hitting the DB per row.
+            var autobaseEmployees = _db.Employees.ToList();
+            var qmsEmployees = _qmsDb.EmployeeMasters.ToList();
+
+            Func<string, autobase.Models.Employee> findAutobase = empNo =>
+                autobaseEmployees.FirstOrDefault(e => e.EmployeeNumber == empNo);
+            Func<string, QmsEmployeeMasterLite> findQms = empNo =>
+                qmsEmployees.FirstOrDefault(e => e.EmployeeNo == empNo);
+
+            // ── FIXED: department lookup now checks Autobase's Employees table
+            //           AND falls back to QMS's EmployeeMaster, so QMS-sourced
+            //           requesters (test employee) are no longer invisible to
+            //           their HOD. Also case/whitespace tolerant. ──
+            if (role == "HOD")
+            {
+                var hodEmp = findAutobase(Session["EmployeeNumber"]?.ToString());
+                string hodDept = hodEmp?.Department;   // HODs are always created via Autobase's own Employees table
+
+                dateRequests = dateRequests
+                    .Where(r =>
+                    {
+                        var e = findAutobase(r.EmployeeNumber);
+                        string reqDept = e != null ? e.Department : findQms(r.EmployeeNumber)?.Department;
+                        return SameDepartment(reqDept, hodDept);
+                    })
+                    .ToList();
+            }
+
             var requestsQuery = dateRequests.AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(search))
@@ -242,19 +290,23 @@ namespace autobase.Controllers
                 requestsQuery = requestsQuery.Where(r => r.Status == "Returned");
 
             var filtered = requestsQuery.OrderByDescending(r => r.RequestedOn).ToList();
-            var employees = _db.Employees.ToList();
 
+            // ── FIXED: name/department/designation now fall back to QMS too,
+            //           so a QMS-sourced requester's row doesn't show "—" for
+            //           everything. ──
             var items = filtered.Select(r =>
             {
-                var emp = employees.FirstOrDefault(e => e.EmployeeNumber == r.EmployeeNumber);
+                var emp = findAutobase(r.EmployeeNumber);
+                var qmsEmp = emp == null ? findQms(r.EmployeeNumber) : null;
+
                 return new SeeRequestItem
                 {
                     RequestId = r.RequestId,
-                    EmployeeName = emp != null ? emp.FullName : r.EmployeeNumber,
+                    EmployeeName = emp != null ? emp.FullName : (qmsEmp != null ? qmsEmp.EmployeeName : r.EmployeeNumber),
                     EmployeeNumber = r.EmployeeNumber,
                     EmployeePhone = emp != null ? emp.MobileNumber : "—",
-                    Department = emp != null ? emp.Department : "—",
-                    Designation = emp != null ? emp.Designation : "—",
+                    Department = emp != null ? emp.Department : (qmsEmp != null ? qmsEmp.Department : "—"),
+                    Designation = emp != null ? emp.Designation : (qmsEmp != null ? qmsEmp.Designation : "—"),
                     VehicleName = r.VehicleName,
                     RegistrationNo = r.RegistrationNo,
                     Purpose = r.Purpose,
@@ -289,13 +341,6 @@ namespace autobase.Controllers
         }
 
         // ── POST: /Autobase/ApproveRequest ────────────────────────────────────
-        // Handles BOTH stages:
-        //   • HOD can only move Pending -> HODApproved.
-        //   • Admin can ONLY give the final approval (HODApproved -> Approved).
-        //     Admin can NOT skip the HOD stage — a Pending request is invisible
-        //     to Admin's approve action until HOD has signed off.
-        //   • SuperAdmin gives the final approval too, AND is the only role
-        //     allowed to bypass HOD entirely by approving straight from Pending.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult ApproveRequest(int requestId, string adminNotes)
@@ -318,6 +363,19 @@ namespace autobase.Controllers
                     return RedirectToAction("SeeRequests");
                 }
 
+                // ── FIXED: extract session value first, then query ──
+                string currentEmpNumber = Session["EmployeeNumber"]?.ToString();
+                string hodDept = _db.Employees
+                    .FirstOrDefault(e => e.EmployeeNumber == currentEmpNumber)
+                    ?.Department;
+                string requesterDept = GetEmployeeDepartment(request.EmployeeNumber);
+
+                if (!SameDepartment(requesterDept, hodDept))
+                {
+                    TempData["ErrorMessage"] = "You can only approve requests from your own department.";
+                    return RedirectToAction("SeeRequests");
+                }
+
                 request.Status = "HODApproved";
                 request.HodNotes = adminNotes;
                 request.HodApprovedBy = approverName;
@@ -328,8 +386,6 @@ namespace autobase.Controllers
             }
             else if (role == "SuperAdmin")
             {
-                // SuperAdmin may finally-approve from HODApproved, OR bypass HOD
-                // entirely by approving straight from Pending.
                 if (request.Status != "Pending" && request.Status != "HODApproved")
                 {
                     TempData["ErrorMessage"] = "This request cannot be approved from its current status.";
@@ -338,7 +394,6 @@ namespace autobase.Controllers
 
                 if (request.Status == "Pending")
                 {
-                    // Record that SuperAdmin covered the HOD step too, so the trail stays honest.
                     request.HodApprovedBy = $"{approverName} (SuperAdmin — HOD step skipped)";
                     request.HodApprovedOn = DateTime.Now;
                 }
@@ -389,7 +444,32 @@ namespace autobase.Controllers
                 return RedirectToAction("Login", "Account");
 
             var request = _db.VehicleRequests.Find(requestId);
-            if (request != null && (request.Status == "Pending" || request.Status == "HODApproved"))
+            if (request == null)
+                return RedirectToAction("SeeRequests");
+
+            if (role == "HOD")
+            {
+                if (request.Status != "Pending")
+                {
+                    TempData["ErrorMessage"] = "This request is not awaiting HOD approval.";
+                    return RedirectToAction("SeeRequests");
+                }
+
+                // ── FIXED: extract session value first, then query ──
+                string currentEmpNumber = Session["EmployeeNumber"]?.ToString();
+                string hodDept = _db.Employees
+                    .FirstOrDefault(e => e.EmployeeNumber == currentEmpNumber)
+                    ?.Department;
+                string requesterDept = GetEmployeeDepartment(request.EmployeeNumber);
+
+                if (!SameDepartment(requesterDept, hodDept))
+                {
+                    TempData["ErrorMessage"] = "You can only reject requests from your own department.";
+                    return RedirectToAction("SeeRequests");
+                }
+            }
+
+            if (request.Status == "Pending" || request.Status == "HODApproved")
             {
                 request.Status = "Rejected";
                 request.AdminNotes = adminNotes;
@@ -433,26 +513,25 @@ namespace autobase.Controllers
             if (role != "SuperAdmin" && role != "Admin" && role != "HOD")
                 return RedirectToAction("Login", "Account");
 
-            // Fetch the vehicle request
             var req = _db.VehicleRequests.Find(id);
             if (req == null)
                 return HttpNotFound();
 
-            // Fetch matching employee (same pattern as SeeRequests)
-            var emp = _db.Employees
-                         .FirstOrDefault(e => e.EmployeeNumber == req.EmployeeNumber);
+            var emp = _db.Employees.FirstOrDefault(e => e.EmployeeNumber == req.EmployeeNumber);
+            var qmsEmp = emp == null
+                ? _qmsDb.EmployeeMasters.FirstOrDefault(e => e.EmployeeNo == req.EmployeeNumber)
+                : null;
 
-            // Calculate duration
             double durationHours = (req.RequiredUntil - req.RequiredFrom).TotalHours;
 
             var dto = new PrintRequestDto
             {
                 RequestId = req.RequestId,
-                EmployeeName = emp != null ? emp.FullName : req.EmployeeNumber,
+                EmployeeName = emp != null ? emp.FullName : (qmsEmp != null ? qmsEmp.EmployeeName : req.EmployeeNumber),
                 EmployeeNumber = req.EmployeeNumber ?? string.Empty,
                 EmployeePhone = emp != null ? emp.MobileNumber : "—",
-                Designation = emp != null ? emp.Designation : "—",
-                Department = emp != null ? emp.Department : "—",
+                Designation = emp != null ? emp.Designation : (qmsEmp != null ? qmsEmp.Designation : "—"),
+                Department = emp != null ? emp.Department : (qmsEmp != null ? qmsEmp.Department : "—"),
                 VehicleName = req.VehicleName ?? string.Empty,
                 RegistrationNo = req.RegistrationNo ?? string.Empty,
                 RequiredFrom = req.RequiredFrom,
@@ -464,12 +543,16 @@ namespace autobase.Controllers
                 Status = req.Status ?? string.Empty,
             };
 
-            return View(dto);   // → Views/Autobase/PrintRequest.cshtml
+            return View(dto);
         }
 
         protected override void Dispose(bool disposing)
         {
-            if (disposing) _db.Dispose();
+            if (disposing)
+            {
+                _db.Dispose();
+                _qmsDb.Dispose();   // ADDED
+            }
             base.Dispose(disposing);
         }
     }
