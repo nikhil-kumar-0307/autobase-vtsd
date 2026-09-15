@@ -1,294 +1,13 @@
 ﻿@model autobase.Models.DTOs.NewRequestDto
 @{
     ViewBag.Title = "New Request";
-    Layout = null;
-
-    string fullName = Session["FullName"]?.ToString() ?? "Employee";
-    string empNo = Session["EmployeeNumber"]?.ToString() ?? "";
-    string initials = string.IsNullOrEmpty(fullName) ? "E" : fullName.Substring(0, 1).ToUpper();
-
-    var now = DateTime.Now;
-    int hour = now.Hour;
-    string greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+    ViewBag.ActiveNav = "NewRequest";
+    ViewBag.PageSubtitle = "Pick an available vehicle and submit your request";
+    Layout = "~/Views/EmployeeDashboard/_EmployeeLayout.cshtml";
 }
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AutoBase — New Request</title>
-    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&family=Barlow+Condensed:wght@700;800&display=swap" rel="stylesheet" />
+
+@section Styles {
     <style>
-        *, *::before, *::after {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: 'Barlow', sans-serif;
-            background: #f8f8f8;
-            color: #0d0d0d;
-            min-height: 100vh;
-        }
-
-        .emp-layout {
-            display: flex;
-            min-height: 100vh;
-        }
-
-        /* Sidebar */
-        .emp-sidebar {
-            width: 200px;
-            min-width: 200px;
-            background: #fff;
-            border-right: 1px solid #f0f0f0;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            position: fixed;
-            left: 0;
-            top: 0;
-            z-index: 100;
-        }
-
-        .emp-logo {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 20px 16px 16px;
-            border-bottom: 1px solid #f5f5f5;
-        }
-
-        .emp-logo-icon {
-            width: 32px;
-            height: 32px;
-            background: #F5C518;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-            .emp-logo-icon svg {
-                width: 20px;
-                height: 20px;
-            }
-
-        .emp-logo-text {
-            font-family: 'Barlow Condensed', sans-serif;
-            font-size: 17px;
-            font-weight: 800;
-            letter-spacing: 1px;
-            color: #0d0d0d;
-        }
-
-        .logo-y {
-            color: #F5C518;
-        }
-
-        .emp-nav {
-            flex: 1;
-            padding: 12px 10px;
-            display: flex;
-            flex-direction: column;
-            gap: 1px;
-        }
-
-        .nav-label {
-            font-size: 9px;
-            font-weight: 700;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            color: #bbb;
-            padding: 10px 8px 4px;
-            margin-top: 4px;
-        }
-
-        .nav-link {
-            display: flex;
-            align-items: center;
-            gap: 9px;
-            padding: 8px 10px;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 500;
-            color: #555;
-            text-decoration: none;
-            transition: background .15s, color .15s;
-        }
-
-            .nav-link svg {
-                flex-shrink: 0;
-                opacity: .7;
-            }
-
-            .nav-link:hover {
-                background: #f7f7f7;
-                color: #0d0d0d;
-            }
-
-                .nav-link:hover svg {
-                    opacity: 1;
-                }
-
-            .nav-link.active {
-                background: #fff8dc;
-                color: #0d0d0d;
-                font-weight: 600;
-            }
-
-                .nav-link.active svg {
-                    opacity: 1;
-                    color: #c9a000;
-                }
-
-        .emp-sidebar-footer {
-            padding: 14px;
-            border-top: 1px solid #f0f0f0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .emp-s-avatar {
-            width: 34px;
-            height: 34px;
-            border-radius: 50%;
-            background: #F5C518;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            font-weight: 700;
-            color: #0d0d0d;
-            flex-shrink: 0;
-        }
-
-        .emp-s-info {
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .emp-s-name {
-            font-size: 12px;
-            font-weight: 600;
-            color: #0d0d0d;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .emp-s-meta {
-            font-size: 10px;
-            color: #999;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        /* Topbar */
-        .emp-topbar {
-            height: 60px;
-            background: #fff;
-            border-bottom: 1px solid #f0f0f0;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 28px;
-            position: fixed;
-            top: 0;
-            left: 200px;
-            right: 0;
-            z-index: 99;
-        }
-
-        .topbar-greet {
-            font-size: 14px;
-            font-weight: 600;
-            color: #0d0d0d;
-        }
-
-        .topbar-sub {
-            font-size: 12px;
-            color: #aaa;
-            margin-top: 1px;
-        }
-
-        .topbar-right {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .user-pill {
-            display: flex;
-            align-items: center;
-            gap: 9px;
-            background: #f7f7f7;
-            border: 1px solid #ebebeb;
-            border-radius: 50px;
-            padding: 5px 12px 5px 5px;
-        }
-
-        .pill-avatar {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background: #F5C518;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 13px;
-            font-weight: 700;
-            color: #0d0d0d;
-        }
-
-        .pill-name {
-            font-size: 12px;
-            font-weight: 600;
-            color: #0d0d0d;
-        }
-
-        .pill-role {
-            font-size: 10px;
-            color: #999;
-        }
-
-        .logout-btn {
-            display: flex;
-            align-items: center;
-            gap: 7px;
-            padding: 8px 16px;
-            border: 1.5px solid #eee;
-            border-radius: 8px;
-            font-family: 'Barlow', sans-serif;
-            font-size: 13px;
-            font-weight: 600;
-            color: #555;
-            text-decoration: none;
-            background: #fff;
-            transition: border-color .2s, color .2s, background .2s;
-        }
-
-            .logout-btn:hover {
-                border-color: #e53e3e;
-                color: #e53e3e;
-                background: #fff5f5;
-            }
-
-        /* Main */
-        .emp-main {
-            margin-left: 200px;
-            padding-top: 60px;
-            flex: 1;
-        }
-
-        .emp-body {
-            padding: 28px;
-        }
-
         .page-title {
             font-size: 24px;
             font-weight: 800;
@@ -511,7 +230,7 @@
                     transform: translateY(-2px);
                 }
 
-            /* ── NEW: Maintenance card (red) ── */
+            /* ── Maintenance card (red) ── */
             .v-card.card-maint {
                 background: #fef2f2;
                 border: 1.5px solid #fecaca;
@@ -709,7 +428,7 @@
             background: #3182ce;
         }
 
-        /* ── NEW: Maintenance status pill ── */
+        /* Maintenance status pill */
         .maint-status-pill {
             display: inline-flex;
             align-items: center;
@@ -730,7 +449,7 @@
             background: #dc2626;
         }
 
-        /* ── NEW: Maintenance notice inside card ── */
+        /* Maintenance notice inside card */
         .maint-notice {
             display: flex;
             align-items: flex-start;
@@ -792,7 +511,7 @@
                     transform: scale(1.01);
                 }
 
-            /* ── NEW: disabled maintenance button ── */
+            /* disabled maintenance button */
             .v-request-btn.btn-maint-disabled {
                 background: #fca5a5;
                 color: #7f1d1d;
@@ -823,7 +542,7 @@
                 color: #bbb;
             }
 
-        /* ── NEW: Pagination ── */
+        /* Pagination */
         .pagination-bar {
             display: flex;
             align-items: center;
@@ -1138,408 +857,321 @@
                 .btn-submit.btn-submit-schedule:hover {
                     background: #2563eb;
                 }
-
-        @@keyframes fadeUp {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
     </style>
-</head>
-<body>
-    <div class="emp-layout">
+}
 
-        <!-- Sidebar -->
-        <aside class="emp-sidebar">
-            <div class="emp-logo">
-                <div class="emp-logo-icon">
-                    <svg viewBox="0 0 24 24" fill="none">
-                        <rect x="1" y="5" width="15" height="11" rx="1" fill="#1a1a1a" />
-                        <path d="M16 9h4l3 4v3h-7V9z" fill="#1a1a1a" />
-                        <circle cx="5.5" cy="18.5" r="2.5" fill="#1a1a1a" />
-                        <circle cx="18.5" cy="18.5" r="2.5" fill="#1a1a1a" />
-                    </svg>
-                </div>
-                <span class="emp-logo-text">AUTO<span class="logo-y">BASE</span></span>
-            </div>
-            <nav class="emp-nav">
-                <div class="nav-label">Overview</div>
-                <a href="@Url.Action("Index","EmployeeDashboard")" class="nav-link">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /></svg>
-                    Dashboard
-                </a>
-                <div class="nav-label">Vehicles</div>
-                <a href="@Url.Action("AvailableVehicles","EmployeeDashboard")" class="nav-link">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
-                    Available Vehicles
-                </a>
-                <a href="@Url.Action("AllocatedVehicle","EmployeeDashboard")" class="nav-link">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" /><circle cx="12" cy="10" r="3" /></svg>
-                    My Allocated Vehicle
-                </a>
-                <div class="nav-label">Requests</div>
-                <a href="@Url.Action("MyRequests","EmployeeDashboard")" class="nav-link">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><polyline points="14 2 14 8 20 8" /><line x1="16" y1="13" x2="8" y2="13" /><line x1="16" y1="17" x2="8" y2="17" /></svg>
-                    My Requests
-                </a>
-                <a href="@Url.Action("NewRequest","EmployeeDashboard")" class="nav-link active">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="16" /><line x1="8" y1="12" x2="16" y2="12" /></svg>
-                    New Request
-                </a>
-            </nav>
-            <div class="emp-sidebar-footer">
-                <div class="emp-s-avatar">@initials</div>
-                <div class="emp-s-info">
-                    <span class="emp-s-name">@fullName</span>
-                    <span class="emp-s-meta">Employee &middot; #@empNo</span>
-                </div>
-            </div>
-        </aside>
+<div class="page-title">New Vehicle Request</div>
+<div class="page-sub">
+    @Model.TotalAvailable available · @Model.TotalInUse in use · @Model.TotalMaintenance in maintenance
+    — available vehicles can be requested now; in-use vehicles can be scheduled from their free time; maintenance vehicles cannot be requested.
+</div>
 
-        <!-- Main -->
-        <div class="emp-main">
-            <header class="emp-topbar">
-                <div>
-                    <div class="topbar-greet">@greeting, @fullName</div>
-                    <div class="topbar-sub">Pick an available vehicle and submit your request</div>
-                </div>
-                <div class="topbar-right">
-                    <div class="user-pill">
-                        <div class="pill-avatar">@initials</div>
-                        <div>
-                            <div class="pill-name">@fullName</div>
-                            <div class="pill-role">Employee</div>
-                        </div>
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9" /></svg>
-                    </div>
-                    <a href="@Url.Action("Logout","Account")" class="logout-btn">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" y1="12" x2="9" y2="12" /></svg>
-                        Logout
-                    </a>
-                </div>
-            </header>
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
+        @TempData["SuccessMessage"]
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-error">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" /></svg>
+        @TempData["ErrorMessage"]
+    </div>
+}
 
-            <div class="emp-body">
-                <div class="page-title">New Vehicle Request</div>
-                <div class="page-sub">
-                    @Model.TotalAvailable available · @Model.TotalInUse in use · @Model.TotalMaintenance in maintenance
-                    — available vehicles can be requested now; in-use vehicles can be scheduled from their free time; maintenance vehicles cannot be requested.
+<!-- Summary chips -->
+<div class="summary-row">
+    <div class="sum-chip">
+        <span class="sum-dot avail"></span>
+        <div><div class="sum-num">@Model.TotalAvailable</div><div class="sum-lbl">Available</div></div>
+    </div>
+    <div class="sum-chip">
+        <span class="sum-dot inuse"></span>
+        <div><div class="sum-num">@Model.TotalInUse</div><div class="sum-lbl">In Use</div></div>
+    </div>
+    <div class="sum-chip">
+        <span class="sum-dot maint"></span>
+        <div><div class="sum-num">@Model.TotalMaintenance</div><div class="sum-lbl">Maintenance</div></div>
+    </div>
+</div>
+
+<!-- Search + filter -->
+<div class="search-bar">
+    <div class="search-wrap">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
+        <input type="text" id="searchInput" placeholder="Search by vehicle name or registration…" oninput="liveSearch(this.value)" />
+    </div>
+    <div class="filter-tabs">
+        <a href="@Url.Action("NewRequest","EmployeeDashboard", new { filter = "All" })"
+           class="ftab @(Model.ActiveFilter == "All" ? "f-all" : "")">All</a>
+        <a href="@Url.Action("NewRequest","EmployeeDashboard", new { filter = "Available" })"
+           class="ftab @(Model.ActiveFilter == "Available" ? "f-avail" : "")">Available</a>
+        <a href="@Url.Action("NewRequest","EmployeeDashboard", new { filter = "InUse" })"
+           class="ftab @(Model.ActiveFilter == "InUse" ? "f-inuse" : "")">In Use</a>
+        <a href="@Url.Action("NewRequest","EmployeeDashboard", new { filter = "Maintenance" })"
+           class="ftab @(Model.ActiveFilter == "Maintenance" ? "f-maint" : "")">Maintenance</a>
+    </div>
+</div>
+
+@if (!Model.AvailableVehicles.Any())
+{
+    <div class="empty-state">
+        <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1" /><path d="M16 8h4l3 4v3h-7V8z" /><circle cx="5.5" cy="18.5" r="2.5" /><circle cx="18.5" cy="18.5" r="2.5" /></svg>
+        <p>No @(Model.ActiveFilter == "All" ? "" : Model.ActiveFilter.ToLower() + " ")vehicles found.</p>
+    </div>
+}
+else
+{
+    <div class="v-grid" id="vehicleGrid">
+        @foreach (var v in Model.AvailableVehicles)
+        {
+            string notes = string.IsNullOrEmpty(v.Notes) ? "—" : v.Notes;
+            string safeName = v.VehicleName.Replace("'", "\\'").Replace("\"", "&quot;");
+            string safeType = v.VehicleTypeName.Replace("'", "\\'");
+
+            string cardCls = v.IsMaintenance ? "card-maint" : v.IsAvailable ? "card-avail" : "card-inuse";
+            string dotCls = v.IsMaintenance ? "maint" : v.IsAvailable ? "avail" : "inuse";
+            string dataStatus = v.IsMaintenance ? "maint" : v.IsAvailable ? "avail" : "inuse";
+
+            string freeAtIso = v.FreeAt.HasValue
+                ? v.FreeAt.Value.ToString("yyyy-MM-ddTHH:mm")
+                : "";
+
+            <div class="v-card @cardCls"
+                 data-name="@v.VehicleName.ToLower()"
+                 data-reg="@v.RegistrationNo.ToLower()"
+                 data-status="@dataStatus">
+
+                <div class="v-card-dot @dotCls"></div>
+                <div class="v-type-badge">@v.VehicleTypeName</div>
+                <div class="v-card-name">@v.VehicleName</div>
+                <div class="v-reg-tag">@v.RegistrationNo</div>
+                <hr class="v-divider" />
+
+                <div class="v-detail-row">
+                    <span class="v-detail-label">Year</span>
+                    <span class="v-detail-val">@v.YearOfManufacture</span>
+                </div>
+                <div class="v-detail-row">
+                    <span class="v-detail-label">Status</span>
+                    <span class="v-detail-val">
+                        @if (v.IsMaintenance)
+                        {
+                            <span class="maint-status-pill">
+                                <span class="maint-status-dot"></span>Maintenance
+                            </span>
+                        }
+                        else if (v.IsAvailable)
+                        {
+                            <span class="v-detail-val green">Available</span>
+                        }
+                        else
+                        {
+                            <span class="inuse-status-pill">
+                                <span class="inuse-status-dot"></span>In Use
+                            </span>
+                        }
+                    </span>
+                </div>
+                <div class="v-detail-row">
+                    <span class="v-detail-label">Notes</span>
+                    <span class="v-detail-val notes">@notes</span>
                 </div>
 
-                @if (TempData["SuccessMessage"] != null)
+                @if (v.IsMaintenance)
                 {
-                    <div class="alert alert-success">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
-                        @TempData["SuccessMessage"]
+                    <div class="maint-notice">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>
+                        <span>This vehicle is under maintenance and cannot be requested right now.</span>
                     </div>
                 }
-                @if (TempData["ErrorMessage"] != null)
+                else if (!v.IsAvailable && v.FreeAt.HasValue)
                 {
-                    <div class="alert alert-error">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" /></svg>
-                        @TempData["ErrorMessage"]
+                    <div class="free-in-badge">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+                        Free in @v.FreeInLabel
+                        &nbsp;·&nbsp; @v.FreeAt.Value.ToString("dd MMM, hh:mm tt")
                     </div>
                 }
 
-                <!-- Summary chips -->
-                <div class="summary-row">
-                    <div class="sum-chip">
-                        <span class="sum-dot avail"></span>
-                        <div><div class="sum-num">@Model.TotalAvailable</div><div class="sum-lbl">Available</div></div>
-                    </div>
-                    <div class="sum-chip">
-                        <span class="sum-dot inuse"></span>
-                        <div><div class="sum-num">@Model.TotalInUse</div><div class="sum-lbl">In Use</div></div>
-                    </div>
-                    <div class="sum-chip">
-                        <span class="sum-dot maint"></span>
-                        <div><div class="sum-num">@Model.TotalMaintenance</div><div class="sum-lbl">Maintenance</div></div>
-                    </div>
-                </div>
-
-                <!-- Search + filter -->
-                <div class="search-bar">
-                    <div class="search-wrap">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
-                        <input type="text" id="searchInput" placeholder="Search by vehicle name or registration…" oninput="liveSearch(this.value)" />
-                    </div>
-                    <div class="filter-tabs">
-                        <a href="@Url.Action("NewRequest","EmployeeDashboard", new { filter = "All" })"
-                           class="ftab @(Model.ActiveFilter == "All" ? "f-all" : "")">All</a>
-                        <a href="@Url.Action("NewRequest","EmployeeDashboard", new { filter = "Available" })"
-                           class="ftab @(Model.ActiveFilter == "Available" ? "f-avail" : "")">Available</a>
-                        <a href="@Url.Action("NewRequest","EmployeeDashboard", new { filter = "InUse" })"
-                           class="ftab @(Model.ActiveFilter == "InUse" ? "f-inuse" : "")">In Use</a>
-                        <a href="@Url.Action("NewRequest","EmployeeDashboard", new { filter = "Maintenance" })"
-                           class="ftab @(Model.ActiveFilter == "Maintenance" ? "f-maint" : "")">Maintenance</a>
-                    </div>
-                </div>
-
-                @if (!Model.AvailableVehicles.Any())
+                @if (v.IsMaintenance)
                 {
-                    <div class="empty-state">
-                        <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1" /><path d="M16 8h4l3 4v3h-7V8z" /><circle cx="5.5" cy="18.5" r="2.5" /><circle cx="18.5" cy="18.5" r="2.5" /></svg>
-                        <p>No @(Model.ActiveFilter == "All" ? "" : Model.ActiveFilter.ToLower() + " ")vehicles found.</p>
-                    </div>
+                    <button class="v-request-btn btn-maint-disabled" disabled title="Vehicle is under maintenance">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" /></svg>
+                        Not Available
+                    </button>
+                }
+                else if (v.IsAvailable)
+                {
+                    <button class="v-request-btn btn-avail"
+                            onclick="openModal(@v.VehicleId, '@safeName', '@v.RegistrationNo', '@safeType', false, '')">
+                        + Request This Vehicle
+                    </button>
+                }
+                else if (v.FreeAt.HasValue)
+                {
+                    <button class="v-request-btn btn-schedule"
+                            onclick="openModal(@v.VehicleId, '@safeName', '@v.RegistrationNo', '@safeType', true, '@freeAtIso')">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+                        Schedule from @v.FreeAt.Value.ToString("hh:mm tt, dd MMM")
+                    </button>
                 }
                 else
                 {
-                    <div class="v-grid" id="vehicleGrid">
-                        @foreach (var v in Model.AvailableVehicles)
-                        {
-                            string notes = string.IsNullOrEmpty(v.Notes) ? "—" : v.Notes;
-                            string safeName = v.VehicleName.Replace("'", "\\'").Replace("\"", "&quot;");
-                            string safeType = v.VehicleTypeName.Replace("'", "\\'");
-
-                            string cardCls = v.IsMaintenance ? "card-maint" : v.IsAvailable ? "card-avail" : "card-inuse";
-                            string dotCls = v.IsMaintenance ? "maint" : v.IsAvailable ? "avail" : "inuse";
-                            string dataStatus = v.IsMaintenance ? "maint" : v.IsAvailable ? "avail" : "inuse";
-
-                            string freeAtIso = v.FreeAt.HasValue
-                                ? v.FreeAt.Value.ToString("yyyy-MM-ddTHH:mm")
-                                : "";
-
-                            <div class="v-card @cardCls"
-                                 data-name="@v.VehicleName.ToLower()"
-                                 data-reg="@v.RegistrationNo.ToLower()"
-                                 data-status="@dataStatus">
-
-                                <div class="v-card-dot @dotCls"></div>
-                                <div class="v-type-badge">@v.VehicleTypeName</div>
-                                <div class="v-card-name">@v.VehicleName</div>
-                                <div class="v-reg-tag">@v.RegistrationNo</div>
-                                <hr class="v-divider" />
-
-                                <div class="v-detail-row">
-                                    <span class="v-detail-label">Year</span>
-                                    <span class="v-detail-val">@v.YearOfManufacture</span>
-                                </div>
-                                <div class="v-detail-row">
-                                    <span class="v-detail-label">Status</span>
-                                    <span class="v-detail-val">
-                                        @if (v.IsMaintenance)
-                                        {
-                                            <span class="maint-status-pill">
-                                                <span class="maint-status-dot"></span>Maintenance
-                                            </span>
-                                        }
-                                        else if (v.IsAvailable)
-                                        {
-                                            <span class="v-detail-val green">Available</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="inuse-status-pill">
-                                                <span class="inuse-status-dot"></span>In Use
-                                            </span>
-                                        }
-                                    </span>
-                                </div>
-                                <div class="v-detail-row">
-                                    <span class="v-detail-label">Notes</span>
-                                    <span class="v-detail-val notes">@notes</span>
-                                </div>
-
-                                @if (v.IsMaintenance)
-                                {
-                                    <div class="maint-notice">
-                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" /><line x1="12" y1="9" x2="12" y2="13" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>
-                                        <span>This vehicle is under maintenance and cannot be requested right now.</span>
-                                    </div>
-                                }
-                                else if (!v.IsAvailable && v.FreeAt.HasValue)
-                                {
-                                    <div class="free-in-badge">
-                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
-                                        Free in @v.FreeInLabel
-                                        &nbsp;·&nbsp; @v.FreeAt.Value.ToString("dd MMM, hh:mm tt")
-                                    </div>
-                                }
-
-                                @if (v.IsMaintenance)
-                                {
-                                    <button class="v-request-btn btn-maint-disabled" disabled title="Vehicle is under maintenance">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><line x1="15" y1="9" x2="9" y2="15" /><line x1="9" y1="9" x2="15" y2="15" /></svg>
-                                        Not Available
-                                    </button>
-                                }
-                                else if (v.IsAvailable)
-                                {
-                                    <button class="v-request-btn btn-avail"
-                                            onclick="openModal(@v.VehicleId, '@safeName', '@v.RegistrationNo', '@safeType', false, '')">
-                                        + Request This Vehicle
-                                    </button>
-                                }
-                                else if (v.FreeAt.HasValue)
-                                {
-                                    <button class="v-request-btn btn-schedule"
-                                            onclick="openModal(@v.VehicleId, '@safeName', '@v.RegistrationNo', '@safeType', true, '@freeAtIso')">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
-                                        Schedule from @v.FreeAt.Value.ToString("hh:mm tt, dd MMM")
-                                    </button>
-                                }
-                                else
-                                {
-                                    <button class="v-request-btn btn-schedule"
-                                            onclick="openModal(@v.VehicleId, '@safeName', '@v.RegistrationNo', '@safeType', true, '')">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
-                                        Request When Available
-                                    </button>
-                                }
-                            </div>
-                        }
-                    </div>
-
-                    <!-- ── NEW: Pagination controls ── -->
-                    if (Model.TotalPages > 1)
-                    {
-                        <div class="pagination-bar">
-                            @if (Model.CurrentPage > 1)
-                            {
-                                <a href="@Url.Action("NewRequest","EmployeeDashboard", new { page = Model.CurrentPage - 1, filter = Model.ActiveFilter })" class="page-btn">‹ Prev</a>
-                            }
-                            else
-                            {
-                                <span class="page-btn disabled">‹ Prev</span>
-                            }
-
-                            @{
-                                int startPage = Math.Max(1, Model.CurrentPage - 2);
-                                int endPage = Math.Min(Model.TotalPages, Model.CurrentPage + 2);
-                            }
-
-                            @if (startPage > 1)
-                            {
-                                <a href="@Url.Action("NewRequest","EmployeeDashboard", new { page = 1, filter = Model.ActiveFilter })" class="page-btn">1</a>
-                                if (startPage > 2)
-                                {
-                                    <span class="page-ellipsis">…</span>
-                                }
-                            }
-
-                            @for (int p = startPage; p <= endPage; p++)
-                            {
-                                if (p == Model.CurrentPage)
-                                {
-                                    <span class="page-btn active">@p</span>
-                                }
-                                else
-                                {
-                                    <a href="@Url.Action("NewRequest","EmployeeDashboard", new { page = p, filter = Model.ActiveFilter })" class="page-btn">@p</a>
-                                }
-                            }
-
-                            @if (endPage < Model.TotalPages)
-                            {
-                                if (endPage < Model.TotalPages - 1)
-                                {
-                                    <span class="page-ellipsis">…</span>
-                                }
-                                <a href="@Url.Action("NewRequest","EmployeeDashboard", new { page = Model.TotalPages, filter = Model.ActiveFilter })" class="page-btn">@Model.TotalPages</a>
-                            }
-
-                            @if (Model.CurrentPage < Model.TotalPages)
-                            {
-                                <a href="@Url.Action("NewRequest","EmployeeDashboard", new { page = Model.CurrentPage + 1, filter = Model.ActiveFilter })" class="page-btn">Next ›</a>
-                            }
-                            else
-                            {
-                                <span class="page-btn disabled">Next ›</span>
-                            }
-                        </div>
-                        <div class="page-info">
-                            Showing @(((Model.CurrentPage - 1) * Model.PageSize) + 1)–@(Math.Min(Model.CurrentPage * Model.PageSize, Model.TotalVehicleCount)) of @Model.TotalVehicleCount vehicles
-                        </div>
-                    }
+                    <button class="v-request-btn btn-schedule"
+                            onclick="openModal(@v.VehicleId, '@safeName', '@v.RegistrationNo', '@safeType', true, '')">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+                        Request When Available
+                    </button>
                 }
             </div>
-        </div>
+        }
     </div>
 
-    <!-- Modal -->
-    <div class="modal-overlay" id="requestModal">
-        <div class="modal">
-            <div class="modal-header" id="modalHeader">
-                <div class="modal-header-left">
-                    <span style="font-size:22px;" id="modalEmoji">🚗</span>
-                    <span class="modal-title" id="modalTitle">Request Vehicle</span>
-                </div>
-                <button class="modal-close" onclick="closeModal()">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
-                </button>
-            </div>
+    <!-- Pagination controls -->
+    if (Model.TotalPages > 1)
+    {
+        <div class="pagination-bar">
+            @if (Model.CurrentPage > 1)
+            {
+                <a href="@Url.Action("NewRequest","EmployeeDashboard", new { page = Model.CurrentPage - 1, filter = Model.ActiveFilter })" class="page-btn">‹ Prev</a>
+            }
+            else
+            {
+                <span class="page-btn disabled">‹ Prev</span>
+            }
 
-            <div class="modal-inuse-notice" id="inuseNotice">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
-                <div class="modal-inuse-notice-text">
-                    <span>Vehicle currently in use</span>
-                    Your request will be scheduled to start from <strong id="noticeFromTime">—</strong>.
-                    The admin will review and approve based on availability.
-                </div>
-            </div>
+            @{
+                int startPage = Math.Max(1, Model.CurrentPage - 2);
+                int endPage = Math.Min(Model.TotalPages, Model.CurrentPage + 2);
+            }
 
-            <div class="modal-vehicle-block">
-                <div class="mvb-name" id="mv-name">—</div>
-                <div class="mvb-tags">
-                    <span class="mvb-reg" id="mv-reg">—</span>
-                    <span class="mvb-type" id="mv-type">—</span>
-                </div>
-            </div>
-
-            <div class="modal-body">
-                @using (Html.BeginForm("SubmitRequest", "EmployeeDashboard", FormMethod.Post, new { id = "requestForm" }))
+            @if (startPage > 1)
+            {
+                <a href="@Url.Action("NewRequest","EmployeeDashboard", new { page = 1, filter = Model.ActiveFilter })" class="page-btn">1</a>
+                if (startPage > 2)
                 {
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" name="VehicleId" id="hVehicleId" />
-                    <input type="hidden" name="VehicleName" id="hVehicleName" />
-                    <input type="hidden" name="RegistrationNo" id="hRegNo" />
-                    <input type="hidden" name="VehicleTypeName" id="hTypeName" />
+                    <span class="page-ellipsis">…</span>
+                }
+            }
 
-                    <div class="form-row-2">
-                        <div class="form-group">
-                            <label class="form-label">Start Date &amp; Time</label>
-                            <input type="datetime-local" class="form-control" name="RequiredFrom"
-                                   id="dtFrom" required onchange="calcDuration()" />
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">End Date &amp; Time</label>
-                            <input type="datetime-local" class="form-control" name="RequiredUntil"
-                                   id="dtUntil" required onchange="calcDuration()" />
-                        </div>
-                    </div>
+            @for (int p = startPage; p <= endPage; p++)
+            {
+                if (p == Model.CurrentPage)
+                {
+                    <span class="page-btn active">@p</span>
+                }
+                else
+                {
+                    <a href="@Url.Action("NewRequest","EmployeeDashboard", new { page = p, filter = Model.ActiveFilter })" class="page-btn">@p</a>
+                }
+            }
 
-                    <div class="duration-pill" id="durationPill">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
-                        <span id="durationText">Set dates to see duration</span>
-                    </div>
+            @if (endPage < Model.TotalPages)
+            {
+                if (endPage < Model.TotalPages - 1)
+                {
+                    <span class="page-ellipsis">…</span>
+                }
+                <a href="@Url.Action("NewRequest","EmployeeDashboard", new { page = Model.TotalPages, filter = Model.ActiveFilter })" class="page-btn">@Model.TotalPages</a>
+            }
 
-                    <div class="form-group">
-                        <label class="form-label">Purpose / Destination</label>
-                        <textarea class="form-control" name="Purpose"
-                                  placeholder="e.g. Client visit to Chennai airport…" required></textarea>
-                    </div>
-                    <!-- ── NEW: Reporting Place ── -->
-                                    <div class="form-group">
-                                        <label class="form-label">Reporting Place</label>
-                                        <input type="text" class="form-control" name="ReportingPlace"
-                                               id="reportingPlace"
-                                               placeholder="e.g. Main Gate, Guest House, HR Office…" required />
-                                    </div>
+            @if (Model.CurrentPage < Model.TotalPages)
+            {
+                <a href="@Url.Action("NewRequest","EmployeeDashboard", new { page = Model.CurrentPage + 1, filter = Model.ActiveFilter })" class="page-btn">Next ›</a>
+            }
+            else
+            {
+                <span class="page-btn disabled">Next ›</span>
+            }
+        </div>
+        <div class="page-info">
+            Showing @(((Model.CurrentPage - 1) * Model.PageSize) + 1)–@(Math.Min(Model.CurrentPage * Model.PageSize, Model.TotalVehicleCount)) of @Model.TotalVehicleCount vehicles
+        </div>
+    }
+}
 
-                                    <button type="submit" class="btn-submit" id="submitBtn">
-                                        Submit Request &rarr;
-                                    </button>
-                                }
+<!-- Modal -->
+<div class="modal-overlay" id="requestModal">
+    <div class="modal">
+        <div class="modal-header" id="modalHeader">
+            <div class="modal-header-left">
+                <span style="font-size:22px;" id="modalEmoji">🚗</span>
+                <span class="modal-title" id="modalTitle">Request Vehicle</span>
+            </div>
+            <button class="modal-close" onclick="closeModal()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+            </button>
+        </div>
+
+        <div class="modal-inuse-notice" id="inuseNotice">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+            <div class="modal-inuse-notice-text">
+                <span>Vehicle currently in use</span>
+                Your request will be scheduled to start from <strong id="noticeFromTime">—</strong>.
+                The admin will review and approve based on availability.
             </div>
         </div>
-    </div>
 
+        <div class="modal-vehicle-block">
+            <div class="mvb-name" id="mv-name">—</div>
+            <div class="mvb-tags">
+                <span class="mvb-reg" id="mv-reg">—</span>
+                <span class="mvb-type" id="mv-type">—</span>
+            </div>
+        </div>
+
+        <div class="modal-body">
+            @using (Html.BeginForm("SubmitRequest", "EmployeeDashboard", FormMethod.Post, new { id = "requestForm" }))
+            {
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="VehicleId" id="hVehicleId" />
+                <input type="hidden" name="VehicleName" id="hVehicleName" />
+                <input type="hidden" name="RegistrationNo" id="hRegNo" />
+                <input type="hidden" name="VehicleTypeName" id="hTypeName" />
+
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label class="form-label">Start Date &amp; Time</label>
+                        <input type="datetime-local" class="form-control" name="RequiredFrom"
+                               id="dtFrom" required onchange="calcDuration()" />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">End Date &amp; Time</label>
+                        <input type="datetime-local" class="form-control" name="RequiredUntil"
+                               id="dtUntil" required onchange="calcDuration()" />
+                    </div>
+                </div>
+
+                <div class="duration-pill" id="durationPill">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
+                    <span id="durationText">Set dates to see duration</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Purpose / Destination</label>
+                    <textarea class="form-control" name="Purpose"
+                              placeholder="e.g. Client visit to Chennai airport…" required></textarea>
+                </div>
+                <!-- Reporting Place -->
+                <div class="form-group">
+                    <label class="form-label">Reporting Place</label>
+                    <input type="text" class="form-control" name="ReportingPlace"
+                           id="reportingPlace"
+                           placeholder="e.g. Main Gate, Guest House, HR Office…" required />
+                </div>
+
+                <button type="submit" class="btn-submit" id="submitBtn">
+                    Submit Request &rarr;
+                </button>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
     <script>
         // ── Live search (narrows only the vehicles already on this page/filter) ──
         function liveSearch(val) {
@@ -1646,5 +1278,4 @@
             b.disabled = true; b.textContent = 'Submitting…';
         });
     </script>
-</body>
-</html>
+}
