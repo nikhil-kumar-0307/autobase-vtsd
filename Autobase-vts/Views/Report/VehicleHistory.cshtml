@@ -1,0 +1,915 @@
+﻿@model autobase.Models.DTOs.VehicleHistoryDto
+@{
+    ViewBag.Title = "Vehicle History";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+@section Styles {
+    <style>
+        .page-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: #0d0d0d;
+            letter-spacing: -.3px;
+        }
+
+        .page-sub {
+            font-size: 14.5px;
+            color: #aaa;
+            margin-top: 3px;
+            margin-bottom: 22px;
+        }
+
+        /* Search card */
+        .search-card {
+            background: #fff;
+            border: 1px solid #efefef;
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .search-row {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+
+        .search-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .search-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #999;
+        }
+
+        .search-main {
+            flex: 1;
+            min-width: 260px;
+            position: relative;
+        }
+
+            .search-main svg {
+                position: absolute;
+                left: 13px;
+                top: 40px;
+                color: #ccc;
+                pointer-events: none;
+            }
+
+            .search-main input {
+                width: 100%;
+                height: 48px;
+                padding: 0 14px 0 40px;
+                border: 1.5px solid #e8e8e8;
+                border-radius: 10px;
+                font-family: 'Barlow', sans-serif;
+                font-size: 15px;
+                font-weight: 600;
+                color: #0d0d0d;
+                background: #fff;
+                outline: none;
+                transition: border-color .2s, box-shadow .2s;
+                box-sizing: border-box;
+            }
+
+                .search-main input:focus {
+                    border-color: #F5C518;
+                    box-shadow: 0 0 0 3px rgba(245,197,24,.12);
+                }
+
+        .filter-input {
+            height: 48px;
+            padding: 0 12px;
+            border: 1.5px solid #e8e8e8;
+            border-radius: 10px;
+            font-family: 'Barlow', sans-serif;
+            font-size: 13.5px;
+            font-weight: 500;
+            color: #0d0d0d;
+            background: #fff;
+            outline: none;
+            transition: border-color .2s;
+        }
+
+            .filter-input:focus {
+                border-color: #F5C518;
+            }
+
+        .btn-search {
+            height: 48px;
+            padding: 0 26px;
+            background: #F5C518;
+            color: #0d0d0d;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Barlow', sans-serif;
+            font-size: 14.5px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background .2s;
+        }
+
+            .btn-search:hover {
+                background: #d4a800;
+            }
+
+        .btn-clear {
+            height: 48px;
+            padding: 0 18px;
+            background: #f5f5f5;
+            color: #555;
+            border: 1.5px solid #e8e8e8;
+            border-radius: 10px;
+            font-family: 'Barlow', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            transition: background .2s;
+        }
+
+            .btn-clear:hover {
+                background: #eee;
+            }
+
+        .preset-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 14px;
+            border-top: 1px solid #f5f5f5;
+            padding-top: 14px;
+        }
+
+        .preset-btn {
+            height: 38px;
+            padding: 0 16px;
+            border: 1.5px solid #e8e8e8;
+            border-radius: 8px;
+            font-family: 'Barlow', sans-serif;
+            font-size: 13.5px;
+            font-weight: 600;
+            color: #666;
+            background: #fff;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            transition: border-color .15s, background .15s, color .15s;
+        }
+
+            .preset-btn:hover {
+                border-color: #ccc;
+                color: #0d0d0d;
+            }
+
+            .preset-btn.active {
+                background: #0d0d0d;
+                border-color: #0d0d0d;
+                color: #fff;
+            }
+
+        /* Summary cards (detail mode) */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: #fff;
+            border: 1px solid #efefef;
+            border-radius: 14px;
+            padding: 18px 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+            .stat-card::after {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 3px;
+                background: #F5C518;
+            }
+
+        .stat-label {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.3px;
+            text-transform: uppercase;
+            color: #bbb;
+            margin-bottom: 8px;
+        }
+
+        .stat-num {
+            font-size: 30px;
+            font-weight: 800;
+            color: #0d0d0d;
+            line-height: 1;
+        }
+
+        .stat-sub {
+            font-size: 12px;
+            color: #bbb;
+            margin-top: 5px;
+        }
+
+        /* Section card / table (shared) */
+        .section-card {
+            background: #fff;
+            border: 1px solid #f0f0f0;
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        .section-header {
+            padding: 17px 20px;
+            border-bottom: 1px solid #f5f5f5;
+            font-size: 15.5px;
+            font-weight: 700;
+            color: #0d0d0d;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .count-badge {
+            background: #f5f5f5;
+            color: #555;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 4px 11px;
+            border-radius: 20px;
+        }
+
+        .section-card table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+            .section-card table th {
+                font-size: 10.5px;
+                font-weight: 700;
+                letter-spacing: 1.1px;
+                text-transform: uppercase;
+                color: #999;
+                padding: 13px 18px;
+                text-align: left;
+                background: #fafafa;
+                border-bottom: 1px solid #f0f0f0;
+                white-space: nowrap;
+            }
+
+            .section-card table td {
+                padding: 16px 18px;
+                font-size: 14.5px;
+                color: #444;
+                border-bottom: 1px solid #f9f9f9;
+                vertical-align: top;
+            }
+
+            .section-card table tr:last-child td {
+                border-bottom: none;
+            }
+
+            .section-card table tr:hover td {
+                background: #fafafa;
+            }
+
+        .v-name {
+            font-size: 14.5px;
+            font-weight: 700;
+            color: #0d0d0d;
+        }
+
+        .v-name-link {
+            font-size: 15px;
+            font-weight: 700;
+            color: #0d0d0d;
+            text-decoration: none;
+        }
+
+            .v-name-link:hover {
+                color: #b48a00;
+                text-decoration: underline;
+            }
+
+        .reg-tag {
+            display: inline-block;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 6px;
+            background: #f5f5f5;
+            color: #555;
+            border: 1px solid #eee;
+            letter-spacing: .5px;
+            margin-top: 4px;
+        }
+
+        .emp-meta {
+            font-size: 12px;
+            color: #bbb;
+            margin-top: 2px;
+        }
+
+        .purpose-cell {
+            max-width: 190px;
+            white-space: normal;
+            overflow-wrap: break-word;
+            line-height: 1.45;
+        }
+
+        .type-tag {
+            display: inline-block;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 6px;
+            background: #fafafa;
+            color: #777;
+            border: 1px solid #eee;
+        }
+
+        /* ── Vehicle status pill — color-coded by status ── */
+        .veh-status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 13px;
+            border-radius: 50px;
+            font-size: 12.5px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .veh-status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .veh-status-pill.available {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        .veh-status-dot.available {
+            background: #16a34a;
+        }
+
+        .veh-status-pill.allocated {
+            background: #fef9c3;
+            color: #a16207;
+            border: 1px solid #fde68a;
+        }
+
+        .veh-status-dot.allocated {
+            background: #ca8a04;
+        }
+
+        .veh-status-pill.maintenance {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .veh-status-dot.maintenance {
+            background: #dc2626;
+        }
+
+        .veh-status-pill.other {
+            background: #f5f5f5;
+            color: #555;
+            border: 1px solid #eee;
+        }
+
+        .veh-status-dot.other {
+            background: #999;
+        }
+
+        /* ── Request status pill (detail mode trips table) ── */
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 13px;
+            border-radius: 50px;
+            font-size: 12.5px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+        }
+
+        .status-pill.pending {
+            background: #fef9c3;
+            color: #a16207;
+            border: 1px solid #fde68a;
+        }
+
+        .status-dot.pending {
+            background: #ca8a04;
+        }
+
+        .status-pill.hodapproved {
+            background: #e0e7ff;
+            color: #3730a3;
+            border: 1px solid #c7d2fe;
+        }
+
+        .status-dot.hodapproved {
+            background: #4f46e5;
+        }
+
+        .status-pill.approved {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        .status-dot.approved {
+            background: #16a34a;
+        }
+
+        .status-pill.rejected {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .status-dot.rejected {
+            background: #dc2626;
+        }
+
+        .status-pill.returned {
+            background: #dbeafe;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
+        }
+
+        .status-dot.returned {
+            background: #2563eb;
+        }
+
+        .btn-view-history {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 8px 14px;
+            background: #fafafa;
+            color: #555;
+            border: 1px solid #eee;
+            border-radius: 7px;
+            font-family: 'Barlow', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background .15s, border-color .15s, color .15s;
+            white-space: nowrap;
+        }
+
+            .btn-view-history:hover {
+                background: #fff8dc;
+                border-color: #F5C518;
+                color: #0d0d0d;
+            }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+        }
+
+            .empty-state svg {
+                color: #e0e0e0;
+                margin-bottom: 12px;
+            }
+
+            .empty-state p {
+                font-size: 14px;
+                color: #bbb;
+            }
+
+        /* Pagination */
+        .pagination-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 20px;
+            border-top: 1px solid #f5f5f5;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .pagination-info {
+            font-size: 13px;
+            color: #999;
+        }
+
+            .pagination-info strong {
+                color: #0d0d0d;
+            }
+
+        .pagination-controls {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .page-btn {
+            height: 36px;
+            min-width: 36px;
+            padding: 0 11px;
+            border: 1.5px solid #e8e8e8;
+            border-radius: 8px;
+            font-family: 'Barlow', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            color: #555;
+            background: #fff;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: border-color .15s, background .15s, color .15s;
+        }
+
+            .page-btn:hover {
+                border-color: #ccc;
+                color: #0d0d0d;
+            }
+
+            .page-btn.active {
+                background: #0d0d0d;
+                border-color: #0d0d0d;
+                color: #fff;
+            }
+
+            .page-btn.disabled {
+                opacity: .35;
+                pointer-events: none;
+            }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #888;
+            text-decoration: none;
+            margin-bottom: 14px;
+        }
+
+            .back-link:hover {
+                color: #0d0d0d;
+            }
+    </style>
+}
+
+<!-- Page heading -->
+<div class="page-title">Vehicle History</div>
+<div class="page-sub">Browse all vehicles, or search one to see its full trip-by-trip request history.</div>
+
+<!-- Search card -->
+<div class="search-card">
+    @using (Html.BeginForm("VehicleHistory", "Report", FormMethod.Get))
+    {
+        <input type="hidden" name="preset" value="@Model.Preset" />
+        <div class="search-row">
+            <div class="search-group search-main">
+                <label class="search-label">Vehicle Registration No. / Name</label>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
+                <input type="text" name="search" placeholder="e.g. JHS36678BNK or Mini Truck" value="@Model.SearchTerm" />
+            </div>
+
+            @if (Model.Preset == "Custom")
+            {
+                <div class="search-group">
+                    <label class="search-label">From</label>
+                    <input type="date" class="filter-input" name="fromDate"
+                           value="@(Model.FromDate?.ToString("yyyy-MM-dd"))" />
+                </div>
+                <div class="search-group">
+                    <label class="search-label">To</label>
+                    <input type="date" class="filter-input" name="toDate"
+                           value="@(Model.ToDate?.ToString("yyyy-MM-dd"))" />
+                </div>
+            }
+
+            <div class="search-group">
+                <button type="submit" class="btn-search">Search</button>
+            </div>
+
+            @if (Model.HasSearched)
+            {
+                <div class="search-group">
+                    <a href="@Url.Action("VehicleHistory", "Report")" class="btn-clear">✕ Clear</a>
+                </div>
+            }
+        </div>
+    }
+
+    <div class="preset-row">
+        <a href="@Url.Action("VehicleHistory", "Report", new { search = Model.SearchTerm, preset = "All" })"
+           class="preset-btn @(Model.Preset == "All" ? "active" : "")">All Time</a>
+        <a href="@Url.Action("VehicleHistory", "Report", new { search = Model.SearchTerm, preset = "Today" })"
+           class="preset-btn @(Model.Preset == "Today" ? "active" : "")">Today</a>
+        <a href="@Url.Action("VehicleHistory", "Report", new { search = Model.SearchTerm, preset = "Last5" })"
+           class="preset-btn @(Model.Preset == "Last5" ? "active" : "")">Last 5 Days</a>
+        <a href="@Url.Action("VehicleHistory", "Report", new { search = Model.SearchTerm, preset = "Last7" })"
+           class="preset-btn @(Model.Preset == "Last7" ? "active" : "")">Last 7 Days</a>
+        <a href="@Url.Action("VehicleHistory", "Report", new { search = Model.SearchTerm, preset = "Last30" })"
+           class="preset-btn @(Model.Preset == "Last30" ? "active" : "")">Last 30 Days</a>
+        <a href="@Url.Action("VehicleHistory", "Report", new { search = Model.SearchTerm, preset = "Custom" })"
+           class="preset-btn @(Model.Preset == "Custom" ? "active" : "")">Custom Range</a>
+    </div>
+
+    @if (Model.FromDate.HasValue && Model.ToDate.HasValue)
+    {
+        <div style="font-size:13px;color:#999;margin-top:12px;">
+            @(Model.HasSearched ? "Showing history from " : "Showing vehicles added from ")
+            <strong style="color:#0d0d0d;">@Model.FromDate.Value.ToString("dd MMM yyyy")</strong>
+            to <strong style="color:#0d0d0d;">@Model.ToDate.Value.ToString("dd MMM yyyy")</strong>
+        </div>
+    }
+</div>
+
+@if (!Model.HasSearched)
+{
+    <!-- ══════════════ LIST MODE — all vehicles, most recently added first ══════════════ -->
+    <div class="section-card">
+        <div class="section-header">
+            All Vehicles
+            <span class="count-badge">@Model.TotalItems total</span>
+        </div>
+
+        @if (!Model.Vehicles.Any())
+        {
+            <div class="empty-state">
+                <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="3" width="15" height="13" rx="1" /><path d="M16 8h4l3 4v3h-7V8z" /><circle cx="5.5" cy="18.5" r="2.5" /><circle cx="18.5" cy="18.5" r="2.5" /></svg>
+                <p>No vehicles found.</p>
+            </div>
+        }
+        else
+        {
+            <table>
+                <thead>
+                    <tr>
+                        <th>Vehicle</th>
+                        <th>Type</th>
+                        <th>Status</th>
+                        <th>Trips Logged</th>
+                        <th>Last Used</th>
+                        <th>Added On</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var v in Model.Vehicles)
+                    {
+                        string vsc = v.Status == "Available" ? "available"
+                                   : v.Status == "Allocated" ? "allocated"
+                                   : v.Status == "Maintenance" ? "maintenance"
+                                   : "other";
+
+                        <tr>
+                            <td>
+                                <a class="v-name-link" href="@Url.Action("VehicleHistory", "Report", new { search = v.RegistrationNo })">@v.VehicleName</a>
+                                <div><span class="reg-tag">@v.RegistrationNo</span></div>
+                            </td>
+                            <td><span class="type-tag">@v.VehicleType</span></td>
+                            <td>
+                                <span class="veh-status-pill @vsc">
+                                    <span class="veh-status-dot @vsc"></span>
+                                    @v.Status
+                                </span>
+                            </td>
+                            <td>@v.TripCount</td>
+                            <td>@(v.LastUsedOn.HasValue ? v.LastUsedOn.Value.ToString("dd MMM yyyy, hh:mm tt") : "—")</td>
+                            <td>@v.AddedOn.ToString("dd MMM yyyy")</td>
+                            <td>
+                                <a class="btn-view-history" href="@Url.Action("VehicleHistory", "Report", new { search = v.RegistrationNo })">View History</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <!-- Pagination -->
+            <div class="pagination-bar">
+                <div class="pagination-info">
+                    Showing <strong>@(((Model.Page - 1) * Model.PageSize) + 1)</strong>–<strong>@(Math.Min(Model.Page * Model.PageSize, Model.TotalItems))</strong>
+                    of <strong>@Model.TotalItems</strong> vehicles
+                </div>
+                <div class="pagination-controls">
+                    @{
+                        var prevPage = Model.Page - 1;
+                        var nextPage = Model.Page + 1;
+                        int startPage = Math.Max(1, Model.Page - 2);
+                        int endPage = Math.Min(Model.TotalPages, startPage + 4);
+                        startPage = Math.Max(1, endPage - 4);
+                    }
+
+                    @if (Model.Page <= 1)
+                    {
+                        <span class="page-btn disabled">‹ Prev</span>
+                    }
+                    else
+                    {
+                        <a class="page-btn" href="@Url.Action("VehicleHistory", "Report", new { preset = Model.Preset, fromDate = Model.FromDate?.ToString("yyyy-MM-dd"), toDate = Model.ToDate?.ToString("yyyy-MM-dd"), page = prevPage })">‹ Prev</a>
+                    }
+
+                    @for (int p = startPage; p <= endPage; p++)
+                    {
+                        if (p == Model.Page)
+                        {
+                            <span class="page-btn active">@p</span>
+                        }
+                        else
+                        {
+                            <a class="page-btn" href="@Url.Action("VehicleHistory", "Report", new { preset = Model.Preset, fromDate = Model.FromDate?.ToString("yyyy-MM-dd"), toDate = Model.ToDate?.ToString("yyyy-MM-dd"), page = p })">@p</a>
+                        }
+                    }
+
+                    @if (Model.Page >= Model.TotalPages)
+                    {
+                        <span class="page-btn disabled">Next ›</span>
+                    }
+                    else
+                    {
+                        <a class="page-btn" href="@Url.Action("VehicleHistory", "Report", new { preset = Model.Preset, fromDate = Model.FromDate?.ToString("yyyy-MM-dd"), toDate = Model.ToDate?.ToString("yyyy-MM-dd"), page = nextPage })">Next ›</a>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <!-- ══════════════ DETAIL MODE — full trip history for the matched vehicle ══════════════ -->
+    <a href="@Url.Action("VehicleHistory", "Report")" class="back-link">← Back to all vehicles</a>
+
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-label">Matching Requests</div>
+            <div class="stat-num">@Model.TotalTrips</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Vehicles Matched</div>
+            <div class="stat-num">@Model.DistinctVehiclesMatched</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Total Hours</div>
+            <div class="stat-num">@Model.TotalHours.ToString("0.#")</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Last Used</div>
+            <div class="stat-num" style="font-size:17px;">
+                @(Model.LastUsedOn.HasValue ? Model.LastUsedOn.Value.ToString("dd MMM yyyy") : "—")
+            </div>
+            @if (Model.FirstUsedOn.HasValue)
+            {
+                <div class="stat-sub">First seen @Model.FirstUsedOn.Value.ToString("dd MMM yyyy")</div>
+            }
+        </div>
+    </div>
+
+    <div class="section-card">
+        <div class="section-header">
+            Request History for "@Model.SearchTerm"
+            <span class="count-badge">@Model.TotalItems total</span>
+        </div>
+
+        @if (!Model.Items.Any())
+        {
+            <div class="empty-state">
+                <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" /><polyline points="14 2 14 8 20 8" /></svg>
+                <p>No requests found for "@Model.SearchTerm" in this date range.</p>
+            </div>
+        }
+        else
+        {
+            <table>
+                <thead>
+                    <tr>
+                        <th>Vehicle</th>
+                        <th>Employee</th>
+                        <th>Department</th>
+                        <th>From</th>
+                        <th>To</th>
+                        <th>Duration</th>
+                        <th>Purpose</th>
+                        <th>Requested On</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Items)
+                    {
+                        string sc = item.Status == "Approved" ? "approved"
+                                  : item.Status == "Rejected" ? "rejected"
+                                  : item.Status == "Returned" ? "returned"
+                                  : item.Status == "HODApproved" ? "hodapproved"
+                                  : "pending";
+
+                        double hrs = item.DurationHours;
+                        string durLabel = hrs >= 1 ? hrs.ToString("0.#") + " hrs" : ((int)(hrs * 60)) + " min";
+
+                        <tr>
+                            <td>
+                                <span class="v-name">@item.VehicleName</span>
+                                <div><span class="reg-tag">@item.RegistrationNo</span></div>
+                            </td>
+                            <td>
+                                @item.EmployeeName
+                                <div class="emp-meta">#@item.EmployeeNumber</div>
+                            </td>
+                            <td>@item.Department</td>
+                            <td>@item.RequiredFrom.ToString("dd MMM yyyy, hh:mm tt")</td>
+                            <td>@item.RequiredUntil.ToString("dd MMM yyyy, hh:mm tt")</td>
+                            <td>@durLabel</td>
+                            <td><div class="purpose-cell">@item.Purpose</div></td>
+                            <td>@item.RequestedOn.ToString("dd MMM yyyy")</td>
+                            <td>
+                                <span class="status-pill @sc">
+                                    <span class="status-dot @sc"></span>
+                                    @item.Status
+                                </span>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+            <!-- Pagination -->
+            <div class="pagination-bar">
+                <div class="pagination-info">
+                    Showing <strong>@(((Model.Page - 1) * Model.PageSize) + 1)</strong>–<strong>@(Math.Min(Model.Page * Model.PageSize, Model.TotalItems))</strong>
+                    of <strong>@Model.TotalItems</strong> requests
+                </div>
+                <div class="pagination-controls">
+                    @{
+                        var prevPage2 = Model.Page - 1;
+                        var nextPage2 = Model.Page + 1;
+                        int startPage2 = Math.Max(1, Model.Page - 2);
+                        int endPage2 = Math.Min(Model.TotalPages, startPage2 + 4);
+                        startPage2 = Math.Max(1, endPage2 - 4);
+                    }
+
+                    @if (Model.Page <= 1)
+                    {
+                        <span class="page-btn disabled">‹ Prev</span>
+                    }
+                    else
+                    {
+                        <a class="page-btn" href="@Url.Action("VehicleHistory", "Report", new { search = Model.SearchTerm, preset = Model.Preset, fromDate = Model.FromDate?.ToString("yyyy-MM-dd"), toDate = Model.ToDate?.ToString("yyyy-MM-dd"), page = prevPage2 })">‹ Prev</a>
+                    }
+
+                    @for (int p = startPage2; p <= endPage2; p++)
+                    {
+                        if (p == Model.Page)
+                        {
+                            <span class="page-btn active">@p</span>
+                        }
+                        else
+                        {
+                            <a class="page-btn" href="@Url.Action("VehicleHistory", "Report", new { search = Model.SearchTerm, preset = Model.Preset, fromDate = Model.FromDate?.ToString("yyyy-MM-dd"), toDate = Model.ToDate?.ToString("yyyy-MM-dd"), page = p })">@p</a>
+                        }
+                    }
+
+                    @if (Model.Page >= Model.TotalPages)
+                    {
+                        <span class="page-btn disabled">Next ›</span>
+                    }
+                    else
+                    {
+                        <a class="page-btn" href="@Url.Action("VehicleHistory", "Report", new { search = Model.SearchTerm, preset = Model.Preset, fromDate = Model.FromDate?.ToString("yyyy-MM-dd"), toDate = Model.ToDate?.ToString("yyyy-MM-dd"), page = nextPage2 })">Next ›</a>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+}

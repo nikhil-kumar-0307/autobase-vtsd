@@ -148,6 +148,30 @@
             </svg>
             Available Vehicle
         </a>
+
+        @* ─ Vehicle Report — visible to SuperAdmin, Admin ── *@
+        @if (role == "SuperAdmin" || role == "Admin")
+        {
+            <div class="nav-section-label">Reports</div>
+            <a href="@Url.Action("VehicleReport", "Report")"
+               class="nav-item @(currentController == "Report" && currentAction == "VehicleReport" ? "active" : "")">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 3v18h18" />
+                    <path d="M18 17V9" />
+                    <path d="M13 17V5" />
+                    <path d="M8 17v-3" />
+                </svg>
+                Vehicle Report
+            </a>
+            <a href="@Url.Action("VehicleHistory", "Report")"
+               class="nav-item @(currentController == "Report" && currentAction == "VehicleHistory" ? "active" : "")">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                </svg>
+                Vehicle History
+            </a>
+        }
     </nav>
 
     <div class="sidebar-footer">
